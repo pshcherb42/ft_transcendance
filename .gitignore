@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment variables - NEVER commit these
+.env
+**/.env
+
+# Prisma generated client
+backend/node_modules/.prisma/
+backend/src/generated/
+
+# Next.js build output
+frontend/.next/
+frontend/out/
+
+# NestJS build output
+backend/dist/
+
+# Docker
+docker-compose.override.yml
+
+# SSL certs (you'll generate these locally)
+nginx/certs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
