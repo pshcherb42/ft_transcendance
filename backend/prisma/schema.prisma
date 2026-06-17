@@ -8,18 +8,24 @@ datasource db {
 
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  username  String   @unique
-  password  String?
-  avatar    String?
-  createdAt DateTime @default(now())
+  id            String   @id @default(uuid())
+  email         String   @unique
+  username      String   @unique
 
-  friends     User[]   @relation("UserFriends")
-  friendOf    User[]   @relation("UserFriends")
-  matchesHome Match[]  @relation("HomePlayer")
-  matchesAway Match[]  @relation("AwayPlayer")
-  stats       Stats?
+  password      String?  // hashed password (bcrypt/argon2)
+  avatar        String?  // URL or path
+
+  refreshToken  String?  // hashed refresh token (NOT raw token)
+
+  createdAt     DateTime @default(now())
+
+  friends       User[]   @relation("UserFriends")
+  friendOf      User[]   @relation("UserFriends")
+
+  matchesHome   Match[]  @relation("HomePlayer")
+  matchesAway   Match[]  @relation("AwayPlayer")
+
+  stats         Stats?
 }
 
 model Match {
