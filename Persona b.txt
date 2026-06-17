@@ -1,0 +1,171 @@
+
+🛠️ PAS 1: User Registration — Guia de Sub-sub-passos
+📦 Mòdul 1.1: Instal·lació de les "eines" (Terminal)
+Abans de programar, necessites descarregar les llibreries que faran la feina bruta (encriptar i validar dades).
+
+[x] 1.1.1: Obre la terminal, entra a la carpeta backend/.
+[x] 1.1.2: Executa npm install bcrypt (per encriptar contrasenyes).
+[x] 1.1.3: Executa npm install --save-dev @types/bcrypt (perquè TypeScript entengui bcrypt).
+[x] 1.1.4: Executa npm install --save class-validator class-transformer (perquè NestJS pugui comprovar si els camps de text estan ben escrits).
+
+⚙️ Mòdul 1.2: Activació de la seguretat global
+Hem de dir-li a NestJS que utilitzi aquestes llibreries de validació a totes les rutes.
+
+[x] 1.2.1: Obre el fitxer src/main.ts.
+[x] 1.2.2: Importa el ValidationPipe a la part superior del fitxer:
+[x] 1.2.3: Afegeix la línia app.useGlobalPipes(new ValidationPipe()); just abans del await app.listen(...).
+
+
+📝 Mòdul 1.3: Definició del contracte d'entrada (El DTO)
+Crearem el "motlle" que defineix quines dades demanem al Frontend i quines regles han de complir.
+
+[x] 1.3.1: Crea la carpeta si no existeix: src/auth/dto/.
+[x] 1.3.2: Crea el fitxer register.dto.ts dins d'aquesta carpeta.
+[x] 1.3.3: Escriu la classe RegisterDto amb tres propietats basades en el model de la Polina:
+
+🧠 Mòdul 1.4: Programació del "Cervell" (src/auth/auth.service.ts)
+Aquí farem servir el teu PrismaService per parlar amb SQL i bcrypt per encriptar.
+
+[x] 1.4.0: Crear ell PrismaService.
+[x] 1.4.1: Importa el PrismaService i RegisterDto al fitxer.
+[x] 1.4.2: Injecta el PrismaService al constructor de la classe AuthService perquè NestJS te'l doni connectat:
+[x] 1.4.3: Crea la funció asíncrona: async register(dto: RegisterDto).
+[x] 1.4.4: [Fase de consulta] Fes servir Prisma per buscar si el correu o l'usuari ja existeixen a la base de dades utilitzant this.prisma.user.findFirst.
+[x] 1.4.5: Si existeix, llança un error de conflicte (throw new ConflictException(...)). Si no, el codi continua.
+[x] 1.4.6: Genera el salt i calcula el hash de la contrasenya:
+[x] 1.4.7: [Fase de guardar] Crida Prisma per fer l'INSERT real a PostgreSQL:
+[x] 1.4.8: Esborra la contrasenya de l'objecte de memòria (delete newUser.password) abans de fer el return newUser per no enviar-la de tornada a internet.
+
+📞 Mòdul 1.5: Creació de la ruta HTTP (src/auth/auth.controller.ts)
+L'últim pas del backend: exposar un botó a internet perquè el Frontend el pugui prémer.
+
+[x] 1.5.1: Obre src/auth/auth.controller.ts.
+[x] 1.5.2: Assegura't que la classe té el decorador @Controller('auth').
+[x] 1.5.3: Crea el mètode de tipus POST: @Post('register').
+[x] 1.5.4: Digues-li que rebi el cos de la petició: async register(@Body() dto: RegisterDto).
+[x] 1.5.5: Crida la funció del servei que has programat al mòdul anterior i retorna el seu resultat: return this.authService.register(dto);.
+
+🔑 PAS 2: Login & JWT Tokens (Access + Refresh)
+L'objectiu d'aquest pas és validar qui diu ser l'usuari i donar-li dues claus: l'Access Token (per moure's) i el Refresh Token (per demanar un nou Access Token quan aquest caduqui).
+
+📦 Mòdul 2.1: Instal·lar el mòdul de JWT
+[ ] 2.1.1: Obre la terminal a backend/ i executa: npm install @nestjs/jwt.
+[ ] 2.1.2: Obre src/auth/auth.module.ts.
+[ ] 2.1.3: Importa el JwtModule de @nestjs/jwt.
+[ ] 2.1.4: Registra'l dins de l'array imports configurant un secret provisional (per exemple, secret: 'SUPER_SECRET_KEY').
+
+📝 Mòdul 2.2: Crear el DTO de Login
+[ ] 2.2.1: Crea el fitxer src/auth/dto/login.dto.ts.
+[ ] 2.2.2: Defineix la classe LoginDto demanant només @IsString() username i @IsString() password, amb els seus corresponents decoradors @IsNotEmpty().
+
+🧠 Mòdul 2.3: Programar el mètode login a auth.service.ts
+[ ] 2.3.1: Injecta el JwtService al constructor d' AuthService: private jwtService: JwtService.
+[ ] 2.3.2: Crea la funció async login(dto: LoginDto).
+[ ] 2.3.3: [Cerca] Busca l'usuari a la base de dades: this.prisma.user.findUnique({ where: { username: dto.username } }). Si no existeix, llança una UnauthorizedException('Credencials incorrectes').
+[ ] 2.3.4: [Comprovació] Compara la contrasenya plana del DTO amb el hash guardat: const isMatch = await bcrypt.compare(dto.password, user.password). Si no coincideixen, llança el mateix error UnauthorizedException.
+[ ] 2.3.5: [Generació de Tokens] Crea un objecte payload amb l'ID de l'usuari ({ sub: user.id, username: user.username }).
+[ ] 2.3.6: Genera l'Access Token signant el payload amb una caducitat curta: this.jwtService.sign(payload, { expiresIn: '15m' }).
+[ ] 2.3.7: Genera el Refresh Token signant el payload amb una caducitat llarga: this.jwtService.sign(payload, { expiresIn: '7d' }).
+[ ] 2.3.8: [Seguretat extra] Fes un hash al Refresh Token amb bcrypt i guarda aquest hash a la taula de l'usuari fent un this.prisma.user.update. (Nota: Comprova si la Polina ha posat una columna per a això al model User, si no, hauràs d'afegir un camp opcional com refreshToken String? al seu schema.prisma i fer npx prisma migrate dev).
+[ ] 2.3.9: Retorna un objecte amb l' access_token i el refresh_token.
+
+📞 Mòdul 2.4 & 2.5: Els endpoints al Controlador (auth.controller.ts)
+[ ] 2.4.1: Crea la ruta @Post('login').
+[ ] 2.4.2: Rebre el body: async login(@Body() dto: LoginDto) { return this.authService.login(dto); }.
+[ ] 2.5.1: Crea la ruta @Post('refresh') que rebi un cos o una capçalera amb el Refresh Token vell.
+[ ] 2.5.2: Al servei, crea una funció refreshTokens(userId: string, refreshToken: string) que verifiqui el token, el compari amb el hash de la base de dades i, si és vàlid, retorni un nou access_token fresc.
+
+🛡️ PAS 3: Protected Routes & Guards (El porter de la discoteca)
+La feina d'aquest pas és interceptar qualsevol petició a rutes privades, llegir el text del token i, si és vàlid, deixar passar l'usuari injectant la seva informació a la petició.
+
+📦 Mòdul 3.1: Instal·lar llibreries de Passport
+[ ] 3.1.1: A la terminal executa: npm install @nestjs/passport passport passport-jwt.
+[ ] 3.1.2: Instal·la els tipus per a TypeScript: npm install --save-dev @types/passport-jwt.
+
+🔍 Mòdul 3.2: Crear l'Estratègia de lectura (jwt.strategy.ts)
+[ ] 3.2.1: Crea el fitxer src/auth/strategies/jwt.strategy.ts.
+[ ] 3.2.2: Crea una classe JwtStrategy que hereti de PassportStrategy(Strategy).
+[ ] 3.2.3: Al seu constructor, configura que busqui el token a la capçalera de tipus Bearer: jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(), i posa-li la mateixa clau secreta que al pas 2 (secretOrKey: 'SUPER_SECRET_KEY').
+[ ] 3.2.4: Programa el mètode async validate(payload: any). Passport hi injectarà el payload ja desencriptat. Retorna un objecte { userId: payload.sub, username: payload.username }. El que retornis aquí es guardarà automàticament dins de req.user.
+
+🚏 Mòdul 3.3: Crear el Guard (jwt-auth.guard.ts)
+[ ] 3.3.1: Crea el fitxer src/auth/guards/jwt-auth.guard.ts.
+[ ] 3.3.2: Crea la classe JwtAuthGuard que hereti de AuthGuard('jwt').
+[ ] 3.3.3: Deixa-la buida. Per si sola, aquesta etiqueta ja farà que NestJS bloquegi qualsevol petició HTTP si l'estratègia del pas 3.2 falla.
+[ ] 3.3.4: Registra tant la JwtStrategy com el JwtAuthGuard a l'array de providers del teu auth.module.ts i afegeix-los a exports.
+
+👤 PAS 4: Profile Endpoints & Avatar Upload
+Aquí crearem endpoints que només funcionen si passes el passaport (JWT) i implementarem la lògica de fitxers de la imatge de perfil.
+
+🔨 Mòdul 4.1: Generar el recurs d'Usuaris
+[ ] 4.1.1: Executa a la terminal: nest g resource users. Quan el CLI et pregunti, tria REST API i zi que SÍ vols que et generi els entrypoints de CRUD.
+[ ] 4.1.2: Esborra els fitxers que no utilitzaràs si vols netejar el codi (com els DTOs generats automàticament a la carpeta users/dto si prefereixes crear-los a mida).
+
+🔍 Mòdul 4.2: Endpoint de Consulta GET /users/:id
+[ ] 4.2.1: Obre src/users/users.controller.ts.
+[ ] 4.2.2: Posa a sobre de la classe o del mètode el guard que has fet al pas 3: @UseGuards(JwtAuthGuard).
+[ ] 4.2.3: Al mètode @Get(':id'), llegeix el paràmetre: async findOne(@Param('id') id: string).
+[ ] 4.2.4: Al servei users.service.ts, programa la cerca: this.prisma.user.findUnique({ where: { id } }). Si no existeix, llança un NotFoundException('Usuari no trobat'). Recorda fer un delete user.password abans de retornar-lo!
+
+📝 Mòdul 4.3: Endpoint d'Actualització PUT /users/me
+[ ] 4.3.1: Al controlador d'usuari, crea la ruta @Put('me') i protegeix-la també amb el @UseGuards(JwtAuthGuard).
+[ ] 4.3.2: Per saber qui és "me", usa un decorador personalitzat o llegeix-lo directe de la request: async updateMe(@Req() req: any, @Body() updateDto: any). L'ID de l'usuari estarà guardat a req.user.userId gràcies al pas 3.2.4.
+[ ] 4.3.3: Al servei, fes l'actualització: this.prisma.user.update({ where: { id: req.user.userId }, data: updateDto }).
+
+📁 Mòdul 4.4: Pujada d'Avatars amb Multer
+[ ] 4.4.1: Al controlador, crea la ruta @Post('avatar'), protegida amb el JwtAuthGuard.
+[ ] 4.4.2: Afegeix-li el decorador d'intercepció de fitxers de NestJS: @UseInterceptors(FileInterceptor('file', { ... })). Configura el destí dins del disc local (per exemple, ./uploads o la ruta de la goinfre si estàs a l'iMac de 42).
+[ ] 4.4.3: Al mètode de la ruta, rep el fitxer guardat amb: async uploadAvatar(@Req() req: any, @UploadedFile() file: Express.Multer.File).
+[ ] 4.4.4: Agafa la ruta on s'ha guardat el fitxer (file.path) i executa un this.prisma.user.update per actualitzar la columna avatar de l'usuari de la request (req.user.userId).
+[ ] 4.4.5: Configura NestJS perquè serveixi la carpeta d'imatges de forma pública (fent servir ServeStaticModule a l'app.module.ts), d'aquesta manera qualsevol navegador podrà carregar la imatge anant a http://localhost:3001/uploads/nom-del-fitxer.png.
+
+🌐 PAS 5: OAuth 2.0 (42 Intra)
+El flux per deixar que els teus companys de 42 es loguegin fent servir l'Intra oficial de l'escola sense posar cap contrasenya.
+
+⚙️ Mòdul 5.1: Crear l'App a l'Intra
+[ ] 5.1.1: Entra a profile.intra.42.fr -> Settings -> Anciennes Applications (o Applications).
+[ ] 5.1.2: Clica a "New Application".
+[ ] 5.1.3: Posa-li un nom (ex: transcendance_login).
+[ ] 5.1.4: Defineix la Redirect URI: http://localhost:3001/auth/42/callback (és on 42 enviarà l'estudiant després de donar el permís).
+[ ] 5.1.5: Desa i copia al teu fitxer .env el UID (Client ID) i el SECRET (Client Secret) que t'ha generat la web.
+
+🔗 Mòdul 5.2 & 5.3: El Callback de recepció
+[ ] 5.2.1: Crea un endpoint GET /auth/42/callback a auth.controller.ts.
+[ ] 5.2.2: Escolta el paràmetre de consulta que t'enviarà 42 automàticament: async handle42Callback(@Query('code') code: string).
+[ ] 5.3.1: Al servei, crea la funció async validate42User(code: string).
+[ ] 5.3.2: Fes una petició tipus POST cap a https://api.intra.42.fr/oauth/token enviant el code, el teu Client ID i el teu Client Secret per demanar el token oficial de 42.
+[ ] 5.3.3: Amb el token que et retorni 42, fes una petició tipus GET a https://api.intra.42.fr/v2/me. Això et retornarà un fitxer JSON gegant amb les dades reals de l'alumne (el seu correu de 42 i el seu login).
+
+🔄 Mòdul 5.4: Lògica de registre/login automàtic (Upsert)
+[ ] 5.4.1: Extrau l'email i el login del JSON de 42.
+[ ] 5.4.2: Busca a la teva base de dades si aquest correu ja existeix: this.prisma.user.findUnique({ where: { email } }).
+[ ] 5.4.3: Si l'usuari no existeix (Registre automàtic): Crea'l directament a la base de dades amb this.prisma.user.create. Com que entra per 42, posa-li password: null i el seu username de 42. El model de la Polina ho acceptarà perquè té el símbol d'interrogació (password String?).
+[ ] 5.4.4: Si l'usuari ja existeix (Login): No creis res, simplement agafa les dades d'aquest usuari trobat.
+[ ] 5.4.5: Finalment, genera exactament el mateix parell de fitxes (Access + Refresh JWT) del Pas 2 per a aquest usuari i retorna'ls. El procés de 42 ha acabat.
+
+🖥️ PAS 6: Frontend (Next.js)
+Un cop el teu backend respon amb precisió i sense errors a totes les rutes anteriors, és el moment de pintar la interfície gràfica amb la Persona B del Frontend (o tu mateix si fas les dues coses).
+
+📝 Mòdul 6.1: Pàgina de Registre (app/register/page.tsx)
+[ ] 6.1.1: Crea un formulari amb 3 inputs de text HTML (email, username, password) i un botó de tipus submit.
+[ ] 6.1.2: Captura l'esdeveniment de tramesa del formulari (onSubmit).
+[ ] 6.1.3: Executa un fetch('http://localhost:3001/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dadesDelFormulari) }).
+[ ] 6.1.4: Si la resposta és un 201, utilitza l'encaminador de Next.js (router.push('/login')) per enviar-lo a la pantalla de loguejar-se. Si falla, mostra un text vermell a la pantalla amb el missatge d'error que et retorna el backend.
+
+🔑 Mòdul 6.2 & 6.3: Pàgina de Login i Botó de 42 (app/login/page.tsx)
+[ ] 6.2.1: Crea un formulari amb els inputs de username i password.
+[ ] 6.2.2: En fer submit, llança la petició POST /auth/login.
+[ ] 6.2.3: Si el backend et retorna els tokens correctament, guarda l' access_token en un estat global de l'aplicació o al context i desa el refresh_token de manera segura (en una cookie o al localStorage). Envia l'usuari cap al panell principal (/dashboard o /home).
+[ ] 6.3.1: Afegeix un botó gran que digui "Entra amb 42".
+[ ] 6.3.2: Fes que l'acció de clicar aquest botó canviï la finestra de localització de la URL sencera cap a l'enllaç d'autorització oficial de 42 (l'enllaç d'autorització té un aspecte com aquest: https://api.intra.42.fr/oauth/authorize?client_id=EL_TEU_UID&redirect_uri=...&response_type=code).
+
+🛡️ Mòdul 6.4: Protected Route Wrapper
+[ ] 6.4.1: Crea un component contenidor o utilitza el fitxer middleware.ts a l'arrel de Next.js.
+[ ] 6.4.2: Programa una funció que comprovi si el token d'accés o de refresc existeix a la memòria del navegador de l'usuari.
+[ ] 6.4.3: Si el token no existeix i l'usuari intenta escriure a la barra de navegació una ruta privada com /profile o /chat, utilitza un redirect('/login') immediat per blocar-lo.
+
+👤 Mòdul 6.5: Pàgina de Perfil (app/profile/page.tsx)
+[ ] 6.5.1: Crea una pàgina que s'executi dins d'un hook useEffect.
+[ ] 6.5.2: Fes una petició fetch('http://localhost:3001/users/me', { method: 'GET', headers: { 'Authorization': Bearer ${TEU_ACCESS_TOKEN} } }).
+[ ] 6.5.3: Desa les dades obtingudes en un estat (const [user, setUser] = useState(null)).
+[ ] 6.5.4: Renderitza a la pantalla les etiquetes HTML: <h1>{user.username}</h1> i una etiqueta d'imatge <img src={http://localhost:3001/${user.avatar}} alt="Avatar" />.

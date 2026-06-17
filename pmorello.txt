@@ -1,0 +1,369 @@
+Person B — Auth system end-to-end
+Auth blocks everything user-related. Get it done early.
+
+User registration + login with hashed/salted passwords (bcrypt)
+JWT tokens, refresh logic, protected route guards in NestJS
+Basic user profile endpoint (GET /users/:id, PUT /users/me)
+Avatar upload with default fallback
+OAuth 2.0 with 42 intra (most natural for your school) or Google
+Frontend: login page, register page, protected route wrapper in Next.js
+
+1. Instala NVM correctament (HOME)
+export NVM_DIR="$HOME/.nvm"
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+
+2. Activar-lo en la sessió actual
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+Comprova:
+nvm -v
+
+3. Fer-ho persistent (IMPORTANT)
+Si uses zsh:
+echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.zshrc
+echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> ~/.zshrc
+source ~/.zshrc
+
+4. Instal·lar Node 20 (correcte)
+nvm install 20
+nvm use 20
+Verifica:
+node -v
+npm -v
+
+5. Reparar el projecte backend
+Ara que Node és correcte:
+cd backend
+rm -rf node_modules package-lock.json
+Comprova si dins de las dependències de package.json estan les llibreries necesrias.
+npm install
+prisma schema OK
+npm install prisma
+npx prisma generate
+npm run build
+Ctrl+Shift+P
+TypeScript: Restart TS Server
+
+
+🧠 FLUX REAL (IMPORTANT)
+🔹 Primera vegada o canvis de codi/deps
+docker compose up --build
+🔹 Només arrancar (sense canvis)
+docker compose up -d
+🔹 Si canvies Prisma / package.json
+docker compose up --build
+⚠️ CAS IMPORTANT PER TU (Prisma)
+
+Quan facis canvis a:
+
+schema.prisma
+dependències Prisma
+
+👉 SEMPRE:
+
+docker compose up --build
+
+perquè prisma generate passa al build.
+
+💡 RESUM SIMPLE
+❌ No fas build després del compose up
+✅ Fas up --build
+🔁 o separes build + up
+
+
+
+email: test@test.com
+username: testuser
+passwod 12345678
+
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZjcyYTJjOC1mZmIzLTQ4NzgtODIzNy01N2I3OWQwMTM4NzUiLCJ1c2VybmFtZSI6InRlc3R1c2VyIiwiZW1haWwiOiJ0ZXN0QHRlc3QuY29tIiwiaWF0IjoxNzgxMzY2NjIzLCJleHAiOjE3ODEzNjc1MjN9.Q6rFjbm_RzuJoNZyR5Z_QRdRULSEVgqLSmoucXl6_SA",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1ZjcyYTJjOC1mZmIzLTQ4NzgtODIzNy01N2I3OWQwMTM4NzUiLCJpYXQiOjE3ODEzNjY2MjMsImV4cCI6MTc4MTk3MTQyM30.vtgE0Qo9EpqrpHpD-IdMR5zpS5hHHeeheleC0ypjlTU"
+}
+
+
+tests
+
+1. Prova de registre
+Endpoint:
+
+POST http://localhost:3001/auth/register
+Body:
+
+Esperat:
+
+Com comprovar el hash
+Mira la taula User a la base de dades
+El camp password ha de ser alguna cosa com $2b$10$...
+No ha de ser 12345678
+Si tens prisma al projecte, pots fer:
+cd backend
+npx prisma studio
+
+2. Prova de login
+Endpoint:
+POST http://localhost:3001/auth/login
+Body:
+Esperat:
+Guarda els dos tokens per als següents passos.
+
+3. Prova del JwtAuthGuard
+Comprova un endpoint protegit
+GET http://localhost:3001/users/me
+Sense header:
+Authorization: Bearer ... → esperat 401 Unauthorized
+Amb header:
+Authorization: Bearer ACCESS_TOKEN
+Esperat: resposta amb el teu usuari, per exemple:
+
+
+4. Prova de refresh token
+Endpoint:
+POST http://localhost:3001/auth/refresh
+Body:
+Esperat:
+Comprova la rotació
+Torna a fer la mateixa crida amb el OLD_REFRESH_TOKEN
+Si la rotació està bé, ha de donar 401 Unauthorized
+
+5. Prova de logout
+Endpoint:
+POST http://localhost:3001/auth/logout
+Body:
+Esperat:
+Comprova que el refresh ja no val
+Fes POST /auth/refresh amb el refreshToken anterior
+Ha de donar 401 Unauthorized
+
+
+6. Comprova GET /users/:id
+Endpoint:
+GET http://localhost:3001/users/EL_ID_DEL_USUARI
+Esperat:
+Important:
+No ha d’incloure password
+No ha d’incloure refreshToken
+
+
+7. Comprova GET /users/me
+Endpoint:
+GET http://localhost:3001/users/me
+Header: Authorization: Bearer ACCESS_TOKEN
+Esperat:
+dades de l’usuari actual
+Sense token:
+401 Unauthorized
+
+
+8. Actualitzar perfil
+Endpoint:
+PUT http://localhost:3001/users/me
+Header: Authorization: Bearer ACCESS_TOKEN
+Body d’exemple:
+Després:
+GET /users/me
+Esperat: el username actualitzat
+
+
+9. Avatar upload
+Endpoint:
+PUT http://localhost:3001/users/me/avatar
+Header: Authorization: Bearer ACCESS_TOKEN
+Content-Type: multipart/form-data
+camp file: una imatge
+Esperat:
+Comprova:
+obre http://localhost:3000/uploads/nomfitxer.jpg (o 3001 si serveix estàtic del backend)
+la imatge ha d’aparèixer
+
+
+10. Fallback avatar
+Si crees un usuari nou sense avatar:
+GET /users/me
+avatarUrl ha de ser null
+A la UI:
+Ha de mostrar la imatge per defecte quan no hi ha avatarUrl.
+
+11. Prova d’OAuth 42 / Google
+Endpoints que hi ha al backend:
+GET /auth/42
+GET /auth/42/callback
+GET /auth/google si està implementat / configurable
+GET /auth/google/callback si està implementat
+Perquè això funcioni:
+cal tenir les variables d’entorn de Google o de 42 configurades
+cal que el callbackURL sigui accessible des del provider
+Prova:
+obre http://localhost:3001/auth/42 o http://localhost:3001/auth/google
+segueix el flux del provider
+al callback ha d’arribar JWT i l’usuari ha de créixer a la BD
+
+12. Prova del frontend
+Arrenca el frontend:
+docker compose up --build o cd frontend && npm run dev
+Després:
+obre http://localhost:3001/login
+fes login
+comprova localStorage en DevTools:
+accessToken
+refreshToken
+
+13. Prova de ruta protegida al frontend
+Visita:
+/game
+Sense token:
+hauria de redirigir a /login
+Amb token vàlid:
+hauria de deixar accedir
+Resum de comprovacions
+
+Si passes aquests pasos i obtens tot això, llavors tens implementat:
+bcrypt hashing
+registre
+login
+JWT guard
+refresh token
+logout
+GET /users/:id
+GET /users/me
+PUT /users/me
+avatar upload
+avatar fallback
+OAuth
+frontend login/register
+rutes protegides
+Si vols, et puc donar ara la llista exacta d’ordres per a Thunder Client / Postman amb tots els JSON i headers.
+
+
+RESULTATS DEL tests
+Com provar-ho a Thunder Client
+Fes servir http://localhost:3001 com a base si el backend està en Docker o local.
+
+1. Registre
+Si funciona, rebràs 200 i l’usuari es crea a la BD.
+
+2. Login
+accessToken
+refreshToken
+
+3. Prova GET /users/me sense token
+Esperat: 401 Unauthorized
+
+4. Prova GET /users/me amb token
+Authorization: Bearer <ACCESS_TOKEN>
+Esperat: Guarda l’id retornat com a userId.
+
+5. Prova POST /auth/refresh
+Mètode: POST
+URL: http://localhost:3001/auth/refresh
+Headers:
+Content-Type: application/json
+Body JSON:
+Esperat:
+Desa el nou refreshToken.
+
+6. Prova rotació de refresh token
+Torna a cridar POST /auth/refresh amb l’OLD_REFRESH_TOKEN.
+Esperat: 401 Unauthorized
+Si això falla, significa que la rotació no funciona correctament.
+
+7. Prova POST /auth/logout
+Mètode: POST
+URL: http://localhost:3001/auth/logout
+Headers:
+Content-Type: application/json
+Body JSON:
+Esperat:
+8. Prova GET /users/:id
+Mètode: GET
+URL: http://localhost:3001/users/EL_ID_DEL_USUARI
+Esperat:
+Important:
+
+no ha de retornar password
+no ha de retornar refreshToken
+9. Prova PUT /users/me
+Mètode: PUT
+URL: http://localhost:3001/users/me
+Headers:
+Content-Type: application/json
+Authorization: Bearer <ACCESS_TOKEN>
+Body JSON:
+Després fes:
+GET /users/me
+Header Authorization: Bearer <ACCESS_TOKEN>
+Esperat: usuari amb username: "newname"
+10. Prova avatar upload
+Mètode: PUT
+URL: http://localhost:3001/users/me/avatar
+Headers:
+Authorization: Bearer <ACCESS_TOKEN>
+Body: form-data
+Camp file = selecciona una imatge
+Esperat:
+
+Després obre:
+
+http://localhost:3001/uploads/nomfitxer.jpg
+o, si el frontend serveix els uploads a 3000, prova http://localhost:3000/uploads/nomfitxer.jpg
+11. Prova fallback avatar
+Crea un nou usuari sense fer upload d’avatar
+Fes GET /users/me amb el seu token
+Esperat:
+A la UI:
+
+src={user.avatarUrl ?? '/default-avatar.png'}
+12. Prova OAuth 42 / Google
+A Thunder Client no ho fas gairebé: has d’obrir el navegador
+
+http://localhost:3001/auth/42
+o http://localhost:3001/auth/google
+Segueix el flux del provider. Si està configurat correctament:
+
+t’has de redirigir
+el backend ha de rebre el callback
+ha de generar JWT
+la BD ha de tenir l’usuari creat
+Consell per organitzar-ho a Thunder Client
+Crea una “Collection” Auth tests
+Usa variables d’entorn:
+accessToken
+refreshToken
+userId
+Quan obtinguis accessToken, copia’l a la variable accessToken
+Quan obtinguis refreshToken, copia’l a la variable refreshToken
+Per exemple, per fer servir la variable a l’header:
+
+Authorization: Bearer {{accessToken}}
+Resum de les peticions importants
+POST /auth/register
+POST /auth/login
+GET /users/me sense token → 401
+GET /users/me amb Authorization
+POST /auth/refresh
+POST /auth/refresh amb token antic → 401
+POST /auth/logout
+GET /users/:id
+PUT /users/me
+PUT /users/me/avatar
+Si vols, et preparo també la col·lecció Thunder Client exacta amb noms i camps.
+
+
+.env
+
+DB_USER=pmorello
+DB_PASSWORD=1234
+DB_NAME=prova
+DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+PORT=3001
+
+JWT_SECRET=prova-secret-key
+JWT_REFRESH_SECRET=prova-refresh-secret-key
+
+GOOGLE_CLIENT_ID=xxx
+GOOGLE_CLIENT_SECRET=xxx
+GOOGLE_CALLBACK_URL=http://localhost:3000/auth/google/callback
+
+FORTYTWO_CLIENT_ID=xxx
+FORTYTWO_CLIENT_SECRET=xxx
+FORTYTWO_CALLBACK_URL=http://localhost:3000/auth/42/callback
