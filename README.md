@@ -411,3 +411,115 @@ I got two erros.
         backend-1   | [12:54:41 PM] Found 1 error. Watching for file changes.
         backend-1   | 
         Gracefully Stopping... press Ctrl+C again to force
+
+
+    Then I thought that the problem might be that prisma.config wasnt copied to the docker environment coreectly so I ran these commands :
+        docker compose exec backend ls /app/prisma/
+        docker compose exec backend cat /app/prisma/prisma.config.ts
+
+    And I recompiled everything.
+    It didnt work.
+    Maybe the error is in the direction of the prisma.config?
+    I changed its location:
+
+    # Remove the wrong location
+    rm backend/prisma/prisma.config.ts
+
+    # Create at correct location (next to package.json)
+    cat > backend/prisma.config.ts << 'EOF'
+    import { defineConfig } from 'prisma/config';
+
+    export default defineConfig({
+      schema: './prisma/schema.prisma',
+    });
+    EOF
+
+    then rebuild.
+
+    The real problem might be the use of Prisma 7. I will downgrade to prisma 6 and see if this works.
+    If ths works I have to update everything to prisma 6. Makefile for example. 
+
+   What is actually broken (summary)
+  NOT broken:
+  schema definition (mostly fine)
+  Nest structure concept
+  BROKEN:
+    Prisma client generation state
+    dependency consistency after downgrade
+    missing NestJS imports
+    possible Docker vs local install mismatch
+    unnecessary Prisma config usage
+
+  # Fix suggested by AI
+ Correct fix order (important — do not skip steps)
+Step 1 — clean install inside backend container
+rm -rf node_modules
+rm -rf package-lock.json
+npm install
+
+inside backend container, not host.
+
+Step 2 — regenerate Prisma client
+npx prisma generate
+Step 3 — migrate if needed
+npx prisma migrate dev
+
+or at least:
+
+npx prisma db push
+Step 4 — fix PrismaService imports
+import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { PrismaClient } from '@prisma/client';
+
+@Injectable()
+export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+  async onModuleInit() {
+    await this.$connect();
+  }
+
+  async onModuleDestroy() {
+    await this.$disconnect();
+  }
+}
+Step 5 — remove this unless you explicitly need it
+import { defineConfig } from 'prisma/config';
+
+Delete prisma.config.ts unless you know exactly why it's there.
+
+# My steps
+
+I did this untill step 4 and got this error:
+ % npx prisma migrate dev
+Loaded Prisma config from prisma.config.ts.
+
+Prisma config detected, skipping environment variable loading.
+Prisma schema loaded from prisma/schema.prisma
+Error: Prisma schema validation - (get-config wasm)
+Error code: P1012
+error: Environment variable not found: DATABASE_URL.
+  -->  prisma/schema.prisma:7
+   | 
+ 6 |   provider = "postgresql"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+
+Validation Error Count: 1
+[Context: getConfig]
+
+Prisma CLI Version : 6.19.3
+
+the reason was prisma.config interfiring with .env
+first I will verify database_url exists inside container:
+  docker compose exec backend printenv DATABASE_URL
+it exists.
+
+then i ensure that env is injected via docker compose
+  backend:
+    build: ./backend
+    ports: ["3001:3001"]
+    depends_on: [db]
+    env_file: .env
+    volumes:
+      - ./backend:/app
+
+the reason might be .env existing in root.
