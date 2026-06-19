@@ -379,4 +379,35 @@ I got two erros.
                 });
                 EOF
 
-        But still got errors. But I didnt recompile. Tommorow I will try this and see if that was the error.
+        But still got errors. But I didnt recompile. Tommorow I will try this and see if that was the error. 
+        Also I suspect it might be the direction of the file. I suspect I might need to move $
+        to the src/prisma/.
+
+        Turns out I dont need prisma config file. I m going to eliminate it and also
+        I will fix prisma service. I save here the previous version:
+          import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+          import { PrismaClient } from '@prisma/client';
+
+          @Injectable()
+          export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+            async onModuleInit() {
+              await this.$connect();
+            }
+
+            async onModuleDestroy() {
+              await this.$disconnect();
+            }
+          }
+
+      I got error again:
+      
+      [12:54:41 PM] File change detected. Starting incremental compilation...
+        backend-1   | 
+        backend-1   | src/prisma/prisma.service.ts:8:7 - error TS2353: Object literal may only specify known properties, and 'datasources' does not exist in type 'Subset<PrismaClientOptions, PrismaClientOptions>'.
+        backend-1   | 
+        backend-1   | 8       datasources: {
+        backend-1   |         ~~~~~~~~~~~
+        backend-1   | 
+        backend-1   | [12:54:41 PM] Found 1 error. Watching for file changes.
+        backend-1   | 
+        Gracefully Stopping... press Ctrl+C again to force
