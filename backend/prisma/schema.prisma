@@ -1,17 +1,20 @@
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+  engineType = "client"
+  moduleFormat = "cjs"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 
 model User {
-  id            String   @id @default(uuid())
+  id            String      @id @default(uuid())
   email         String   @unique
   username      String   @unique
+  name          String?
 
   password      String?  // hashed password (bcrypt/argon2)
   avatar        String?  // URL or path

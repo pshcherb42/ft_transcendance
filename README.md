@@ -523,3 +523,849 @@ then i ensure that env is injected via docker compose
       - ./backend:/app
 
 the reason might be .env existing in root.
+
+# Delete everything prisma related and start over.
+
+Files:
+rm -rf prisma/migrations
+rm -f prisma/schema.prisma
+rm -f prisma.config.ts
+rm -f prisma/prisma.config.ts
+rm -f src/prisma/prisma.service.ts
+rm -f src/prisma/prisma.module.ts
+Packages:
+npm uninstall prisma @prisma/client
+Client:
+rm -rf node_modules/.prisma
+rm -rf node_modules/@prisma
+Cache:
+docker compose down -v
+docker builder prune -f
+
+# Start over
+
+Step 1 — Install packages
+bashnpm install @prisma/client @prisma/adapter-pg pg
+npm install -D prisma dotenv
+
+Step 2 — package.json
+Add "type": "module" at the top level:
+json{
+  "type": "module",
+  ...
+}
+
+Step 3 — prisma/schema.prisma
+prismagenerator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+Step 4 — prisma.config.ts (at backend root, next to package.json)
+typescriptimport "dotenv/config";
+import { defineConfig, env } from "prisma/config";
+
+export default defineConfig({
+  schema: "prisma/schema.prisma",
+  migrations: {
+    path: "prisma/migrations",
+  },
+  datasource: {
+    url: env("DATABASE_URL"),
+  },
+});
+
+Step 5 — src/prisma/prisma.service.ts
+typescriptimport { Injectable } from "@nestjs/common";
+import { PrismaClient } from "../generated/prisma/client.js";
+import { PrismaPg } from "@prisma/adapter-pg";
+
+@Injectable()
+export class PrismaService extends PrismaClient {
+  constructor() {
+    const adapter = new PrismaPg({
+      connectionString: process.env.DATABASE_URL as string,
+    });
+    super({ adapter });
+  }
+}
+
+Step 6 — Dockerfile
+dockerfileFROM node:20-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npx prisma generate
+EXPOSE 3001
+CMD ["npm", "run", "start:dev"]
+The key addition is RUN npx prisma generate — this must happen at build time so the client is generated into src/generated/prisma before the app starts.
+
+# Error again
+
+ => ERROR [backend 6/6] RUN npx prisma generate                                                   23.5s
+------
+ > [backend 6/6] RUN npx prisma generate:
+3.509 npm warn exec The following package was not found and will be installed: prisma@7.8.0
+10.55 npm warn EBADENGINE Unsupported engine {
+10.55 npm warn EBADENGINE   package: '@prisma/streams-local@0.1.2',
+10.55 npm warn EBADENGINE   required: { bun: '>=1.3.6', node: '>=22.0.0' },
+10.55 npm warn EBADENGINE   current: { node: 'v20.20.2', npm: '10.8.2' }
+10.55 npm warn EBADENGINE }
+16.16 Failed to load config file "/app/prisma.config.ts" as a TypeScript/JavaScript module. Error: Error: Cannot find module 'prisma/config'
+16.16 Require stack:
+16.16 - /app/prisma.config.ts
+------
+Dockerfile:6
+
+--------------------
+
+   4 |     RUN npm install
+
+   5 |     COPY . .
+
+   6 | >>> RUN npx prisma generate
+
+   7 |     EXPOSE 3001
+
+   8 |     CMD ["npm", "run", "start:dev"]
+
+--------------------
+
+target backend: failed to solve: process "/bin/sh -c npx prisma generate" did not complete successfully: exit code: 1
+
+
+[!] Error: Failed to start. Try running 'make install-deps' to ensure all packages are installed.
+make: *** [Makefile:17: up] Error 1
+# Solution
+
+Step 1 — Update your Dockerfile
+dockerfileFROM node:22-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN ./node_modules/.bin/prisma generate
+EXPOSE 3001
+CMD ["npm", "run", "start:dev"]
+
+Step 2 — Make sure prisma is in your devDependencies
+Check your package.json has:
+json"devDependencies": {
+  "prisma": "^7.8.0"
+}
+
+# Error again 2
+ => ERROR [backend 6/6] RUN ./node_modules/.bin/prisma generate               5.0s
+------
+ > [backend 6/6] RUN ./node_modules/.bin/prisma generate:
+4.124 Failed to load config file "/app" as a TypeScript/JavaScript module. Error: PrismaConfigEnvError: Cannot resolve environment variable: DATABASE_URL.
+------
+Dockerfile:6
+
+--------------------
+
+   4 |     RUN npm install
+
+   5 |     COPY . .
+
+   6 | >>> RUN ./node_modules/.bin/prisma generate
+
+   7 |     EXPOSE 3001
+
+   8 |     CMD ["npm", "run", "start:dev"]
+
+--------------------
+
+target backend: failed to solve: process "/bin/sh -c ./node_modules/.bin/prisma generate" did not complete successfully: exit code: 1
+
+# Solution 
+
+The problem is that prisma.config.ts tries to resolve DATABASE_URL at generate time, but during Docker build there's no .env available. prisma generate doesn't need the DB URL at all — that's only needed at runtime.
+The fix is to make the URL optional in the config so generate can proceed without it:
+prisma.config.ts
+typescriptimport { defineConfig } from "prisma/config";
+
+export default defineConfig({
+  schema: "prisma/schema.prisma",
+  migrations: {
+    path: "prisma/migrations",
+  },
+  datasource: {
+    url: process.env.DATABASE_URL ?? "postgresql://placeholder:placeholder@localhost:5432/placeholder",
+  },
+});
+prisma generate only reads the schema file — it uses the datasource block to know the provider type, not to actually connect. The placeholder URL will never be used during generate.
+Then rebuild:
+bashdocker compose down
+docker compose up --build
+
+# Error again 3
+
+ => ERROR [backend 6/6] RUN ./node_modules/.bin/prisma generate               3.4s
+------
+ > [backend 6/6] RUN ./node_modules/.bin/prisma generate:
+2.385 Loaded Prisma config from prisma.config.ts.
+2.385 
+2.563 Prisma schema loaded from prisma/schema.prisma.
+2.578 Error: Prisma schema validation - (get-dmmf wasm)
+2.578 Error code: P1012
+2.578 error: Error parsing attribute "@relation": The type of the field `homeId` in the model `Match` is not matching the type of the referenced field `id` in model `User`.
+2.578   -->  prisma/schema.prisma:35
+2.578    | 
+2.578 34 |   id         String   @id @default(uuid())
+2.578 35 |   homePlayer User     @relation("HomePlayer", fields: [homeId], references: [id])
+2.578 36 |   homeId     String
+2.578    | 
+2.578 error: Error parsing attribute "@relation": The type of the field `awayId` in the model `Match` is not matching the type of the referenced field `id` in model `User`.
+2.578   -->  prisma/schema.prisma:37
+2.578    | 
+2.578 36 |   homeId     String
+2.578 37 |   awayPlayer User     @relation("AwayPlayer", fields: [awayId], references: [id])
+2.578 38 |   awayId     String
+2.578    | 
+2.578 error: Error parsing attribute "@relation": The type of the field `userId` in the model `Stats` is not matching the type of the referenced field `id` in model `User`.
+2.578   -->  prisma/schema.prisma:49
+2.578    | 
+2.578 48 |   id      String @id @default(uuid())
+2.578 49 |   user    User   @relation(fields: [userId], references: [id])
+2.578 50 |   userId  String @unique
+2.578    | 
+2.578 
+2.578 Validation Error Count: 3
+2.578 [Context: getDmmf]
+2.578 
+2.578 Prisma CLI Version : 7.8.0
+------
+Dockerfile:6
+
+--------------------
+
+   4 |     RUN npm install
+
+   5 |     COPY . .
+
+   6 | >>> RUN ./node_modules/.bin/prisma generate
+
+   7 |     EXPOSE 3001
+
+   8 |     CMD ["npm", "run", "start:dev"]
+
+--------------------
+
+target backend: failed to solve: process "/bin/sh -c ./node_modules/.bin/prisma generate" did not complete successfully: exit code: 1
+
+# Solution 
+
+Change User.id to String
+prismamodel User {
+  id            String   @id @default(uuid())  // was Int @id @default(autoincrement())
+  ...
+}
+
+# Error again 4
+
+backend-1  | src/app.controller.ts:2:28 - error TS2307: Cannot find module './app.service' or its corresponding type declarations.
+backend-1  | 
+backend-1  | 2 import { AppService } from './app.service';
+backend-1  |                              ~~~~~~~~~~~~~~~
+backend-1  | 
+backend-1  | src/app.module.ts:2:31 - error TS2307: Cannot find module './app.controller' or its corresponding type declarations.
+backend-1  | 
+backend-1  | 2 import { AppController } from './app.controller';
+backend-1  |                                 ~~~~~~~~~~~~~~~~~~
+backend-1  | 
+backend-1  | src/app.module.ts:3:28 - error TS2307: Cannot find module './app.service' or its corresponding type declarations.
+backend-1  | 
+backend-1  | 3 import { AppService } from './app.service';
+backend-1  |                              ~~~~~~~~~~~~~~~
+backend-1  | 
+backend-1  | src/app.module.ts:4:29 - error TS2307: Cannot find module './users/users.module' or its corresponding type declarations.
+backend-1  | 
+backend-1  | 4 import { UsersModule } from './users/users.module';
+backend-1  |                               ~~~~~~~~~~~~~~~~~~~~~~
+backend-1  | 
+backend-1  | src/app.module.ts:5:28 - error TS2307: Cannot find module './auth/auth.module' or its corresponding type declarations.
+backend-1  | 
+backend-1  | 5 import { AuthModule } from './auth/auth.module';
+backend-1  |                              ~~~~~~~~~~~~~~~~~~~~
+backend-1  | 
+backend-1  | src/app.module.ts:6:30 - error TS2307: Cannot find module './prisma/prisma.module' or its corresponding type declarations.
+backend-1  | 
+backend-1  | 6 import { PrismaModule } from './prisma/prisma.module';
+backend-1  |                                ~~~~~~~~~~~~~~~~~~~~~~~~
+backend-1  | 
+backend-1  | src/auth/auth.controller.ts:5:31 - error TS2307: Cannot find module './auth.service' or its corresponding type declarations.
+backend-1  | 
+backend-1  | 5   import { AuthService } from './auth.service';
+backend-1  |                                 ~~~~~~~~~~~~~~~~
+backend-1  | 
+backend-1  | src/auth/auth.controller.ts:6:34 - error TS2307: Cannot find module './guards/local-auth.guard' or its corresponding type declarations.
+backend-1  | 
+backend-1  | 6   import { LocalAuthGuard } from './guards/local-auth.guard';
+backend-1  |                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+backend-1  | 
+backend-1  | src/auth/auth.controller.ts:7:32 - error TS2307: Cannot find module './guards/jwt-auth.guard' or its corresponding type declarations.
+backend-1  | 
+backend-1  | 7   import { JwtAuthGuard } from './guards/jwt-auth.guard';
+backend-1  |                                  ~~~~~~~~~~~~~~~~~~~~~~~~~
+backend-1  | 
+backend-1  | src/auth/auth.controller.ts:8:35 - error TS2307: Cannot find module './guards/jwt-refresh.guard' or its corresponding type declarations.
+backend-1  | 
+backend-1  | 8   import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
+backend-1  |                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+backend-1  | 
+backend-1  | src/auth/auth.module.ts:4:29 - error TS2307: Cannot find module './auth.service' or its corresponding type declarations.
+backend-1  | 
+
+
+nginx-1    | /docker-entrypoint.sh: Launching /docker-entrypoint.d/10-listen-on-ipv6-by-default.sh
+backend-1  | 4 import { AuthService } from './auth.service';
+backend-1  |                               ~~~~~~~~~~~~~~~~
+backend-1  | 
+backend-1  | src/auth/auth.module.ts:5:32 - error TS2307: Cannot find module './auth.controller' or its corresponding type declarations.
+backend-1  | 
+backend-1  | 5 import { AuthController } from './auth.controller';
+backend-1  |                                  ~~~~~~~~~~~~~~~~~~~
+backend-1  | 
+backend-1  | src/auth/auth.module.ts:6:31 - error TS2307: Cannot find module './strategies/local.strategy' or its corresponding type declarations.
+backend-1  | 
+backend-1  | 6 import { LocalStrategy } from './strategies/local.strategy';
+backend-1  |                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+backend-1  | 
+backend-1  | src/auth/auth.module.ts:7:29 - error TS2307: Cannot find module './strategies/jwt.strategy' or its corresponding type declarations.
+backend-1  | 
+backend-1  | 7 import { JwtStrategy } from './strategies/jwt.strategy';
+backend-1  |                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+backend-1  | 
+backend-1  | src/auth/auth.module.ts:8:36 - error TS2307: Cannot find module './strategies/jwt-refresh.strategy' or its corresponding type declarations.
+backend-1  | 
+backend-1  | 8 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
+backend-1  |                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+backend-1  | 
+backend-1  | src/auth/auth.module.ts:9:29 - error TS2307: Cannot find module '../users/users.module' or its corresponding type declarations.
+backend-1  | 
+backend-1  | 9 import { UsersModule } from '../users/users.module';
+backend-1  |                               ~~~~~~~~~~~~~~~~~~~~~~~
+backend-1  | 
+backend-1  | src/auth/auth.service.ts:4:30 - error TS2307: Cannot find module '../users/users.service' or its corresponding type declarations.
+backend-1  | 
+backend-1  | 4 import { UsersService } from '../users/users.service';
+backend-1  |                                ~~~~~~~~~~~~~~~~~~~~~~~~
+backend-1  | 
+backend-1  | src/auth/strategies/jwt-refresh.strategy.ts:6:30 - error TS2307: Cannot find module '../../users/users.service' or its corresponding type declarations.
+backend-1  | 
+backend-1  | 6 import { UsersService } from '../../users/users.service';
+backend-1  |                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+backend-1  | 
+backend-1  | src/auth/strategies/local.strategy.ts:4:29 - error TS2307: Cannot find module '../auth.service' or its corresponding type declarations.
+backend-1  | 
+backend-1  | 4 import { AuthService } from '../auth.service';
+backend-1  |                               ~~~~~~~~~~~~~~~~~
+backend-1  | 
+backend-1  | src/main.ts:2:27 - error TS2307: Cannot find module './app.module' or its corresponding type declarations.
+backend-1  | 
+backend-1  | 2 import { AppModule } from './app.module';
+backend-1  |                             ~~~~~~~~~~~~~~
+backend-1  | 
+backend-1  | src/prisma/prisma.service.ts:2:30 - error TS2307: Cannot find module '../generated/prisma/client.js' or its corresponding type declarations.
+backend-1  | 
+backend-1  | 2 import { PrismaClient } from "../generated/prisma/client.js";
+backend-1  |                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+backend-1  | 
+backend-1  | src/prisma/prisma.service.ts:3:26 - error TS2307: Cannot find module '@prisma/adapter-pg' or its corresponding type declarations.
+backend-1  | 
+backend-1  | 3 import { PrismaPg } from "@prisma/adapter-pg";
+backend-1  |                            ~~~~~~~~~~~~~~~~~~~~
+backend-1  | 
+backend-1  | src/users/users.controller.ts:2:30 - error TS2307: Cannot find module './users.service' or its corresponding type declarations.
+backend-1  | 
+backend-1  | 2 import { UsersService } from './users.service';
+backend-1  |                                ~~~~~~~~~~~~~~~~~
+backend-1  | 
+backend-1  | src/users/users.controller.ts:3:30 - error TS2307: Cannot find module '../auth/guards/jwt-auth.guard' or its corresponding type declarations.
+backend-1  | 
+backend-1  | 3 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+backend-1  |                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+backend-1  | 
+backend-1  | src/users/users.module.ts:2:30 - error TS2307: Cannot find module './users.service' or its corresponding type declarations.
+backend-1  | 
+backend-1  | 2 import { UsersService } from './users.service';
+backend-1  |                                ~~~~~~~~~~~~~~~~~
+backend-1  | 
+backend-1  | src/users/users.module.ts:3:33 - error TS2307: Cannot find module './users.controller' or its corresponding type declarations.
+backend-1  | 
+backend-1  | 3 import { UsersController } from './users.controller';
+backend-1  |                                   ~~~~~~~~~~~~~~~~~~~~
+backend-1  | 
+backend-1  | src/users/users.service.ts:2:31 - error TS2307: Cannot find module '../prisma/prisma.service' or its corresponding type declarations.
+backend-1  | 
+backend-1  | 2 import { PrismaService } from '../prisma/prisma.service';
+backend-1  |                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~
+backend-1  | 
+backend-1  | src/users/users.service.ts:3:22 - error TS2307: Cannot find module '../generated/prisma/client.js' or its corresponding type declarations.
+backend-1  | 
+backend-1  | 3 import { User } from "../generated/prisma/client.js";
+backend-1  |                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+backend-1  | 
+backend-1  | [3:41:45 PM] Found 28 errors. Watching for file changes.
+
+# Solution 
+
+Step 1 — Remove "type": "module" from package.json
+Open backend/package.json and delete this line:
+json"type": "module",
+
+Step 2 — Fix prisma.service.ts imports (no .js extensions in CJS)
+typescriptimport { Injectable } from "@nestjs/common";
+import { PrismaClient } from "../generated/prisma";
+import { PrismaPg } from "@prisma/adapter-pg";
+
+@Injectable()
+export class PrismaService extends PrismaClient {
+  constructor() {
+    const adapter = new PrismaPg({
+      connectionString: process.env.DATABASE_URL as string,
+    });
+    super({ adapter });
+  }
+}
+
+Step 3 — Fix the same in users.service.ts
+Change:
+typescriptimport { User } from "../generated/prisma/client.js";
+To:
+typescriptimport { User } from "../generated/prisma";
+
+# Error again 6
+
+backend-1   | src/app.module.ts:6:30 - error TS2307: Cannot find module './prisma/prisma.module' or its corresponding type declarations.
+backend-1   | 
+backend-1   | 6 import { PrismaModule } from './prisma/prisma.module';
+backend-1   |                                ~~~~~~~~~~~~~~~~~~~~~~~~
+backend-1   | 
+backend-1   | src/prisma/prisma.service.ts:2:30 - error TS2307: Cannot find module '../generated/prisma' or its corresponding type declarations.
+backend-1   | 
+backend-1   | 2 import { PrismaClient } from "../generated/prisma";
+backend-1   |                                ~~~~~~~~~~~~~~~~~~~~~
+backend-1   | 
+backend-1   | src/prisma/prisma.service.ts:3:26 - error TS2307: Cannot find module '@prisma/adapter-pg' or its corresponding type declarations.
+backend-1   | 
+backend-1   | 3 import { PrismaPg } from "@prisma/adapter-pg";
+backend-1   |                            ~~~~~~~~~~~~~~~~~~~~
+backend-1   | 
+backend-1   | src/users/users.service.ts:3:22 - error TS2307: Cannot find module '../generated/prisma' or its corresponding type declarations.
+backend-1   | 
+backend-1   | 3 import { User } from "../generated/prisma";
+backend-1   |                        ~~~~~~~~~~~~~~~~~~~~~
+backend-1   | 
+backend-1   | src/users/users.service.ts:11:24 - error TS2339: Property 'user' does not exist on type 'PrismaService'.
+backend-1   | 
+backend-1   | 11     return this.prisma.user.findUnique({ where: { id } });
+backend-1   |                           ~~~~
+backend-1   | 
+backend-1   | src/users/users.service.ts:15:24 - error TS2339: Property 'user' does not exist on type 'PrismaService'.
+backend-1   | 
+backend-1   | 15     return this.prisma.user.findUnique({ where: { email } });
+backend-1   |                           ~~~~
+backend-1   | 
+backend-1   | src/users/users.service.ts:19:24 - error TS2339: Property 'user' does not exist on type 'PrismaService'.
+backend-1   | 
+backend-1   | 19     return this.prisma.user.findUnique({ where: { username } });
+backend-1   |                           ~~~~
+backend-1   | 
+backend-1   | src/users/users.service.ts:30:24 - error TS2339: Property 'user' does not exist on type 'PrismaService'.
+backend-1   | 
+backend-1   | 30     return this.prisma.user.create({
+backend-1   |                           ~~~~
+backend-1   | 
+backend-1   | src/users/users.service.ts:41:23 - error TS2339: Property 'user' does not exist on type 'PrismaService'.
+backend-1   | 
+backend-1   | 41     await this.prisma.user.update({
+backend-1   |                          ~~~~
+backend-1   | 
+backend-1   | src/users/users.service.ts:48:24 - error TS2339: Property 'user' does not exist on type 'PrismaService'.
+backend-1   | 
+backend-1   | 48     return this.prisma.user.update({
+backend-1   |                           ~~~~
+backend-1   | 
+backend-1   | src/users/users.service.ts:60:24 - error TS2339: Property 'user' does not exist on type 'PrismaService'.
+backend-1   | 
+backend-1   | 60     return this.prisma.user.update({
+backend-1   |                           ~~~~
+backend-1   | 
+backend-1   | [3:50:51 PM] Found 11 errors. Watching for file changes.
+
+# Solution
+
+Step 1 — Verify packages are actually installed
+Run this inside the container:
+bashdocker compose exec backend npm list @prisma/adapter-pg
+If it says "not found", install it:
+bashdocker compose exec backend npm install @prisma/adapter-pg pg
+
+Step 2 — Check your schema.prisma generator block
+It must look exactly like this — output must be inside src/:
+prismagenerator client {
+  provider   = "prisma-client"
+  output     = "../src/generated/prisma"
+  engineType = "client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+No url in the datasource block — that lives only in prisma.config.ts.
+
+Step 3 — Run prisma generate manually inside the container
+bashdocker compose exec backend npx prisma generate
+This creates src/generated/prisma/. Without this, TypeScript has nothing to import and all those "cannot find module" errors cascade.
+
+Step 4 — Update your Dockerfile so this happens at build time
+dockerfileFROM node:20-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+ARG DATABASE_URL=postgresql://dummy:dummy@localhost:5432/dummy
+ENV DATABASE_URL=$DATABASE_URL
+RUN npx prisma generate
+EXPOSE 3001
+CMD ["npm", "run", "start:dev"]
+The ARG/ENV trick is needed because prisma.config.ts calls env('DATABASE_URL') at generate time — it needs something there even if it's a dummy value.
+
+Step 6 — Fix users.service.ts import
+typescriptimport { User } from "../generated/prisma/client";
+
+# Error the last one
+
+backend-1  | src/app.module.ts:6:30 - error TS2307: Cannot find module './prisma/prisma.module' or its corresponding type declarations.
+backend-1  | 
+backend-1  | 6 import { PrismaModule } from './prisma/prisma.module';
+backend-1  |                                ~~~~~~~~~~~~~~~~~~~~~~~~
+backend-1  | 
+backend-1  | [4:09:39 PM] Found 1 error. Watching for file changes.
+
+I am missing prisma.module.ts
+
+# Solution
+
+Create it:
+src/prisma/prisma.module.ts
+typescriptimport { Global, Module } from '@nestjs/common';
+import { PrismaService } from './prisma.service';
+
+@Global()
+@Module({
+  providers: [PrismaService],
+  exports: [PrismaService],
+})
+export class PrismaModule {}
+
+# Really the last error
+
+[4:14:12 PM] File change detected. Starting incremental compilation...
+backend-1   | 
+backend-1   | [4:14:12 PM] Found 0 errors. Watching for file changes.
+backend-1   | 
+backend-1   | file:///app/dist/src/generated/prisma/client.js:38
+backend-1   | Object.defineProperty(exports, "__esModule", { value: true });
+backend-1   |                       ^
+backend-1   | 
+backend-1   | ReferenceError: exports is not defined in ES module scope
+backend-1   |     at file:///app/dist/src/generated/prisma/client.js:38:23
+backend-1   |     at ModuleJobSync.runSync (node:internal/modules/esm/module_job:454:37)
+backend-1   |     at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:445:47)
+backend-1   |     at loadESMFromCJS (node:internal/modules/cjs/loader:1600:24)
+backend-1   |     at Module._compile (node:internal/modules/cjs/loader:1763:5)
+backend-1   |     at Object..js (node:internal/modules/cjs/loader:1913:10)
+backend-1   |     at Module.load (node:internal/modules/cjs/loader:1505:32)
+backend-1   |     at Function._load (node:internal/modules/cjs/loader:1309:12)
+backend-1   |     at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+backend-1   |     at Module.require (node:internal/modules/cjs/loader:1527:12)
+backend-1   | 
+backend-1   | Node.js v22.23.0
+db-1        | 2026-06-20 16:14:40.399 UTC [27] LOG:  checkpoint starting: time
+db-1        | 2026-06-20 16:14:40.692 UTC [27] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.034 s, sync=0.023 s, total=0.290 s; sync files=2, longest=0.015 s, average=0.012 s; distance=0 kB, estimate=0 kB; lsn=0/1951FB0, redo lsn=0/1951F78
+
+# solution
+
+Change tsconfig.json to use CommonJS:
+json{
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "resolvePackageJsonExports": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2021",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "noFallthroughCasesInSwitch": false
+  }
+}
+Two changes:
+
+"module": "nodenext" → "commonjs"
+"moduleResolution": "nodenext" → "node"
+"target": "ES2023" → "ES2021" (safer for NestJS with CJS)
+
+# The last last error
+
+	"message": "Option 'resolvePackageJsonExports' can only be used when 'moduleResolution' is set to 'node16', 'nodenext', or 
+
+# Solution
+
+Fix 1 — tsconfig.json
+Remove resolvePackageJsonExports entirely (it's not needed with "moduleResolution": "node"):
+
+Fix 2 — Rebuild the container
+docker compose down
+docker compose up --build
+
+# The most lst in the world error the last for real
+
+
+backend-1  | file:///app/dist/src/generated/prisma/client.js:38
+backend-1  | Object.defineProperty(exports, "__esModule", { value: true });
+backend-1  |                       ^
+backend-1  | 
+backend-1  | ReferenceError: exports is not defined in ES module scope
+backend-1  |     at file:///app/dist/src/generated/prisma/client.js:38:23
+backend-1  |     at ModuleJobSync.runSync (node:internal/modules/esm/module_job:454:37)
+backend-1  |     at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:445:47)
+backend-1  |     at loadESMFromCJS (node:internal/modules/cjs/loader:1600:24)
+backend-1  |     at Module._compile (node:internal/modules/cjs/loader:1763:5)
+backend-1  |     at Object..js (node:internal/modules/cjs/loader:1913:10)
+backend-1  |     at Module.load (node:internal/modules/cjs/loader:1505:32)
+backend-1  |     at Function._load (node:internal/modules/cjs/loader:1309:12)
+backend-1  |     at wrapModuleLoad (node:internal/modules/cjs/loader:254:19)
+backend-1  |     at Module.require (node:internal/modules/cjs/loader:1527:12)
+backend-1  | 
+backend-1  | Node.js v22.23.0
+
+# Solution
+
+The real fix: Use Node 20 in your Dockerfile
+Node 22's module detection is stricter. Your entire NestJS stack targets CommonJS, so use the LTS version that works predictably with it:
+Dockerfile:
+dockerfileFROM node:20-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+ARG DATABASE_URL=postgresql://dummy:dummy@localhost:5432/dummy
+ENV DATABASE_URL=$DATABASE_URL
+RUN npx prisma generate
+EXPOSE 3001
+CMD ["npm", "run", "start:dev"]
+
+Also add this to schema.prisma
+prismagenerator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  engineType   = "client"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+rebuild
+docker compose down -v
+docker compose build --no-cache
+docker compose up
+
+# Really I am serious as never before last error
+
+backend-1   | Object.defineProperty(exports, "__esModule", { value: true });
+backend-1   |                       ^
+backend-1   | 
+backend-1   | ReferenceError: exports is not defined in ES module scope
+backend-1   |     at file:///app/dist/src/generated/prisma/client.js:38:23
+backend-1   |     at ModuleJobSync.runSync (node:internal/modules/esm/module_job:437:37)
+backend-1   |     at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:389:47)
+backend-1   |     at loadESMFromCJS (node:internal/modules/cjs/loader:1363:24)
+backend-1   |     at Module._compile (node:internal/modules/cjs/loader:1503:5)
+backend-1   |     at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)
+backend-1   |     at Module.load (node:internal/modules/cjs/loader:1266:32)
+backend-1   |     at Module._load (node:internal/modules/cjs/loader:1091:12)
+backend-1   |     at Module.require (node:internal/modules/cjs/loader:1289:19)
+backend-1   |     at require (node:internal/modules/helpers:182:18)
+backend-1   | 
+backend-1   | Node.js v20.20.2
+
+# Solution
+ So the current error is the same exports is not defined in ES module scope but now on Node 20 — meaning the moduleFormat = "cjs" fix didn't take effect yet.So the current error is the same exports is not defined in ES module scope but now on Node 20 — meaning the moduleFormat = "cjs" fix didn't take effect yet. Most likely the old generated client is still cached.
+Run this to force a clean regeneration:
+docker compose down
+rm -rf backend/src/generated
+docker compose build --no-cache
+docker compose up
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## MOVING ON ! FINALLY
+# Add JWT keys 
+
+inside .env:
+JWT_REFRESH_SECRET=
+JWT_EXPIRES_IN=
+
+Rebuild:
+docker compose down
+docker compose up --build
+
+# Test 1 - Register a user
+
+# Error 1
+ % curl -v -X POST http://localhost:8080/api/auth/register \
+  -H "Content-Type: application/json" \ 
+  -d '{"email":"test@test.com","username":"testuser","password":"password123"}'
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 127.0.0.1:8080...
+* Connected to localhost (127.0.0.1) port 8080 (#0)
+> POST /api/auth/register HTTP/1.1
+> Host: localhost:8080
+> User-Agent: curl/7.81.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 72
+> 
+* Mark bundle as not supporting multiuse
+< HTTP/1.1 502 Bad Gateway
+< Server: nginx/1.31.2
+< Date: Sat, 20 Jun 2026 18:31:01 GMT
+< Content-Type: text/html
+< Content-Length: 157
+< Connection: keep-alive
+< 
+<html>
+<head><title>502 Bad Gateway</title></head>
+<body>
+<center><h1>502 Bad Gateway</h1></center>
+<hr><center>nginx/1.31.2</center>
+</body>
+</html>
+
+nginx-1     | 172.18.0.1 - - [20/Jun/2026:18:31:01 +0000] "POST /api/auth/register HTTP/1.1" 502 157 "-" "curl/7.81.0"
+nginx-1     | 2026/06/20 18:31:01 [error] 22#22: *1 connect() failed (111: Connection refused) while connecting to upstream, client: 172.18.0.1, server: , request: "POST /api/auth/register HTTP/1.1", upstream: "http://172.18.0.3:3001/auth/register", host: "localhost:8080"
+
+
+# Fix
+Fix backend/src/main.ts:
+typescriptimport { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  await app.listen(3001); // await app.listen(process.env.PORT ?? 3000);
+}
+bootstrap();
+
+This worked.
+
+# Run migrations
+
+docker compose exec backend npx prisma migrate dev --name init
+
+Migration applied perfectly.
+
+# Retry the register curl
+
+curl -s -X POST http://localhost:8080/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@test.com","username":"testuser","password":"password123"}' | jq
+
+
+## AUTH IS WORKING
+
+# Test 2 - login
+
+curl -s -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@test.com","password":"password123"}' | jq
+
+ "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlNWM1MDY5OC1mNmM0LTRmZDgtOTQ5NC0wYjgyZWRjNDQ5NzgiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJpYXQiOjE3ODE5ODEzNjksImV4cCI6MTc4MTk4MjI2OX0.CgY0hcKSNCQ-utfV31nj2WeENeZ7xZLXPqiBiFbg9i8",
+
+Then save the accessToken from the response and test the protected route:
+bashcurl -s http://localhost:8080/api/users/me \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN_HERE" | jq
+
+curl -s http://localhost:8080/api/users/me \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlNWM1MDY5OC1mNmM0LTRmZDgtOTQ5NC0wYjgyZWRjNDQ5NzgiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJpYXQiOjE3ODE5ODEzNjksImV4cCI6MTc4MTk4MjI2OX0.CgY0hcKSNCQ-utfV31nj2WeENeZ7xZLXPqiBiFbg9i8" | jq
+
+Register → returns JWT pair
+
+Protected route → JWT guard works, returns sanitized user (no password/refreshToken leaked)
+
+DB migration applied, User table exists
+
+# Test 3 - Refresh
+
+curl -s -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@test.com","password":"password123"}' | jq
+
+ "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlNWM1MDY5OC1mNmM0LTRmZDgtOTQ5NC0wYjgyZWRjNDQ5NzgiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJpYXQiOjE3ODE5ODE3MzksImV4cCI6MTc4MjU4NjUzOX0.FmcXzayjGpkKGPFu1aWeht-KqlipU91YXT-65P3qI04"
+
+curl -s -X POST http://localhost:8080/api/auth/refresh \
+  -H "Content-Type: application/json" \
+  -d '{"refreshToken":"PASTE_REFRESH_TOKEN_HERE"}' | jq
+
+curl -s -X POST http://localhost:8080/api/auth/refresh \
+  -H "Content-Type: application/json" \
+  -d '{"refreshToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlNWM1MDY5OC1mNmM0LTRmZDgtOTQ5NC0wYjgyZWRjNDQ5NzgiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJpYXQiOjE3ODE5ODE3MzksImV4cCI6MTc4MjU4NjUzOX0.FmcXzayjGpkKGPFu1aWeht-KqlipU91YXT-65P3qI04"}' | jq
+
+✅ Register → returns tokens
+✅ GET /users/me → returns sanitized profile (no password/refreshToken)
+✅ Login → returns fresh tokens
+✅ Refresh → rotates both tokens
+
+
+
+
+
+
+
+
+
+
+
+## NEXT: AVATAR UPLOAD
+
