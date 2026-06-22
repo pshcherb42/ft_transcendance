@@ -4,10 +4,11 @@ import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const { login } = useAuth();
   const router    = useRouter();
 
+  const [username, setUsername] = useState('');
   const [email,    setEmail]    = useState('');
   const [password, setPassword] = useState('');
   const [error,    setError]    = useState<string | null>(null);
@@ -19,14 +20,14 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch('/api/auth/register', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ email, password }),
+        body:    JSON.stringify({ username, email, password }),
       });
 
       const data = await res.json();
-      if (!res.ok) { setError(data.message ?? 'Login failed'); return; }
+      if (!res.ok) { setError(data.message ?? 'Registration failed'); return; }
 
       await login(data.access_token, data.refresh_token);
       router.push('/');
@@ -41,10 +42,11 @@ export default function LoginPage() {
     <main className="flex flex-1 items-center justify-center bg-zinc-50 dark:bg-black px-4">
       <div className="w-full max-w-sm space-y-6">
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-          Log in
+          Create account
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <Field label="Username" type="text"     value={username} onChange={setUsername} />
           <Field label="Email"    type="email"    value={email}    onChange={setEmail}    />
           <Field label="Password" type="password" value={password} onChange={setPassword} />
 
@@ -57,14 +59,14 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full h-11 rounded-full bg-zinc-900 text-white font-medium hover:bg-zinc-700 disabled:opacity-50 transition-colors dark:bg-zinc-50 dark:text-black dark:hover:bg-zinc-300"
           >
-            {loading ? 'Signing in…' : 'Log in'}
+            {loading ? 'Creating…' : 'Register'}
           </button>
         </form>
 
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          No account?{' '}
-          <a href="/register" className="font-medium text-zinc-900 dark:text-zinc-50 hover:underline">
-            Register
+          Already have an account?{' '}
+          <a href="/login" className="font-medium text-zinc-900 dark:text-zinc-50 hover:underline">
+            Log in
           </a>
         </p>
       </div>

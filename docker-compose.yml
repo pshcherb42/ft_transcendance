@@ -4,6 +4,9 @@ services:
     ports: ["3000:3000"]
     depends_on: [backend]
     env_file: .env
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules 
 
   backend:
     build: ./backend

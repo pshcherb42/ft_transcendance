@@ -1369,3 +1369,337 @@ curl -s -X POST http://localhost:8080/api/auth/refresh \
 
 ## NEXT: AVATAR UPLOAD
 
+Step 1: Create the uploads directory inside the container
+
+docker compose exec backend mkdir -p uploads/avatars
+
+
+Step 2: Update main.ts to serve the uploads folder as static files
+
+docker compose exec backend cat src/main.ts
+
+
+Then we'll patch it. But first, paste the output of this so I can confirm the current state matches what you showed, then run:
+bashdocker compose exec backend npm install @nestjs/serve-static
+Actually — let's keep it simpler and avoid serve-static (it adds config overhead). NestJS can serve static assets directly via useStaticAssets from the Express adapter. Here's the full sequence:
+
+
+Step 2: Patch main.ts
+
+cat > /tmp/main.ts << 'EOF'
+import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { AppModule } from './app.module';
+import { join } from 'path';
+
+async function bootstrap() {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+    prefix: '/uploads',
+  });
+  await app.listen(3001);
+}
+bootstrap();
+EOF
+docker compose exec -T backend bash -c 'cat > src/main.ts' < /tmp/main.ts
+
+
+Step 3: Add the avatar upload endpoint to users.controller.ts
+
+cat > /tmp/users.controller.ts << 'EOF'
+import {
+  Controller, Get, Put, Post, Param, Body,
+  UseGuards, Request, NotFoundException,
+  UseInterceptors, UploadedFile, BadRequestException,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
+import { UsersService } from './users.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+
+@Controller('users')
+export class UsersController {
+  constructor(private usersService: UsersService) {}
+
+  // GET /users/me
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  async getMe(@Request() req) {
+    const user = await this.usersService.findById(req.user.id);
+    if (!user) throw new NotFoundException();
+    return this.usersService.sanitize(user);
+  }
+
+  // GET /users/:id
+  @UseGuards(JwtAuthGuard)
+  @Get(':id')
+  async getUser(@Param('id') id: string) {
+    const user = await this.usersService.findById(id);
+    if (!user) throw new NotFoundException('User not found');
+    return this.usersService.sanitize(user);
+  }
+
+  // PUT /users/me
+  @UseGuards(JwtAuthGuard)
+  @Put('me')
+  async updateMe(@Request() req, @Body() body: { username?: string }) {
+    const updated = await this.usersService.updateProfile(req.user.id, body);
+    return this.usersService.sanitize(updated);
+  }
+
+  // POST /users/me/avatar
+  @UseGuards(JwtAuthGuard)
+  @Post('me/avatar')
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      storage: diskStorage({
+        destination: './uploads/avatars',
+        filename: (_req, file, cb) => {
+          const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, unique + extname(file.originalname));
+        },
+      }),
+      limits: { fileSize: 2 * 1024 * 1024 }, // 2 MB
+      fileFilter: (_req, file, cb) => {
+        if (!file.mimetype.match(/^image\/(jpeg|png|gif|webp)$/)) {
+          return cb(new BadRequestException('Only image files are allowed'), false);
+        }
+        cb(null, true);
+      },
+    }),
+  )
+  async uploadAvatar(@Request() req, @UploadedFile() file: Express.Multer.File) {
+    if (!file) throw new BadRequestException('No file uploaded');
+    const avatarPath = `/uploads/avatars/${file.filename}`;
+    const updated = await this.usersService.updateAvatar(req.user.id, avatarPath);
+    return this.usersService.sanitize(updated);
+  }
+}
+EOF
+docker compose exec -T backend bash -c 'cat > src/users/users.controller.ts' < /tmp/users.controller.ts
+
+
+Step 4: Rebuild and test
+
+docker compose up --build -d
+
+# Test
+
+Wait ~10 seconds, then test the upload:
+
+First grab a fresh access token
+
+TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@test.com","password":"password123"}' | jq -r '.accessToken')
+
+echo $TOKEN
+
+
+Then upload with a real image file (grab any small jpg/png on your machine):
+
+curl -s -X POST https://localhost/api/users/me/avatar \
+  -H "Authorization: Bearer $TOKEN" \
+  -F "avatar=@/path/to/any/image.jpg" \
+  --insecure | jq
+
+Expected response:
+json{
+  "id": "...",
+  "email": "your@email.com",
+  "username": "yourname",
+  "avatar": "/uploads/avatars/1234567890-123456789.jpg",
+  ...
+}
+
+
+Then confirm the file is actually served as static:
+
+curl -I https://localhost/uploads/avatars/<filename-from-above> --insecure
+
+Should return HTTP/1.1 200 OK with a Content-Type: image/jpeg header.
+
+# Error
+
+TOKEN returns null because database was wiped during the rebuild.
+
+
+# Solution
+
+I am going to run migrations:
+docker compose exec backend npx prisma migrate deploy
+
+# Re-register user and retry avatar upload
+
+Re-register:
+curl -s -X POST http://localhost:8080/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@test.com","username":"testuser","password":"password123"}' | jq
+
+Grab token:
+TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@test.com","password":"password123"}' | jq -r '.accessToken')
+echo $TOKEN
+
+Upload image:
+curl -s -o /tmp/test.jpg "https://picsum.photos/100" && \
+curl -s -X POST http://localhost:8080/api/users/me/avatar \
+  -H "Authorization: Bearer $TOKEN" \
+  -F "avatar=@/tmp/test.jpg" | jq
+
+Confirm it was actually saved as static:
+curl -I http://localhost:8080/uploads/avatars/<filename-from-above> --insecure
+
+curl -I http://localhost:8080/uploads/avatars/1782129804800-606375318.jpg --insecure
+
+# Error
+
+Nginx routing /upload/ to the next.js frontend instead of backend. 
+
+# Solution
+
+Add location block for it
+
+cat > ../nginx/nginx.conf << 'EOF'
+events {}
+
+http {
+  server {
+    listen 80;
+
+    location / {
+      proxy_pass http://frontend:3000;
+    }
+
+    location /api/ {
+      proxy_pass http://backend:3001/;
+    }
+
+    location /uploads/ {
+      proxy_pass http://backend:3001/uploads/;
+    }
+  }
+}
+EOF
+
+# Error
+
+Routing to the backend works correctly now. But static assests middleware isn't finding the file.
+
+# Solution
+
+Verufy both paths:
+
+## Where did multer actually save the file?
+docker compose exec backend find / -name "*.jpg" 2>/dev/null | grep uploads
+
+## What does __dirname resolve to at runtime?
+docker compose exec backend node -e "console.log(__dirname)"
+
+Fix the static assets path:
+
+cat > /tmp/main.ts << 'EOF'
+import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { AppModule } from './app.module';
+
+async function bootstrap() {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.useStaticAssets('/app/uploads', {
+    prefix: '/uploads',
+  });
+  await app.listen(3001);
+}
+bootstrap();
+EOF
+docker compose exec -T backend bash -c 'cat > src/main.ts' < /tmp/main.ts
+
+Rebuild and retest:
+
+docker compose up --build -d backend
+sleep 8
+curl -I http://localhost:8080/uploads/avatars/1782129804800-606375318.jpg
+
+
+# AVATAR UPLOAD IS FULLY WORKING
+
+# BACKEND REGISTRATION COMPLETE
+Backend is now complete:
+
+✅ Register → returns tokens
+✅ Login → returns fresh tokens
+✅ Refresh → rotates both tokens
+✅ GET /users/me → sanitized profile
+✅ POST /users/me/avatar → multipart upload, saves to disk, serves as static, stores path in DB
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# FRONTEND REGISTRATION
+
+What will be build:
+
+app/
+├── layout.tsx              ← add AuthProvider here
+├── page.tsx                ← replace with protected dashboard
+├── login/page.tsx          ← replace stub with real form
+├── register/page.tsx       ← create from scratch
+├── profile/page.tsx        ← replace stub with real profile + avatar
+└── lib/
+    ├── auth.ts             ← token helpers (localStorage + refresh logic)
+    └── api.ts              ← typed fetch wrapper (attaches token, handles 401)
+context/
+└── AuthContext.tsx         ← currentUser state, login/logout/refresh
+
+app/lib/auth.ts
+This file owns all token I/O so nothing else touches localStorage directly.
+
+app/lib/api.ts
+The fetch wrapper — attaches the bearer token, auto-refreshes on 401, redirects to /login if refresh also fails.
+
+context/AuthContext.tsx
+Global auth state — wraps the whole app so any component can call useAuth().
+
+app/layout.tsx — add AuthProvider
+
+app/register/page.tsx — new file
+
+app/login/page.tsx — replace stub
+
+app/page.tsx — protected dashboard
+
+nginx — add /api proxy block:
+location /api/ {
+    proxy_pass         http://backend:3001/;
+    proxy_set_header   Host              $host;
+    proxy_set_header   X-Real-IP         $remote_addr;
+    proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+    proxy_set_header   X-Forwarded-Proto $scheme;
+}
+
+Rebuild.
+
+# Works
