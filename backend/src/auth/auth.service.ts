@@ -46,6 +46,20 @@ export class AuthService {
     await this.usersService.updateRefreshToken(userId, null);
   }
 
+  // Find-or-create user from Google OAuth, then issue JWT pair
+async googleLogin(email: string, displayName: string) {
+  let user = await this.usersService.findByEmail(email);
+  if (!user) {
+    // Create with no password — Google users can't log in with local strategy
+    user = await this.usersService.create({
+      email,
+      username: displayName,
+      password: null,
+    });
+  }
+  return this.login({ id: user.id, email: user.email });
+}
+
   private async generateTokens(userId: string, email: string) {
     const payload = { sub: userId, email };
     const [accessToken, refreshToken] = await Promise.all([

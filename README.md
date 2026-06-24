@@ -2273,167 +2273,107 @@ Step 2 - plan
 3. auth.controller.ts — add the two OAuth routes
 4. auth.module.ts — register the Google strategy
 
-
-Google OAuth — Backend
-Here's the plan: Passport google strategy → on callback, find-or-create user → issue your existing JWT pair → redirect to frontend.
-
-I already installed google strategy
-
-% docker compose exec backend find src/auth -type f | sort
-src/auth/auth.controller.ts
-src/auth/auth.module.ts
-src/auth/auth.service.ts
-src/auth/guards/jwt-auth.guard.ts
-src/auth/guards/jwt-refresh.guard.ts
-src/auth/guards/local-auth.guard.ts
-src/auth/strategies/jwt-refresh.strategy.ts
-src/auth/strategies/jwt.strategy.ts
-src/auth/strategies/local.strategy.ts
-
-Good clean structure. We need to add one file and edit three. Here's the full plan:
-
-src/auth/strategies/google.strategy.ts — new file
-auth.service.ts — add googleLogin() method
-auth.controller.ts — add the two OAuth routes
-auth.module.ts — register the Google strategy
-
-pshcherb@cbr3s5 /goinfre/pshcherb/ft_transc
- % docker compose exec backend cat src/auth/auth.service.ts
-docker compose exec backend cat src/auth/auth.controller.ts
-docker compose exec backend cat src/auth/auth.module.ts
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+Step 3 - google.strategy.ts
+docker compose exec backend sh -c "cat > src/auth/strategies/google.strategy.ts << 'EOF'
+import { Injectable } from '@nestjs/common';
+import { PassportStrategy } from '@nestjs/passport';
+import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { ConfigService } from '@nestjs/config';
-import { UsersService } from '../users/users.service';
-import * as bcrypt from 'bcrypt';
+import { AuthService } from '../auth.service';
 
 @Injectable()
-export class AuthService {
+export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(
-    private usersService: UsersService,
-    private jwtService: JwtService,
     private config: ConfigService,
-  ) {}
-
-  // Called by LocalStrategy — validates email+password
-  async validateUser(email: string, password: string) {
-    const user = await this.usersService.findByEmail(email);
-    if (!user || !user.password) return null;
-    const match = await bcrypt.compare(password, user.password);
-    if (!match) return null;
-    return this.usersService.sanitize(user);
+    private authService: AuthService,
+  ) {
+    super({
+      clientID: config.get<string>('GOOGLE_CLIENT_ID'),
+      clientSecret: config.get<string>('GOOGLE_CLIENT_SECRET'),
+      callbackURL: config.get<string>('GOOGLE_CALLBACK_URL'),
+      scope: ['email', 'profile'],
+    });
   }
 
-  // Generate both tokens and store hashed refresh token
-  async login(user: { id: string; email: string }) {
-    const tokens = await this.generateTokens(user.id, user.email);
-    await this.usersService.updateRefreshToken(user.id, tokens.refreshToken);
-    return tokens;
+  async validate(
+    _accessToken: string,
+    _refreshToken: string,
+    profile: any,
+    done: VerifyCallback,
+  ) {
+    const { emails, displayName } = profile;
+    const email = emails[0].value;
+    const tokens = await this.authService.googleLogin(email, displayName);
+    done(null, tokens);
   }
+}
+EOF"
 
-  // Register new user then log them in
-  async register(email: string, username: string, password: string) {
-    const user = await this.usersService.create({ email, username, password });
-    return this.login({ id: user.id, email: user.email });
+Step 4 - edit auth.service.ts add googleLogin()
+// Find-or-create user from Google OAuth, then issue JWT pair
+async googleLogin(email: string, displayName: string) {
+  let user = await this.usersService.findByEmail(email);
+  if (!user) {
+    // Create with no password — Google users can't log in with local strategy
+    user = await this.usersService.create({
+      email,
+      username: displayName,
+      password: null,
+    });
   }
+  return this.login({ id: user.id, email: user.email });
+}
 
-  // Rotate refresh token — called by JwtRefreshGuard
-  async refreshTokens(userId: string, email: string) {
-    const tokens = await this.generateTokens(userId, email);
-    await this.usersService.updateRefreshToken(userId, tokens.refreshToken);
-    return tokens;
-  }
+Step 5 - add two OAuth routes to auth.controller.ts
+docker compose exec backend sed -i \
+  "s/import {$/import {/" \
+  src/auth/auth.controller.ts
 
-  // Clear stored refresh token on logout
-  async logout(userId: string) {
-    await this.usersService.updateRefreshToken(userId, null);
-  }
+docker compose exec backend sed -i \
+  's/Controller, Post, Body, UseGuards,/Controller, Post, Get, Body, UseGuards, Redirect,/' \
+  src/auth/auth.controller.ts
 
-  private async generateTokens(userId: string, email: string) {
-    const payload = { sub: userId, email };
-    const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(payload, {
-        secret: this.config.get<string>('JWT_SECRET'),
-        expiresIn: '15m',
-      }),
-      this.jwtService.signAsync(payload, {
-        secret: this.config.get<string>('JWT_REFRESH_SECRET'),
-        expiresIn: '7d',
-      }),
-    ]);
-    return { accessToken, refreshToken };
-  }
-}import {
-    Controller, Post, Body, UseGuards,
-    Request, HttpCode, HttpStatus,
-  } from '@nestjs/common';
-  import { AuthService } from './auth.service';
-  import { LocalAuthGuard } from './guards/local-auth.guard';
-  import { JwtAuthGuard } from './guards/jwt-auth.guard';
-  import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
-  
-  @Controller('auth')
-  export class AuthController {
-    constructor(private authService: AuthService) {}
-  
-    // POST /auth/register
-    @Post('register')
-    async register(@Body() body: { email: string; username: string; password: string }) {
-      return this.authService.register(body.email, body.username, body.password);
-    }
-  
-    // POST /auth/login  (LocalStrategy validates email+password first)
-    @UseGuards(LocalAuthGuard)
-    @Post('login')
-    @HttpCode(HttpStatus.OK)
-    async login(@Request() req) {
-      return this.authService.login(req.user);
-    }
-  
-    // POST /auth/refresh  (JwtRefreshGuard validates the refresh token)
-    @UseGuards(JwtRefreshGuard)
-    @Post('refresh')
-    @HttpCode(HttpStatus.OK)
-    async refresh(@Request() req) {
-      return this.authService.refreshTokens(req.user.id, req.user.email);
-    }
-  
-    // POST /auth/logout
-    @UseGuards(JwtAuthGuard)
-    @Post('logout')
-    @HttpCode(HttpStatus.OK)
-    async logout(@Request() req) {
-      await this.authService.logout(req.user.id);
-      return { message: 'Logged out' };
-    }
-  }import { Module } from '@nestjs/common';
-import { PassportModule } from '@nestjs/passport';
-import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
-import { LocalStrategy } from './strategies/local.strategy';
-import { JwtStrategy } from './strategies/jwt.strategy';
-import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
-import { UsersModule } from '../users/users.module';
+Step 6 - append two Google routes before final }
+docker compose exec backend sed -i \
+  's/^}$/\n  \/\/ GET \/auth\/google  — redirect to Google consent screen\n  @Get("google")\n  @UseGuards(AuthGuard("google"))\n  googleAuth() {}\n\n  \/\/ GET \/auth\/google\/callback  — Google redirects here after consent\n  @Get("google\/callback")\n  @UseGuards(AuthGuard("google"))\n  @Redirect()\n  googleCallback(@Request() req) {\n    const { accessToken, refreshToken } = req.user;\n    const frontend = process.env.FRONTEND_URL ?? "https:\/\/localhost";\n    return {\n      url: `${frontend}\/auth\/callback?accessToken=${accessToken}\&refreshToken=${refreshToken}`,\n    };\n  }\n}/' \
+  src/auth/auth.controller.ts
 
-@Module({
-  imports: [
-    ConfigModule,
-    UsersModule,
-    PassportModule,
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        secret: config.get<string>('JWT_SECRET'),
-        signOptions: { 
-          expiresIn: (config.get<string>('JWT_EXPIRES_IN') ?? '15m') as any,
-        },
-      }),
-    }),
-  ],
-  providers: [AuthService, LocalStrategy, JwtStrategy, JwtRefreshStrategy],
-  controllers: [AuthController],
-})
-export class AuthModule {}%  
+Step 7 - add authGuard to the imorts
+docker compose exec backend sed -i \
+  "s/import { AuthService } from '.\/auth.service';/import { AuthService } from '.\/auth.service';\nimport { AuthGuard } from '@nestjs\/passport';/" \
+  src/auth/auth.controller.ts
+
+Step 8 - reguster GoogleStrategy inside auth.module.ts
+docker compose exec backend sed -i \
+  "s/import { JwtRefreshStrategy } from '.\/strategies\/jwt-refresh.strategy';/import { JwtRefreshStrategy } from '.\/strategies\/jwt-refresh.strategy';\nimport { GoogleStrategy } from '.\/strategies\/google.strategy';/" \
+  src/auth/auth.module.ts
+
+docker compose exec backend sed -i \
+  's/providers: \[AuthService, LocalStrategy, JwtStrategy, JwtRefreshStrategy\]/providers: [AuthService, LocalStrategy, JwtStrategy, JwtRefreshStrategy, GoogleStrategy]/' \
+  src/auth/auth.module.ts
+
+Step 9 - add Google vars to .env
+GOOGLE_CLIENT_ID=your-client-id-here
+GOOGLE_CLIENT_SECRET=your-client-secret-here
+GOOGLE_CALLBACK_URL=https://localhost/api/auth/google/callback
+
+Step 10 - rebuild and test
+docker compose up --build -d
+docker compose logs backend -f
+
+# Error 
+password: null 
+i am going to fix userService.create()
+docker compose exec backend sed -i \
+  's/async create(data: { email: string; username: string; password: string })/async create(data: { email: string; username: string; password: string | null })/' \
+  src/users/users.service.ts
+
+StrategyOptions type ambiguity
+I am going to fix google.strategy.ts
+docker compose exec backend sed -i \
+  "s/import { Injectable } from '@nestjs\/common';/import { Injectable } from '@nestjs\/common';\nimport type { StrategyOptions } from 'passport-google-oauth20';/" \
+  src/auth/strategies/google.strategy.ts
+
+docker compose exec backend sed -i \
+  's/super({/super({} as StrategyOptions);  \/\/ placeholder replaced below\n    \/\/ @ts-ignore — constructor overload resolution workaround\n    super({/' \
+  src/auth/strategies/google.strategy.ts
