@@ -28,7 +28,7 @@ export default function LoginPage() {
       const data = await res.json();
       if (!res.ok) { setError(data.message ?? 'Login failed'); return; }
 
-      await login(data.access_token, data.refresh_token);
+      await login(data.accessToken, data.refreshToken);
       router.push('/');
     } catch {
       setError('Network error — is the backend running?');

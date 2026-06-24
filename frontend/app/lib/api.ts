@@ -18,7 +18,7 @@ async function tryRefresh(): Promise<boolean> {
   }
 
   const data = await res.json();
-  storeTokens(data.access_token, data.refresh_token);
+  storeTokens(data.accessToken, data.refreshToken);
   return true;
 }
 

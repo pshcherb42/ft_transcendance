@@ -1,7 +1,14 @@
 FROM node:20-alpine
 WORKDIR /app
+
 COPY package*.json ./
+COPY backend/package*.json ./backend/
+COPY frontend/package*.json ./frontend/
+
 RUN npm install
-COPY . .
+
+COPY frontend/ ./frontend/
+
+WORKDIR /app/frontend
 EXPOSE 3000
-CMD ["npm", "run", "dev"]
+CMD ["../node_modules/.bin/next", "dev"]
