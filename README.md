@@ -2,11 +2,13 @@
 Surprise.
 
 To turn on:
-cp .env.example
+cp .env.example .env
 npm install inside root directory
 docker compose up --build
 docker compose exec backend npx prisma generate
 docker compose exec backend npx prisma migrate deploy
+docker compose exec backend npm install passport-google-oauth20
+docker compose exec backend npm install --save-dev @types/passport-google-oauth20
 
 # Preparation 
 
