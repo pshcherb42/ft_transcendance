@@ -1,8 +1,9 @@
 import {
-    Controller, Post, Body, UseGuards,
+    Controller, Post, Get, Body, UseGuards, Redirect,
     Request, HttpCode, HttpStatus,
   } from '@nestjs/common';
   import { AuthService } from './auth.service';
+import { AuthGuard } from '@nestjs/passport';
   import { LocalAuthGuard } from './guards/local-auth.guard';
   import { JwtAuthGuard } from './guards/jwt-auth.guard';
   import { JwtRefreshGuard } from './guards/jwt-refresh.guard';

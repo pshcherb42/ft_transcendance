@@ -20,14 +20,24 @@ export class UsersService {
     return this.prisma.user.findUnique({ where: { username } });
   }
 
-  async create(data: { email: string; username: string; password: string }): Promise<User> {
+  async create(data: {
+    email: string;
+    username: string;
+    password: string | null;
+  }): Promise<User> {
+  
     const existingEmail = await this.findByEmail(data.email);
-    if (existingEmail) throw new ConflictException('Email already in use');
-
+    if (existingEmail)
+      throw new ConflictException('Email already in use');
+  
     const existingUsername = await this.findByUsername(data.username);
-    if (existingUsername) throw new ConflictException('Username already taken');
-
-    const hashedPassword = await bcrypt.hash(data.password, 12);
+    if (existingUsername)
+      throw new ConflictException('Username already taken');
+  
+    const hashedPassword = data.password
+      ? await bcrypt.hash(data.password, 12)
+      : null;
+  
     return this.prisma.user.create({
       data: {
         email: data.email,
