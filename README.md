@@ -1804,3 +1804,412 @@ I wil try to register now again
 
 
 # OMG IT WORKS!!!!
+
+
+It works! Great milestone — the full register → token → redirect flow is live.
+Looking at Person B's checklist, here's what's done and what's left:
+✅ Done:
+
+Registration + login with bcrypt
+JWT access + refresh tokens + guards
+GET /users/me + avatar upload
+Frontend login, register, protected dashboard
+
+Remaining for Person B:
+
+PUT /users/me (profile edit endpoint)
+OAuth 2.0 with 42 Intra or Google
+Frontend profile page (avatar upload UI + edit form)
+
+The natural next step is PUT /users/me — it's small, pure backend, and unblocks the profile page. Then OAuth. Then we wire up the profile UI.
+
+Q: Which OAuth provider do you want to tackle first?
+A: Google
+
+Q: What should PUT /users/me allow editing?
+A: Username + email + password change
+
+Perfect. Here's the plan of attack:
+
+PUT /users/me backend endpoint (username + email + password change)
+Google OAuth backend (Passport google strategy → JWT on callback)
+Frontend profile page (edit form + avatar upload UI)
+Frontend Google login button
+
+Let's start with PUT /users/me. First let me see your current users module:
+bashdocker compose exec backend cat src/users/users.service.ts
+docker compose exec backend cat src/users/users.controller.ts
+docker compose exec backend cat src/users/dto/update-user.dto.ts 2>/dev/null || echo "NO DTO YET"
+Paste those three outputs and we'll add the endpoint cleanly on top of what's already there.
+
+pshcherb@cbr3s5 /goinfre/pshcherb/ft_transc
+ % docker compose exec backend cat src/users/users.service.ts
+docker compose exec backend cat src/users/users.controller.ts
+docker compose exec backend cat src/users/dto/update-user.dto.ts 2>/dev/null || echo "NO DTO YET"
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { User } from "../generated/prisma/client";
+import * as bcrypt from 'bcrypt';
+
+@Injectable()
+export class UsersService {
+  constructor(private prisma: PrismaService) {}
+
+  async findById(id: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { id } });
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { email } });
+  }
+
+  async findByUsername(username: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { username } });
+  }
+
+  async create(data: { email: string; username: string; password: string }): Promise<User> {
+    const existingEmail = await this.findByEmail(data.email);
+    if (existingEmail) throw new ConflictException('Email already in use');
+
+    const existingUsername = await this.findByUsername(data.username);
+    if (existingUsername) throw new ConflictException('Username already taken');
+
+    const hashedPassword = await bcrypt.hash(data.password, 12);
+    return this.prisma.user.create({
+      data: {
+        email: data.email,
+        username: data.username,
+        password: hashedPassword,
+      },
+    });
+  }
+
+  async updateRefreshToken(userId: string, refreshToken: string | null): Promise<void> {
+    const hashed = refreshToken ? await bcrypt.hash(refreshToken, 10) : null;
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { refreshToken: hashed },
+    });
+  }
+
+  async updateAvatar(userId: string, avatarPath: string): Promise<User> {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { avatar: avatarPath },
+    });
+  }
+
+  async updateProfile(userId: string, data: { username?: string }): Promise<User> {
+    if (data.username) {
+      const existing = await this.findByUsername(data.username);
+      if (existing && existing.id !== userId)
+        throw new ConflictException('Username already taken');
+    }
+    return this.prisma.user.update({
+      where: { id: userId },
+      data,
+    });
+  }
+
+  // Returns user WITHOUT sensitive fields
+  sanitize(user: User) {
+    const { password, refreshToken, ...safe } = user;
+    return safe;
+  }
+}
+import {
+  Controller, Get, Put, Post, Param, Body,
+  UseGuards, Request, NotFoundException,
+  UseInterceptors, UploadedFile, BadRequestException,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
+import { UsersService } from './users.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+
+@Controller('users')
+export class UsersController {
+  constructor(private usersService: UsersService) {}
+
+  // GET /users/me
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  async getMe(@Request() req) {
+    const user = await this.usersService.findById(req.user.id);
+    if (!user) throw new NotFoundException();
+    return this.usersService.sanitize(user);
+  }
+
+  // GET /users/:id
+  @UseGuards(JwtAuthGuard)
+  @Get(':id')
+  async getUser(@Param('id') id: string) {
+    const user = await this.usersService.findById(id);
+    if (!user) throw new NotFoundException('User not found');
+    return this.usersService.sanitize(user);
+  }
+
+  // PUT /users/me
+  @UseGuards(JwtAuthGuard)
+  @Put('me')
+  async updateMe(@Request() req, @Body() body: { username?: string }) {
+    const updated = await this.usersService.updateProfile(req.user.id, body);
+    return this.usersService.sanitize(updated);
+  }
+
+  // POST /users/me/avatar
+  @UseGuards(JwtAuthGuard)
+  @Post('me/avatar')
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      storage: diskStorage({
+        destination: './uploads/avatars',
+        filename: (_req, file, cb) => {
+          const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, unique + extname(file.originalname));
+        },
+      }),
+      limits: { fileSize: 2 * 1024 * 1024 }, // 2 MB
+      fileFilter: (_req, file, cb) => {
+        if (!file.mimetype.match(/^image\/(jpeg|png|gif|webp)$/)) {
+          return cb(new BadRequestException('Only image files are allowed'), false);
+        }
+        cb(null, true);
+      },
+    }),
+  )
+  async uploadAvatar(@Request() req, @UploadedFile() file: Express.Multer.File) {
+    if (!file) throw new BadRequestException('No file uploaded');
+    const avatarPath = `/uploads/avatars/${file.filename}`;
+    const updated = await this.usersService.updateAvatar(req.user.id, avatarPath);
+    return this.usersService.sanitize(updated);
+  }
+}
+cat: can't open 'src/users/dto/update-user.dto.ts': No such file or directory
+NO DTO YET
+
+
+
+# What I will o next
+
+Fix updateAvatar → use avatarUrl instead of avatar
+Extend updateProfile to support password change
+Add a proper UpdateUserDto with validation
+Update the controller to use the DTO and handle password
+
+Step 1 - create the DTO
+sh: can't create src/users/dto/update-user.dto.ts: nonexistent directory
+
+Step 2 - Update users.service.ts
+avatar->vatarUrl and add password change logic to updateProfile
+zsh: event not found: user)
+
+Step 3 - update users.controlelr.ts
+zsh: event not found: user)
+
+I have to get inside the container
+docker compose exec -it backend sh
+
+Step 1 — Create the dto directory and file
+shmkdir -p src/users/dto
+cat > src/users/dto/update-user.dto.ts << 'EOF'
+import { IsOptional, IsString, MinLength, MaxLength, Matches } from 'class-validator';
+
+export class UpdateUserDto {
+  @IsOptional()
+  @IsString()
+  @MinLength(3)
+  @MaxLength(20)
+  @Matches(/^[a-zA-Z0-9_]+$/, { message: 'Username can only contain letters, numbers, and underscores' })
+  username?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(8)
+  currentPassword?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(8)
+  newPassword?: string;
+}
+EOF
+Step 2 — Overwrite users.service.ts
+shcat > src/users/users.service.ts << 'EOF'
+import { Injectable, NotFoundException, ConflictException, BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { User } from '../generated/prisma/client';
+import * as bcrypt from 'bcrypt';
+import { UpdateUserDto } from './dto/update-user.dto';
+
+@Injectable()
+export class UsersService {
+  constructor(private prisma: PrismaService) {}
+
+  async findById(id: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { id } });
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { email } });
+  }
+
+  async findByUsername(username: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { username } });
+  }
+
+  async create(data: { email: string; username: string; password: string }): Promise<User> {
+    const existingEmail = await this.findByEmail(data.email);
+    if (existingEmail) throw new ConflictException('Email already in use');
+
+    const existingUsername = await this.findByUsername(data.username);
+    if (existingUsername) throw new ConflictException('Username already taken');
+
+    const hashedPassword = await bcrypt.hash(data.password, 12);
+    return this.prisma.user.create({
+      data: {
+        email: data.email,
+        username: data.username,
+        password: hashedPassword,
+      },
+    });
+  }
+
+  async updateRefreshToken(userId: string, refreshToken: string | null): Promise<void> {
+    const hashed = refreshToken ? await bcrypt.hash(refreshToken, 10) : null;
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { refreshToken: hashed },
+    });
+  }
+
+  async updateAvatar(userId: string, avatarPath: string): Promise<User> {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { avatarUrl: avatarPath },
+    });
+  }
+
+  async updateProfile(userId: string, dto: UpdateUserDto): Promise<User> {
+    const user = await this.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+
+    const updateData: Partial<{ username: string; password: string }> = {};
+
+    if (dto.username) {
+      const existing = await this.findByUsername(dto.username);
+      if (existing && existing.id !== userId)
+        throw new ConflictException('Username already taken');
+      updateData.username = dto.username;
+    }
+
+    if (dto.newPassword) {
+      if (!dto.currentPassword)
+        throw new BadRequestException('Current password is required to set a new password');
+
+      if (!user.password)
+        throw new BadRequestException('Cannot change password for OAuth accounts');
+
+      const valid = await bcrypt.compare(dto.currentPassword, user.password);
+      if (!valid)
+        throw new UnauthorizedException('Current password is incorrect');
+
+      updateData.password = await bcrypt.hash(dto.newPassword, 12);
+    }
+
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+    });
+  }
+
+  sanitize(user: User) {
+    const { password, refreshToken, ...safe } = user;
+    return safe;
+  }
+}
+EOF
+Step 3 — Overwrite users.controller.ts
+shcat > src/users/users.controller.ts << 'EOF'
+import {
+  Controller, Get, Put, Post, Param, Body,
+  UseGuards, Request, NotFoundException,
+  UseInterceptors, UploadedFile, BadRequestException,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
+import { UsersService } from './users.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { UpdateUserDto } from './dto/update-user.dto';
+
+@Controller('users')
+export class UsersController {
+  constructor(private usersService: UsersService) {}
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  async getMe(@Request() req) {
+    const user = await this.usersService.findById(req.user.id);
+    if (!user) throw new NotFoundException();
+    return this.usersService.sanitize(user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('me')
+  async updateMe(@Request() req, @Body() dto: UpdateUserDto) {
+    const updated = await this.usersService.updateProfile(req.user.id, dto);
+    return this.usersService.sanitize(updated);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('me/avatar')
+  @UseInterceptors(
+    FileInterceptor('avatar', {
+      storage: diskStorage({
+        destination: './uploads/avatars',
+        filename: (_req, file, cb) => {
+          const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, unique + extname(file.originalname));
+        },
+      }),
+      limits: { fileSize: 2 * 1024 * 1024 },
+      fileFilter: (_req, file, cb) => {
+        if (!file.mimetype.match(/^image\/(jpeg|png|gif|webp)$/)) {
+          return cb(new BadRequestException('Only image files are allowed'), false);
+        }
+        cb(null, true);
+      },
+    }),
+  )
+  async uploadAvatar(@Request() req, @UploadedFile() file: Express.Multer.File) {
+    if (!file) throw new BadRequestException('No file uploaded');
+    const avatarPath = `/uploads/avatars/${file.filename}`;
+    const updated = await this.usersService.updateAvatar(req.user.id, avatarPath);
+    return this.usersService.sanitize(updated);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':id')
+  async getUser(@Param('id') id: string) {
+    const user = await this.usersService.findById(id);
+    if (!user) throw new NotFoundException('User not found');
+    return this.usersService.sanitize(user);
+  }
+}
+EOF
+Then exit the container and rebuild:
+bashexit
+docker compose up --build -d && docker compose logs backend --tail=30
+
+# check for backend logs:
+
+docker compose logs backend --tail=40
+
+# i get some error class validator not installed and schema still uses avatar 
+
+docker compose exec backend npm install class-validator class-transformer
+
+check what actually prisma uses:
+docker compose exec backend grep -n "avatar" /app/prisma/schema.prisma

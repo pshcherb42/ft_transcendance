@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { User } from "../generated/prisma/client";
+import { User } from '../generated/prisma/client';
 import * as bcrypt from 'bcrypt';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -51,19 +52,39 @@ export class UsersService {
     });
   }
 
-  async updateProfile(userId: string, data: { username?: string }): Promise<User> {
-    if (data.username) {
-      const existing = await this.findByUsername(data.username);
+  async updateProfile(userId: string, dto: UpdateUserDto): Promise<User> {
+    const user = await this.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+
+    const updateData: Partial<{ username: string; password: string }> = {};
+
+    if (dto.username) {
+      const existing = await this.findByUsername(dto.username);
       if (existing && existing.id !== userId)
         throw new ConflictException('Username already taken');
+      updateData.username = dto.username;
     }
+
+    if (dto.newPassword) {
+      if (!dto.currentPassword)
+        throw new BadRequestException('Current password is required to set a new password');
+
+      if (!user.password)
+        throw new BadRequestException('Cannot change password for OAuth accounts');
+
+      const valid = await bcrypt.compare(dto.currentPassword, user.password);
+      if (!valid)
+        throw new UnauthorizedException('Current password is incorrect');
+
+      updateData.password = await bcrypt.hash(dto.newPassword, 12);
+    }
+
     return this.prisma.user.update({
       where: { id: userId },
-      data,
+      data: updateData,
     });
   }
 
-  // Returns user WITHOUT sensitive fields
   sanitize(user: User) {
     const { password, refreshToken, ...safe } = user;
     return safe;
