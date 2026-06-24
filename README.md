@@ -2,9 +2,11 @@
 Surprise.
 
 To turn on:
-make install dependecies
-make
+cp .env.example
+npm install inside root directory
+docker compose up --build
 docker compose exec backend npx prisma generate
+docker compose exec backend npx prisma migrate deploy
 
 # Preparation 
 
@@ -1791,3 +1793,14 @@ INTRA_CALLBACK_URL=https://localhost/api/auth/42/callback
 
 # I had some problems with node_modules since I changed their installing inside the root repository.
 
+# Frontend registration doesnt fully work yet
+
+Prisma is trying to connect as user postgres but thats not what my database is configured with.
+i had a duplicate of DATABASE_URL duh
+
+I fixed it and did docker compose restart backend
+
+I wil try to register now again
+
+
+# OMG IT WORKS!!!!
