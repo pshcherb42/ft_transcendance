@@ -2379,3 +2379,133 @@ docker compose exec backend sed -i \
 docker compose exec backend sed -i \
   's/super({/super({} as StrategyOptions);  \/\/ placeholder replaced below\n    \/\/ @ts-ignore — constructor overload resolution workaround\n    super({/' \
   src/auth/strategies/google.strategy.ts
+
+
+# Real google credentials
+
+Step 1: Get credentials from Google Cloud Console
+
+1. Go to console.cloud.google.com
+2. Create a project (or pick an existing one)
+3. APIs & Services → OAuth consent screen
+
+  User type: External
+  Fill in app name, your email — everything else can be blank for now
+  Scopes: add email and profile
+  Test users: add your own Gmail address (required while app is in "Testing" mode)
+
+
+4. APIs & Services → Credentials → Create Credentials → OAuth 2.0 Client ID
+
+  Application type: Web application
+  Authorized redirect URIs: http://localhost/api/auth/google/callback
+  Click Create → copy the Client ID and Client Secret
+
+  OAuth client created
+The client ID can always be accessed from Clients tab under Google Auth Platform.
+Client ID
+  761200382852-2d0bj7j11gpblrt3mpg33gs530vh90r4.apps.googleusercontent.com
+
+Step 2 - Put them in .env
+
+# error 
+
+I missed the lient secret
+I am going to regenerate again
+Regenerate the secret
+
+# done
+
+restart backend
+
+Step 3 - test
+
+http://localhost:8080/api/auth/google
+
+# error google routes were missing
+
+docker compose exec backend sh -c "cat > src/auth/auth.controller.ts << 'EOF'
+import {
+  Controller, Post, Get, Body, UseGuards,
+  Request, HttpCode, HttpStatus, Redirect,
+} from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { AuthService } from './auth.service';
+import { LocalAuthGuard } from './guards/local-auth.guard';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
+
+@Controller('auth')
+export class AuthController {
+  constructor(private authService: AuthService) {}
+
+  // POST /auth/register
+  @Post('register')
+  async register(@Body() body: { email: string; username: string; password: string }) {
+    return this.authService.register(body.email, body.username, body.password);
+  }
+
+  // POST /auth/login
+  @UseGuards(LocalAuthGuard)
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  async login(@Request() req) {
+    return this.authService.login(req.user);
+  }
+
+  // POST /auth/refresh
+  @UseGuards(JwtRefreshGuard)
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  async refresh(@Request() req) {
+    return this.authService.refreshTokens(req.user.id, req.user.email);
+  }
+
+  // POST /auth/logout
+  @UseGuards(JwtAuthGuard)
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  async logout(@Request() req) {
+    await this.authService.logout(req.user.id);
+    return { message: 'Logged out' };
+  }
+
+  // GET /auth/google — redirect to Google consent screen
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  googleAuth() {}
+
+  // GET /auth/google/callback — Google redirects here after consent
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  @Redirect()
+  googleCallback(@Request() req) {
+    const { accessToken, refreshToken } = req.user;
+    const frontend = process.env.FRONTEND_URL ?? 'http://localhost:8080';
+    return {
+      url: \`\${frontend}/auth/callback?accessToken=\${accessToken}&refreshToken=\${refreshToken}\`,
+    };
+  }
+}
+EOF"
+
+
+# error redirect uri mismatch
+
+docker compose exec backend printenv | grep GOOGLE
+
+is different from
+
+grep GOOGLE .env
+
+I going o do a full restart
+
+docker compose down && docker compose up -d
+
+
+# error empy page fter register
+
+sed -i "s|router.replace('/dashboard')|router.replace('/')|" \
+  /goinfre/pshcherb/ft_transc/frontend/app/auth/callback/page.tsx
+
+  Added this to redirect to profle instead of dashboard
