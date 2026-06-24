@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 
 export default function HomePage() {
@@ -10,7 +11,9 @@ export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !user) router.push('/login');
+    if (!loading && !user) {
+      router.push('/login');
+    }
   }, [user, loading, router]);
 
   if (loading || !user) {
@@ -21,7 +24,7 @@ export default function HomePage() {
     );
   }
 
-  const avatarSrc = user.avatarPath ? user.avatarPath : null;
+  const avatarSrc = user.avatarPath || null;
 
   function handleLogout() {
     logout();
@@ -40,26 +43,31 @@ export default function HomePage() {
             className="rounded-full object-cover"
           />
         ) : (
-          <div className="w-20 h-20 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center text-2xl font-bold text-zinc-500">
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-zinc-200 text-2xl font-bold text-zinc-500 dark:bg-zinc-700">
             {user.username[0].toUpperCase()}
           </div>
         )}
 
         <div className="text-center">
-          <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">{user.username}</p>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">{user.email}</p>
+          <p className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+            {user.username}
+          </p>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+            {user.email}
+          </p>
         </div>
 
-        <div className="flex gap-3 w-full pt-2">
-          
+        <div className="flex w-full gap-3 pt-2">
+          <Link
             href="/profile"
-            className="flex-1 h-10 rounded-full border border-zinc-200 dark:border-zinc-700 flex items-center justify-center text-sm font-medium text-zinc-900 dark:text-zinc-50 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+            className="flex h-10 flex-1 items-center justify-center rounded-full border border-zinc-200 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-50 dark:hover:bg-zinc-800"
           >
             Profile
-          </a>
+          </Link>
+
           <button
             onClick={handleLogout}
-            className="flex-1 h-10 rounded-full bg-zinc-900 dark:bg-zinc-50 text-white dark:text-black text-sm font-medium hover:bg-zinc-700 dark:hover:bg-zinc-300 transition-colors"
+            className="flex h-10 flex-1 items-center justify-center rounded-full bg-zinc-900 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-50 dark:text-black dark:hover:bg-zinc-300"
           >
             Log out
           </button>

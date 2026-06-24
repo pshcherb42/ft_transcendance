@@ -1,6 +1,11 @@
 # ft_transcendance
 Surprise.
 
+To turn on:
+make install dependecies
+make
+docker compose exec backend npx prisma generate
+
 # Preparation 
 
 What I did in this days:
@@ -1703,3 +1708,86 @@ location /api/ {
 Rebuild.
 
 # Works
+
+# Fixed typo mismatch
+
+grep "accessToken\|access_token" frontend/app/register/page.tsx
+grep "accessToken\|access_token" frontend/app/login/page.tsx
+grep "accessToken\|access_token" frontend/app/lib/api.ts
+
+sed -i 's/data\.access_token/data.accessToken/g; s/data\.refresh_token/data.refreshToken/g' frontend/app/register/page.tsx
+sed -i 's/data\.access_token/data.accessToken/g; s/data\.refresh_token/data.refreshToken/g' frontend/app/login/page.tsx
+sed -i 's/data\.access_token/data.accessToken/g; s/data\.refresh_token/data.refreshToken/g' frontend/app/lib/api.ts
+
+# Fixed nginx.config
+
+events {}
+
+http {
+  server {
+    listen 80;
+
+    location / {
+      proxy_pass http://frontend:3000;
+
+      proxy_http_version 1.1;
+
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection "upgrade";
+
+      proxy_set_header Host $host;
+      proxy_cache_bypass $http_upgrade;
+    }
+
+    location /api/ {
+      proxy_pass http://backend:3001/;
+      proxy_set_header   Host              $host;
+      proxy_set_header   X-Real-IP         $remote_addr;
+      proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+      proxy_set_header   X-Forwarded-Proto $scheme;
+    }
+
+    location /uploads/ {
+      proxy_pass http://backend:3001/uploads/;
+    }
+  }
+}
+
+# Added .env.example
+
+DB_USER=postgres
+DB_PASSWORD=yourpassword
+DB_NAME=transcendence
+DATABASE_URL=postgresql://postgres:yourpassword@db:5432/transcendence
+JWT_SECRET=changeme
+NEXTAUTH_SECRET=changeme
+
+
+OAUTH_CLIENT_ID=
+OAUTH_CLIENT_SECRET=
+
+# Database
+DATABASE_URL=postgresql://postgres:<password>@db:5432/ft_transcendence
+
+# JWT
+JWT_SECRET=<your_secret>
+JWT_REFRESH_SECRET=<your_refresh_secret>
+JWT_EXPIRES_IN=15m
+JWT_REFRESH_EXPIRES_IN=7d
+
+# App
+PORT=3001
+
+# OAuth (were placeholders at the time)
+GOOGLE_CLIENT_ID=xxx
+GOOGLE_CLIENT_SECRET=xxx
+GOOGLE_CALLBACK_URL=https://localhost/api/auth/google/callback
+
+INTRA_CLIENT_ID=xxx
+INTRA_CLIENT_SECRET=xxx
+INTRA_CALLBACK_URL=https://localhost/api/auth/42/callback
+
+
+
+# I had some problems with node_modules since I changed their installing inside the root repository.
+
