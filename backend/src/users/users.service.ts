@@ -58,7 +58,7 @@ export class UsersService {
   async updateAvatar(userId: string, avatarPath: string): Promise<User> {
     return this.prisma.user.update({
       where: { id: userId },
-      data: { avatar: avatarPath },
+      data: { avatar: avatarPath },  // now stores base64 string
     });
   }
 
@@ -96,7 +96,11 @@ export class UsersService {
   }
 
   sanitize(user: User) {
-    const { password, refreshToken, ...safe } = user;
-    return safe;
+    const { password, refreshToken, avatar, ...rest } = user;
+    return {
+      ...rest,
+      avatarPath:  avatar ?? null,   // now a base64 data URL or null
+      hasPassword: password !== null,
+    };
   }
 }

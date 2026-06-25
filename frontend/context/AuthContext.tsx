@@ -16,6 +16,7 @@ interface User {
   username:   string;
   email:      string;
   avatarPath: string | null;
+  hasPassword: boolean;
 }
 
 interface AuthContextValue {

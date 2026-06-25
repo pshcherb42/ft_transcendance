@@ -3,12 +3,13 @@ Surprise.
 
 To turn on:
 cp .env.example .env
-npm install inside root directory
+npm install (inside root directory)
 docker compose up --build
 docker compose exec backend npx prisma generate
 docker compose exec backend npx prisma migrate deploy
 docker compose exec backend npm install passport-google-oauth20
 docker compose exec backend npm install --save-dev @types/passport-google-oauth20
+docker compose exec frontend npm install browser-image-compression
 
 # Preparation 
 
@@ -2223,7 +2224,7 @@ First create a user to test this
 # 1. Login to get a token
 TOKEN=$(curl -s -X POST http://localhost:3001/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"yourmail@gmail.com","password":"yourpassword"}' \
+  -d '{"email":"polina@gmail.com","password":"password"}' \
   --insecure | grep -o '"accessToken":"[^"]*"' | cut -d'"' -f4)
 
 echo "Token: $TOKEN"
@@ -2851,3 +2852,196 @@ bashdocker compose exec backend cat src/users/users.service.ts
 Paste both and I'll add the update endpoint.
 
 transc on claude google oauth backend
+
+curl -s http://localhost:8080/api/users/me \
+  -H "Authorization: Bearer $(cat /tmp/tok 2>/dev/null || echo 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1OTJiZWE4Ny1kZWU4LTQ2ZTItOTdkZC0zMjViNWY3ZWZhM2YiLCJlbWFpbCI6InBvbGluYUBnbWFpbC5jb20iLCJpYXQiOjE3ODIzODEyOTMsImV4cCI6MTc4MjM4MjE5M30.Tye48LM-2KNAu37dxxGQZBmmBzQqdG31S7CLeCViSjQ')" | python3 -m json.tool
+
+
+
+
+# Avatar upload to persist between sessions without cloud storage
+
+The approach
+Instead of saving files to ./uploads/avatars/ on disk (which doesn't persist across Docker container restarts), you:
+
+1. Frontend: compress with browser-image-compression, convert to base64, send as JSON
+2. Backend: receive the base64 string, store it in a TEXT column in Postgres
+3. Frontend: render with <img src={user.avatar} /> directly — no /api/uploads/... URL needed
+
+Step 1 - prisma.schema
+
+Step 2 - install browser-image-compression in the frntend
+docker compose exec frontend npm install browser-image-compression
+
+Step 3 - backend: simplify the avatar endpoint
+users.controller.ts replace the uploadAvatar method
+@UseGuards(JwtAuthGuard)
+@Post('me/avatar')
+async uploadAvatar(@Request() req, @Body() body: { avatar: string }) {
+  if (!body?.avatar || !body.avatar.startsWith('data:image/')) {
+    throw new BadRequestException('Invalid image data');
+  }
+  // Rough size check: base64 of 1MB ≈ 1.37MB string, limit to ~800KB compressed
+  if (body.avatar.length > 1_100_000) {
+    throw new BadRequestException('Image too large (max ~800 KB after compression)');
+  }
+  const updated = await this.usersService.updateAvatar(req.user.id, body.avatar);
+  return this.usersService.sanitize(updated);
+}
+
+I left these imports imports multer, because they were used for something
+
+//import { FileInterceptor } from '@nestjs/platform-express';
+//import { diskStorage } from 'multer';
+//import { extname } from 'path';
+
+users.service.ts — updateAvatar is already generic, no change needed:
+tsasync updateAvatar(userId: string, avatarPath: string): Promise<User> {
+  return this.prisma.user.update({
+    where: { id: userId },
+    data: { avatar: avatarPath },  // now stores base64 string
+  });
+}
+sanitize — update to pass the base64 directly:
+tssanitize(user: User) {
+  const { password, refreshToken, avatar, ...rest } = user;
+  return {
+    ...rest,
+    avatarPath:  avatar ?? null,   // now a base64 data URL or null
+    hasPassword: password !== null,
+  };
+}
+
+Step 4 - frontend: ProfilePage avatar upload.
+
+
+# error
+
+cant find browser-image-compression extention
+
+I changed frontend/next.config.ts
+'''
+import path from 'path';
+import type { NextConfig } from 'next';
+
+const nextConfig: NextConfig = {
+  experimental: {
+    externalDir: true,
+  },
+  turbopack: {
+    root: path.resolve(__dirname, '..'),  // points to /app
+  },
+};
+
+export default nextConfig;
+'''
+
+rebuild.
+
+I am going to check inside container
+its there
+I will change frontend package.json "dev": "next dev --webpack"
+rebuild
+
+Possible that typescript cant see root node_modules
+docker compose exec frontend cat tsconfig.json
+shows:
+{
+  "compilerOptions": {
+    "moduleResolution": "bundler"
+  }
+}
+
+vscode is using the wrong typescript
+docker compose exec frontend npx tsc --noEmit
+succeeds but vscode still shows red squiggles
+
+@types package conflict
+npm uninstall @types/browser-image-compression
+then rebuild
+
+that seemed to work
+
+# error payload too large
+
+base64 is too large for nginx
+add a client body size limit to nginx config
+client_max_body_size 5m;
+
+then restart nginx
+
+i will try upload h eimage again and if i still hit 413 error from backend I will also add to my main.ts
+app.use(express.json({ limit: '5mb' }));
+
+3:39 PM4 / 4Claude responded: Two fixes — import express, and put app.Two fixes — import express, and put app.use before app.listen:
+tsimport { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { ValidationPipe } from '@nestjs/common';
+import * as express from 'express';
+import { AppModule } from './app.module';
+
+async function bootstrap() {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.use(express.json({ limit: '5mb' }));
+  app.useStaticAssets('/app/uploads', { prefix: '/uploads' });
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+  await app.listen(3001);
+}
+bootstrap();
+app.use must come before app.listen, otherwise it's registered after the server is already accepting requests.
+
+# error nothing happens when i save changes
+docker compose logs backend --tail=30
+curl -H "Authorization: Bearer <your_token>" http://localhost:8080/api/users/me
+docker compose exec backend sed -n '30,65p' src/users/users.controller.ts
+I had duplicates of logic. rewriting the user.controller.ts
+cat > backend/src/users/users.controller.ts << 'EOF'
+import {
+  Controller, Get, Put, Post, Param, Body,
+  UseGuards, Request, NotFoundException, BadRequestException,
+} from '@nestjs/common';
+import { UsersService } from './users.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { UpdateUserDto } from './dto/update-user.dto';
+
+@Controller('users')
+export class UsersController {
+  constructor(private usersService: UsersService) {}
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  async getMe(@Request() req) {
+    const user = await this.usersService.findById(req.user.id);
+    if (!user) throw new NotFoundException();
+    return this.usersService.sanitize(user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('me')
+  async updateMe(@Request() req, @Body() dto: UpdateUserDto) {
+    const updated = await this.usersService.updateProfile(req.user.id, dto);
+    return this.usersService.sanitize(updated);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('me/avatar')
+  async uploadAvatar(@Request() req, @Body() body: { avatar: string }) {
+    if (!body?.avatar || !body.avatar.startsWith('data:image/')) {
+      throw new BadRequestException('Invalid image data');
+    }
+    if (body.avatar.length > 1_100_000) {
+      throw new BadRequestException('Image too large');
+    }
+    const updated = await this.usersService.updateAvatar(req.user.id, body.avatar);
+    return this.usersService.sanitize(updated);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':id')
+  async getUser(@Param('id') id: string) {
+    const user = await this.usersService.findById(id);
+    if (!user) throw new NotFoundException('User not found');
+    return this.usersService.sanitize(user);
+  }
+}
+EOF
