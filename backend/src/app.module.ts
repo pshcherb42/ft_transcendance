@@ -5,8 +5,10 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 
+import { WebsocketsModule } from './websockets/websockets.module';
+
 @Module({
-  imports: [UsersModule, AuthModule, PrismaModule],
+  imports: [UsersModule, AuthModule, PrismaModule, WebsocketsModule],
   controllers: [AppController],
   providers: [AppService],
 })

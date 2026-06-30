@@ -8,7 +8,10 @@ BACKEND_PACKS = @nestjs/passport \
                 bcrypt \
                 @nestjs/config \
                 @nestjs/platform-express \
-                multer
+                multer \
+				@nestjs/websockets \
+                @nestjs/platform-socket.io \
+                socket.io
 
 all: up
 
