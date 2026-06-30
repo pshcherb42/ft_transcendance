@@ -1,0 +1,8 @@
+{
+  "name": "mi-proyecto-monorepo",
+  "version": "1.0.0",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ]
+}
