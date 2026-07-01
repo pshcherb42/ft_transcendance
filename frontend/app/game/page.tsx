@@ -60,7 +60,7 @@ return (
 	<div className="flex flex-col items-center justify-center min-h-screen bg-gray-800">
 	<h1 className="text-3xl font-bold text-white mb-4">Pong Engine Test</h1>
 	<canvas 
-		ref={canvasRef} 
+		ref={canvasRef}
 		width={800} 
 		height={600} 
 		className="border-4 border-white shadow-lg"
