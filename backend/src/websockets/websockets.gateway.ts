@@ -44,18 +44,18 @@ import {
   
 		// 3. Si es válido, guardamos la info del usuario en el socket para usarla luego
 		client.data.user = payload;
-		console.log(`🟢 Cliente conectado: ${client.id} | User ID: ${payload.sub}`);
+		console.log(`Client connected: ${client.id} | User ID: ${payload.sub}`);
 		
 	  } catch (error) {
 		// Si el token es falso, ha caducado, o no hay, lo echamos
-		console.log(`🔴 Conexión rechazada (${client.id}): ${error.message}`);
+		console.log(`Connection rejected: ${client.id} | Error: ${error.message}`);
 		client.disconnect();
 	  }
 	}
   
 	// Este método salta cuando un cliente cierra la pestaña o pierde internet
 	handleDisconnect(client: Socket) {
-	  console.log(`⚪ Cliente desconectado: ${client.id}`);
+		console.log(`Client disconnected: ${client.id}`);
 	}
   
 	// ---- UN EVENTO DE PRUEBA ----
@@ -63,7 +63,7 @@ import {
 	@SubscribeMessage('ping')
 	handlePing(@ConnectedSocket() client: Socket, @MessageBody() data: any) {
 	  const userEmail = client.data.user.email;
-	  console.log(`Recibido ping de ${userEmail} con datos:`, data);
+	  console.log(`Ping received from ${userEmail} | Data:`, data);
 	  
 	  // Respondemos solo a ese cliente
 	  client.emit('pong', { message: `Hola ${userEmail}, conexión WebSocket exitosa!` });

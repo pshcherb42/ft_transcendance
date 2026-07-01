@@ -6,7 +6,7 @@ import { WebsocketsGateway } from './websockets.gateway';
 @Module({
   imports: [
     ConfigModule,
-    JwtModule, // Importamos esto para poder usar el JwtService en nuestro Gateway
+    JwtModule,
   ],
   providers: [WebsocketsGateway],
 })
