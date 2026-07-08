@@ -9,19 +9,21 @@ services:
     depends_on: [backend]
     env_file: .env
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - ./frontend:/app/frontend
+      - /app/frontend/node_modules
 
   backend:
     build:
       context: .
       dockerfile: backend/Dockerfile
     ports: ["3001:3001"]
-    depends_on: [db]
+    depends_on:
+      db:
+        condition: service_healthy
     env_file: .env
     volumes:
-      - ./backend:/app
-      - /app/node_modules
+      - ./backend:/app/backend
+      - /app/backend/node_modules
 
   db:
     image: postgres:16
@@ -31,6 +33,11 @@ services:
       POSTGRES_DB: ${DB_NAME}
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   nginx:
     image: nginx:alpine

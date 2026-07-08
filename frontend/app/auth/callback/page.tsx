@@ -18,8 +18,7 @@ export default function OAuthCallbackPage() {
       return;
     }
 
-    login(accessToken, refreshToken);
-    router.replace('/');
+    login(accessToken, refreshToken).then(() => router.replace('/'));
   }, [searchParams, router, login]);
 
   return (
