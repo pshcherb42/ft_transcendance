@@ -57,7 +57,14 @@ export default function HomePage() {
           </p>
         </div>
 
-        <div className="flex w-full gap-3 pt-2">
+        <Link
+          href="/game"
+          className="flex h-11 w-full items-center justify-center rounded-full bg-zinc-900 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-50 dark:text-black dark:hover:bg-zinc-300"
+        >
+          Jugar
+        </Link>
+
+        <div className="flex w-full gap-3">
           <Link
             href="/profile"
             className="flex h-10 flex-1 items-center justify-center rounded-full border border-zinc-200 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-50 dark:hover:bg-zinc-800"
@@ -67,7 +74,7 @@ export default function HomePage() {
 
           <button
             onClick={handleLogout}
-            className="flex h-10 flex-1 items-center justify-center rounded-full bg-zinc-900 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-50 dark:text-black dark:hover:bg-zinc-300"
+            className="flex h-10 flex-1 items-center justify-center rounded-full border border-zinc-200 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-50 dark:hover:bg-zinc-800"
           >
             Log out
           </button>
