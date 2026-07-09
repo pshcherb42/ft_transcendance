@@ -8,7 +8,10 @@ BACKEND_PACKS = @nestjs/passport \
                 bcrypt \
                 @nestjs/config \
                 @nestjs/platform-express \
-                multer
+                multer \
+				browser-image-compression \
+				--save-dev @types/passport-google-oauth20 \
+				passport-google-oauth20
 
 all: up
 
@@ -25,6 +28,8 @@ build:
 install-deps:
 	@echo "Installing dependencies... (This might take a while)"
 	@docker compose run --rm backend npm install $(BACKEND_PACKS) || (echo "\n[!] Error: Installation failed. If it's a 'no space' error, run 'make clean-docker' first." && exit 1)
+	@docker compose run --rm backend npx prisma generate
+	@docker compose run --rm backend npx prisma migrate deploy
 
 clean-docker:
 	@echo "Cleaning Docker cache, unused items..."
