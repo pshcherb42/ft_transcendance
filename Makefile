@@ -9,9 +9,9 @@ BACKEND_PACKS = @nestjs/passport \
                 @nestjs/config \
                 @nestjs/platform-express \
                 multer \
-				browser-image-compression \
-				--save-dev @types/passport-google-oauth20 \
-				passport-google-oauth20
+				@nestjs/websockets \
+                @nestjs/platform-socket.io \
+                socket.io
 
 all: up
 

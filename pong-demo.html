@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pong — Demo (ft_transcendance)</title>
+  <style>
+    :root { --fg: #f4f4f5; --muted: #a1a1aa; --accent: #4ade80; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 16px; padding: 24px;
+      background: #0a0a0a; color: var(--fg);
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    h1 { margin: 0; font-size: 28px; letter-spacing: 1px; }
+    canvas { border: 4px solid var(--fg); border-radius: 6px; box-shadow: 0 10px 40px rgba(0,0,0,.6); max-width: 100%; height: auto; }
+    .hint { color: var(--muted); font-size: 14px; text-align: center; line-height: 1.6; }
+    .hint b { color: var(--fg); }
+    .tag { color: var(--accent); font-size: 12px; text-transform: uppercase; letter-spacing: 2px; }
+  </style>
+</head>
+<body>
+  <span class="tag">ft_transcendance · demo sin Docker</span>
+  <h1>PONG</h1>
+  <canvas id="game" width="800" height="600"></canvas>
+  <p class="hint">
+    La IA juega sola (attract mode). <b>Toma el control</b> cuando quieras:<br />
+    Izquierda: <b>W</b> / <b>S</b> &nbsp;·&nbsp; Derecha: <b>↑</b> / <b>↓</b> &nbsp;·&nbsp; primero a 5 gana
+  </p>
+
+  <script>
+  // ============================================================================
+  // Motor de Pong (puerto en JS plano del motor autoritativo del backend).
+  // Física y constantes IDÉNTICAS a backend/src/websockets/pong-engine.ts y
+  // frontend/app/game/pong-engine.ts. Este HTML es autocontenido a propósito:
+  // se abre con doble clic (file://), sin Next.js ni contenedores.
+  // ============================================================================
+  const C = {
+    WIDTH: 800, HEIGHT: 600,
+    PADDLE_WIDTH: 12, PADDLE_HEIGHT: 90, PADDLE_SPEED: 8,
+    LEFT_PADDLE_X: 24, RIGHT_PADDLE_X: 800 - 24 - 12, // 764
+    BALL_RADIUS: 9, BALL_SPEED_START: 7, BALL_SPEED_MAX: 15, BALL_SPEEDUP: 0.6,
+    MAX_BOUNCE_RAD: Math.PI / 4,
+    WINNING_SCORE: 5, TICK_RATE: 30, COUNTDOWN_TICKS: 90,
+    COLOR_BG: '#0a0a0a', COLOR_FG: '#f4f4f5', COLOR_ACCENT: '#4ade80',
+  };
+  const clamp = (v, min, max) => (v < min ? min : v > max ? max : v);
+
+  class PongEngine {
+    constructor() {
+      this.leftPaddleY = (C.HEIGHT - C.PADDLE_HEIGHT) / 2;
+      this.rightPaddleY = (C.HEIGHT - C.PADDLE_HEIGHT) / 2;
+      this.ballX = C.WIDTH / 2; this.ballY = C.HEIGHT / 2;
+      this.ballVX = 0; this.ballVY = 0; this.ballSpeed = C.BALL_SPEED_START;
+      this.scoreLeft = 0; this.scoreRight = 0;
+      this.status = 'countdown'; this.winner = null;
+      this.countdownTicks = C.COUNTDOWN_TICKS;
+      this.serveDir = Math.random() < 0.5 ? 1 : -1;
+      this.leftInput = { up: false, down: false };
+      this.rightInput = { up: false, down: false };
+    }
+    setInput(side, dir) {
+      const input = side === 'left' ? this.leftInput : this.rightInput;
+      input.up = dir === 'up'; input.down = dir === 'down';
+    }
+    step() {
+      if (this.status === 'finished') return;
+      this._movePaddles();
+      if (this.status === 'countdown') {
+        if (--this.countdownTicks <= 0) this._serve();
+        return;
+      }
+      this._moveBall();
+    }
+    getSnapshot() {
+      return {
+        status: this.status,
+        countdown: this.status === 'countdown' ? Math.ceil(this.countdownTicks / C.TICK_RATE) : 0,
+        leftPaddleY: this.leftPaddleY, rightPaddleY: this.rightPaddleY,
+        ballX: this.ballX, ballY: this.ballY,
+        scoreLeft: this.scoreLeft, scoreRight: this.scoreRight, winner: this.winner,
+      };
+    }
+    _movePaddles() {
+      if (this.leftInput.up) this.leftPaddleY -= C.PADDLE_SPEED;
+      if (this.leftInput.down) this.leftPaddleY += C.PADDLE_SPEED;
+      if (this.rightInput.up) this.rightPaddleY -= C.PADDLE_SPEED;
+      if (this.rightInput.down) this.rightPaddleY += C.PADDLE_SPEED;
+      this.leftPaddleY = clamp(this.leftPaddleY, 0, C.HEIGHT - C.PADDLE_HEIGHT);
+      this.rightPaddleY = clamp(this.rightPaddleY, 0, C.HEIGHT - C.PADDLE_HEIGHT);
+    }
+    _startCountdown(serveDir) {
+      this.status = 'countdown'; this.countdownTicks = C.COUNTDOWN_TICKS;
+      this.serveDir = serveDir;
+      this.ballX = C.WIDTH / 2; this.ballY = C.HEIGHT / 2;
+      this.ballVX = 0; this.ballVY = 0; this.ballSpeed = C.BALL_SPEED_START;
+    }
+    _serve() {
+      this.status = 'playing';
+      const angle = (Math.random() * 2 - 1) * (C.MAX_BOUNCE_RAD * 0.5);
+      this.ballVX = this.serveDir * this.ballSpeed * Math.cos(angle);
+      this.ballVY = this.ballSpeed * Math.sin(angle);
+    }
+    _moveBall() {
+      this.ballX += this.ballVX; this.ballY += this.ballVY;
+      if (this.ballY - C.BALL_RADIUS <= 0) { this.ballY = C.BALL_RADIUS; this.ballVY = Math.abs(this.ballVY); }
+      else if (this.ballY + C.BALL_RADIUS >= C.HEIGHT) { this.ballY = C.HEIGHT - C.BALL_RADIUS; this.ballVY = -Math.abs(this.ballVY); }
+      this._bounce('left'); this._bounce('right');
+      if (this.ballX - C.BALL_RADIUS <= 0) { this.scoreRight++; this._afterGoal('right'); }
+      else if (this.ballX + C.BALL_RADIUS >= C.WIDTH) { this.scoreLeft++; this._afterGoal('left'); }
+    }
+    _bounce(side) {
+      const paddleX = side === 'left' ? C.LEFT_PADDLE_X : C.RIGHT_PADDLE_X;
+      const paddleY = side === 'left' ? this.leftPaddleY : this.rightPaddleY;
+      const movingToward = side === 'left' ? this.ballVX < 0 : this.ballVX > 0;
+      if (!movingToward) return;
+      const overlapX = this.ballX - C.BALL_RADIUS < paddleX + C.PADDLE_WIDTH && this.ballX + C.BALL_RADIUS > paddleX;
+      const overlapY = this.ballY + C.BALL_RADIUS > paddleY && this.ballY - C.BALL_RADIUS < paddleY + C.PADDLE_HEIGHT;
+      if (!overlapX || !overlapY) return;
+      const relative = clamp((this.ballY - (paddleY + C.PADDLE_HEIGHT / 2)) / (C.PADDLE_HEIGHT / 2), -1, 1);
+      const angle = relative * C.MAX_BOUNCE_RAD;
+      this.ballSpeed = Math.min(this.ballSpeed + C.BALL_SPEEDUP, C.BALL_SPEED_MAX);
+      const dirX = side === 'left' ? 1 : -1;
+      this.ballVX = dirX * this.ballSpeed * Math.cos(angle);
+      this.ballVY = this.ballSpeed * Math.sin(angle);
+      this.ballX = side === 'left' ? paddleX + C.PADDLE_WIDTH + C.BALL_RADIUS : paddleX - C.BALL_RADIUS;
+    }
+    _afterGoal(scorer) {
+      if (this.scoreLeft >= C.WINNING_SCORE || this.scoreRight >= C.WINNING_SCORE) {
+        this.status = 'finished';
+        this.winner = this.scoreLeft >= C.WINNING_SCORE ? 'left' : 'right';
+        return;
+      }
+      this._startCountdown(scorer === 'left' ? 1 : -1);
+    }
+  }
+
+  // --- Renderer (mismo dibujo que frontend/app/game/renderer.ts) ---
+  function draw(ctx, s) {
+    ctx.fillStyle = C.COLOR_BG; ctx.fillRect(0, 0, C.WIDTH, C.HEIGHT);
+    ctx.strokeStyle = 'rgba(244,244,245,0.25)'; ctx.lineWidth = 2;
+    ctx.setLineDash([12, 18]); ctx.beginPath();
+    ctx.moveTo(C.WIDTH / 2, 0); ctx.lineTo(C.WIDTH / 2, C.HEIGHT); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = C.COLOR_FG; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+    ctx.font = '48px "Courier New", monospace';
+    ctx.fillText(String(s.scoreLeft), C.WIDTH / 4, 64);
+    ctx.fillText(String(s.scoreRight), (C.WIDTH / 4) * 3, 64);
+    ctx.fillRect(C.LEFT_PADDLE_X, s.leftPaddleY, C.PADDLE_WIDTH, C.PADDLE_HEIGHT);
+    ctx.fillRect(C.RIGHT_PADDLE_X, s.rightPaddleY, C.PADDLE_WIDTH, C.PADDLE_HEIGHT);
+    ctx.beginPath(); ctx.arc(s.ballX, s.ballY, C.BALL_RADIUS, 0, Math.PI * 2); ctx.fill();
+    if (s.status === 'countdown' && s.countdown > 0) {
+      ctx.fillStyle = C.COLOR_ACCENT; ctx.font = '64px "Courier New", monospace';
+      ctx.textBaseline = 'middle'; ctx.fillText(String(s.countdown), C.WIDTH / 2, C.HEIGHT / 2 - 70);
+      ctx.textBaseline = 'alphabetic';
+    }
+    if (s.status === 'finished') {
+      ctx.fillStyle = 'rgba(10,10,10,0.72)'; ctx.fillRect(0, 0, C.WIDTH, C.HEIGHT);
+      ctx.fillStyle = C.COLOR_FG; ctx.font = '64px "Courier New", monospace';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(s.winner === 'left' ? 'GANA IZQUIERDA' : 'GANA DERECHA', C.WIDTH / 2, C.HEIGHT / 2);
+      ctx.textBaseline = 'alphabetic';
+    }
+  }
+
+  // --- IA sencilla para el attract mode ---
+  function aiDir(engine, side) {
+    const paddleY = side === 'left' ? engine.leftPaddleY : engine.rightPaddleY;
+    const center = paddleY + C.PADDLE_HEIGHT / 2;
+    const dead = 12;
+    if (engine.ballY < center - dead) return 'up';
+    if (engine.ballY > center + dead) return 'down';
+    return 'stop';
+  }
+
+  // --- Entrada de teclado (toma el control de un lado al pulsar) ---
+  const pressed = new Set();
+  let humanLeft = false, humanRight = false;
+  addEventListener('keydown', (e) => {
+    const k = e.key;
+    if (k === 'w' || k === 'W' || k === 's' || k === 'S') { humanLeft = true; pressed.add(k.toLowerCase()); }
+    else if (k === 'ArrowUp' || k === 'ArrowDown') { humanRight = true; pressed.add(k); e.preventDefault(); }
+  });
+  addEventListener('keyup', (e) => {
+    const k = e.key;
+    if (k === 'w' || k === 'W' || k === 's' || k === 'S') pressed.delete(k.toLowerCase());
+    else if (k === 'ArrowUp' || k === 'ArrowDown') pressed.delete(k);
+  });
+  function applyInputs(engine) {
+    if (humanLeft) {
+      const up = pressed.has('w'), down = pressed.has('s');
+      engine.setInput('left', up && !down ? 'up' : down && !up ? 'down' : 'stop');
+    } else engine.setInput('left', aiDir(engine, 'left'));
+    if (humanRight) {
+      const up = pressed.has('ArrowUp'), down = pressed.has('ArrowDown');
+      engine.setInput('right', up && !down ? 'up' : down && !up ? 'down' : 'stop');
+    } else engine.setInput('right', aiDir(engine, 'right'));
+  }
+
+  // --- Bucle a paso fijo (física a TICK_RATE Hz, dibujo a la tasa del navegador) ---
+  const ctx = document.getElementById('game').getContext('2d');
+  let engine = new PongEngine();
+  let acc = 0, last = performance.now(), finishedMs = 0;
+  const STEP = 1000 / C.TICK_RATE;
+  function frame(now) {
+    acc = Math.min(acc + (now - last), 250); last = now;
+    while (acc >= STEP) {
+      applyInputs(engine);
+      engine.step();
+      if (engine.status === 'finished') {
+        finishedMs += STEP;
+        if (finishedMs >= 2500) { engine = new PongEngine(); finishedMs = 0; }
+      }
+      acc -= STEP;
+    }
+    draw(ctx, engine.getSnapshot());
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  </script>
+</body>
+</html>
