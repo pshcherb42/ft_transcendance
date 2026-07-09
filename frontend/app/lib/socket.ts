@@ -6,8 +6,12 @@ import { getAccessToken } from './auth';
 // enruta /socket.io hacia backend:3001. El JWT viaja en el handshake para que
 // el gateway pueda autenticar en handleConnection.
 export function connectGameSocket(): Socket {
-  return io({
+  return io(`${window.location.origin}/game`, {
     path: '/socket.io',
-    auth: { token: getAccessToken() },
+    auth: { token: getAccessToken() || '' },
+    reconnection: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000,
   });
 }
+
