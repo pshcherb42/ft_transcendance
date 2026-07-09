@@ -9,8 +9,8 @@ services:
     depends_on: [backend]
     env_file: .env
     volumes:
-      - ./frontend:/app/frontend
-      - /app/node_modules
+      - ./frontend:/app/frontend # lets docker see changes in real time
+      - /app/node_modules # lets use node_modules from the root
 
   backend:
     build:
@@ -30,15 +30,15 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data # chain the volum with the inside Postgres folder
 
   nginx:
     image: nginx:alpine
     ports: ["8080:80"]
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf # 
     depends_on: [frontend, backend]
     restart: on-failure
 
 volumes:
-  pgdata:
+  pgdata: # declare it so Docker knows that it exists
