@@ -19,4 +19,5 @@ RUN npx prisma generate --schema=./backend/prisma/schema.prisma
 
 WORKDIR /app/backend
 EXPOSE 3001
-CMD ["../node_modules/.bin/nest", "start", "--watch"]
+# CMD ["../node_modules/.bin/nest", "start", "--watch"]
+CMD sh -c "npx prisma generate --schema=./prisma/schema.prisma && npx prisma migrate deploy && ../node_modules/.bin/nest start --watch"

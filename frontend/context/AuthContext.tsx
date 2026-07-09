@@ -12,7 +12,7 @@ import { storeTokens, clearTokens, isLoggedIn } from '@/app/lib/auth';
 import { apiFetch } from '@/app/lib/api';
 
 interface User {
-  id:         number;
+  id:         string;
   username:   string;
   email:      string;
   avatarPath: string | null;
@@ -34,6 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const fetchUser = useCallback(async () => {
+    setLoading(true);
     if (!isLoggedIn()) { setLoading(false); return; }
     try {
       const res = await apiFetch('/users/me');
