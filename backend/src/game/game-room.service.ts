@@ -130,4 +130,17 @@ export class GameRoomService {
     if (room.disconnectTimer) clearTimeout(room.disconnectTimer);
     this.rooms.delete(roomId);
   }
+
+  handleCorruptedMatch(room : GameRoom, server : Server){
+    const player = room.players.find((p) => server.sockets.sockets.has(p.socketId));
+    if (player){
+      this.logger.log(`Devolviendo a la cola al jugador remanente: ${player.username}`);
+      this.enqueue(player.userId, player.username, player.socketId)
+    }
+    room.players.forEach((p) => this.userToRoom.delete(p.userId));
+    if(room.disconnectTimer) clearTimeout(room.disconnectTimer);
+    this.rooms.delete(room.id);
+
+    this.logger.log(`Sala corrupta desarmada y eliminada con éxito: ${room.id}`)
+  }
 }
