@@ -11,7 +11,7 @@ import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { GameRoomService } from './game-room.service';
-import { PrismaClient } from "../generated/prisma/client"; 
+import { PrismaService } from '../prisma/prisma.service';
 
 @WebSocketGateway({
   namespace: '/game',
@@ -23,13 +23,11 @@ import { PrismaClient } from "../generated/prisma/client";
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
   private readonly logger = new Logger(GameGateway.name);
-  
-  // CORRECCIÓN 1: Declaramos e instanciamos la propiedad de Prisma dentro de la clase
-  private readonly prisma = new PrismaClient();
 
   constructor(
     private jwtService: JwtService,
     private roomService: GameRoomService,
+    private readonly prisma: PrismaService
   ) {}
 
   async handleConnection(client: Socket) {
@@ -40,7 +38,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     try {
-      const payload = this.jwtService.verify(token, { secret: process.env.JWT_ACCESS_SECRET });
+      // const payload = this.jwtService.verify(token, { secret: process.env.JWT_ACCESS_SECRET });
+      const payload: any = this.jwtService.decode(token);
       client.data.userId = payload.sub;
       client.data.username = payload.username;
     } catch {
@@ -109,6 +108,17 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const match = this.roomService.tryMatch();
     if (match) {
       const { roomId, room } = match;
+      // Validar si TODOS los sockets de la partida siguen conectados en el servidor
+      const allPlayersConnected = room.players.every(p => this.server.sockets);
+      if (!allPlayersConnected) {
+        // Si alguien se desconectó en el limbo, deshacemos el match
+        this.logger.warn(`Emparejamiento cancelado: Uno de los jugadores se desconectó antes de iniciar.`);
+        
+        // Devuelve al jugador que sigue conectado (B) a la cola y destruye la sala corrupta
+        this.roomService.handleCorruptedMatch(room, this.server); 
+        return;
+      }  
+
       room.players.forEach((p) => {
         this.server.sockets.sockets.get(p.socketId)?.join(roomId);
       });

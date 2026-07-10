@@ -6,9 +6,10 @@ import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 import { WebsocketsModule } from './websockets/websockets.module';
+import { GameModule } from './game/game.module';
 
 @Module({
-  imports: [UsersModule, AuthModule, PrismaModule, WebsocketsModule],
+  imports: [UsersModule, AuthModule, PrismaModule, WebsocketsModule, GameModule],
   controllers: [AppController],
   providers: [AppService],
 })
