@@ -36,42 +36,47 @@ import {
 
 	// Este método salta automáticamente cuando un cliente intenta conectarse
 	async handleConnection(client: Socket) {
-	  try {
-		// 1. Extraemos el token que el frontend enviará al conectarse
-		const token = client.handshake.auth.token;
-
-		if (!token) {
-		  throw new Error('No token provided');
+		try {
+		  const token = client.handshake.auth.token;
+		  if (!token) throw new Error('No token provided');
+	  
+		  const payload = await this.jwtService.verifyAsync(token, {
+			secret: this.configService.get<string>('JWT_SECRET'),
+		  });
+	  
+		  client.data.user = payload;
+		  console.log(`Client connected: ${client.id} | User ID: ${payload.sub}`);
+	  
+		  // Reconexión: si este usuario tenía una sala activa en periodo de gracia,
+		  // la retoma antes de que expiren los 15s.
+		  const roomId = this.gameService.handleReconnect(payload.sub, this.server);
+		  if (roomId) {
+			const players = this.gameService.getRoomPlayers(roomId);
+			if (players) {
+			  const side: Side = players.leftUserId === payload.sub ? 'left' : 'right';
+			  this.assignToRoom(client, roomId, side);
+			  client.emit('rejoinedGame', { roomId, side });
+			}
+		  }
+		} catch (error) {
+		  console.log(`Connection rejected: ${client.id} | Error: ${error.message}`);
+		  client.disconnect();
 		}
-
-		// 2. Verificamos que el token sea válido usando la clave secreta de tus compañeros
-		const payload = await this.jwtService.verifyAsync(token, {
-		  secret: this.configService.get<string>('JWT_SECRET'),
-		});
-
-		// 3. Si es válido, guardamos la info del usuario en el socket para usarla luego
-		client.data.user = payload;
-		console.log(`Client connected: ${client.id} | User ID: ${payload.sub}`);
-
-	  } catch (error) {
-		// Si el token es falso, ha caducado, o no hay, lo echamos
-		console.log(`Connection rejected: ${client.id} | Error: ${error.message}`);
-		client.disconnect();
-	  }
 	}
 
 	// Este método salta cuando un cliente cierra la pestaña o pierde internet
 	handleDisconnect(client: Socket) {
 		console.log(`Client disconnected: ${client.id}`);
-
-		// 1. Si estaba esperando en la cola, lo quitamos.
+	  
 		this.queue = this.queue.filter((s) => s.id !== client.id);
-
-		// 2. Si estaba jugando, terminamos la partida y avisamos al rival.
+	  
+		const userId: string | undefined = client.data.user?.sub;
 		const roomId: string | undefined = client.data.roomId;
-		if (roomId) {
-			this.gameService.removeGame(roomId);
-			client.to(roomId).emit('opponentLeft');
+	  
+		if (roomId && userId) {
+		  // Periodo de gracia en vez de forfeit instantáneo — se avisa al rival y
+		  // se pausa el bucle hasta reconexión o hasta que expiren los 15s.
+		  this.gameService.handleDisconnect(userId, this.server);
 		}
 	}
 
@@ -79,44 +84,46 @@ import {
 	// El frontend pide entrar en la cola. Si hay rival esperando, empezamos partida.
 	@SubscribeMessage('joinQueue')
 	handleJoinQueue(@ConnectedSocket() client: Socket) {
-	  // Evitar duplicados o entrar en cola mientras ya se juega.
-	  if (client.data.roomId || this.queue.some((s) => s.id === client.id)) {
-		return;
-	  }
+		// Evitar duplicados o entrar en cola mientras ya se juega.
+		if (client.data.roomId || this.queue.some((s) => s.id === client.id)) {
+			return;
+		}
 
-	  const opponent = this.queue.shift();
+	  	let opponent: Socket | undefined;
+		while ((opponent = this.queue.shift())) {
+			const activeOpponent = this.server.sockets.sockets.get(opponent.id);
+			if (activeOpponent && activeOpponent.connected) {
+				opponent = activeOpponent;
+				break;
+			} // still connected, use it
+			opponent = undefined; // stale entry, discard and keep looking
+		}
 
-	  if (!opponent) {
-		// No hay nadie: encolamos y avisamos.
-		this.queue.push(client);
-		client.emit('waiting');
-		return;
-	  }
+		if (!opponent) {
+			// No hay nadie: encolamos y avisamos.
+			this.queue.push(client);
+			client.emit('waiting');
+			return;
+		}
 
-	  // Emparejamos: el que esperaba es 'left', el nuevo es 'right'.
-	  const roomId = `game-${opponent.id}-${client.id}`;
+		// Emparejamos: el que esperaba es 'left', el nuevo es 'right'.
+		const roomId = `game-${opponent.id}-${client.id}`;
 
-	  this.assignToRoom(opponent, roomId, 'left');
-	  this.assignToRoom(client, roomId, 'right');
+		this.assignToRoom(opponent, roomId, 'left');
+		this.assignToRoom(client, roomId, 'right');
 
-	  opponent.emit('matchFound', {
-		roomId,
-		side: 'left',
-		opponent: { id: client.data.user?.sub, email: client.data.user?.email },
-	  });
-	  client.emit('matchFound', {
-		roomId,
-		side: 'right',
-		opponent: { id: opponent.data.user?.sub, email: opponent.data.user?.email },
-	  });
+		opponent.emit('matchFound', {
+			roomId,
+			side: 'left',
+			opponent: { id: client.data.user?.sub, email: client.data.user?.email },
+		});
+		client.emit('matchFound', {
+			roomId,
+			side: 'right',
+			opponent: { id: opponent.data.user?.sub, email: opponent.data.user?.email },
+		});
 
-	  // Pasamos los userId (del JWT) para poder persistir el resultado al terminar.
-	  this.gameService.createGame(
-		roomId,
-		opponent.data.user.sub,
-		client.data.user.sub,
-		this.server,
-	  );
+		this.gameService.createGame(roomId, opponent.data.user.sub, client.data.user.sub, this.server);
 	}
 
 	@SubscribeMessage('leaveQueue')
