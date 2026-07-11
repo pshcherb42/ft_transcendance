@@ -4,12 +4,10 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
-
 import { WebsocketsModule } from './websockets/websockets.module';
-import { GameModule } from './game/game.module';
 
 @Module({
-  imports: [UsersModule, AuthModule, PrismaModule, WebsocketsModule, GameModule],
+  imports: [UsersModule, AuthModule, PrismaModule, WebsocketsModule],
   controllers: [AppController],
   providers: [AppService],
 })
