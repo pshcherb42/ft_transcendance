@@ -17,7 +17,17 @@ import {
   // 8080 = acceso vía nginx (mismo origen que la app); 3000 = frontend directo en dev.
   @WebSocketGateway({
 	cors: {
-	  origin: ['http://localhost:8080', 'http://localhost:3000'],
+	  origin: (origin, callback) => {
+		if (!origin) return callback(null, true); // same-machine/non-browser clients
+  
+		const allowed =
+		  /^https?:\/\/localhost(:\d+)?$/.test(origin) ||
+		  /^https?:\/\/127\.0\.0\.1(:\d+)?$/.test(origin) ||
+		  /^https?:\/\/192\.168\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(origin) ||
+		  /^https?:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(origin);
+  
+		callback(allowed ? null : new Error('Not allowed by CORS'), allowed);
+	  },
 	  credentials: true,
 	},
   })
