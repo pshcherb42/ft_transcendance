@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation';
 import type { Socket } from 'socket.io-client';
 import { useAuth } from '@/context/AuthContext';
 import { connectGameSocket } from '@/app/lib/socket';
-import { PongEngine } from './pong-engine';
-import { PongAi, type Difficulty } from './ai';
 import { PongRenderer } from './renderer';
-import { WIDTH, HEIGHT, TICK_RATE } from './constants';
+import { PongMatch } from './PongMatch';
+import { TournamentView } from './TournamentView';
+import { type Difficulty } from './ai';
+import { WIDTH, HEIGHT } from './constants';
+import { MAP_LABEL, type MapId } from './config';
 import type { GameSnapshot, Mode, Side } from './types';
 
 type OnlineStatus =
@@ -28,23 +30,25 @@ export default function GamePage() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null); // solo modo online
   const rendererRef = useRef(new PongRenderer());
 
   const [mode, setMode] = useState<Mode>('menu');
 
-  // Estado del modo ONLINE
+  // Modo ONLINE
   const [onlineStatus, setOnlineStatus] = useState<OnlineStatus>('connecting');
   const [side, setSide] = useState<Side | null>(null);
   const [winner, setWinner] = useState<Side | null>(null);
   const [onlineRound, setOnlineRound] = useState(0);
 
-  // Estado del modo LOCAL
+  // Modo LOCAL / IA
   const [localWinner, setLocalWinner] = useState<Side | null>(null);
   const [localRound, setLocalRound] = useState(0);
-
-  // Dificultad de la IA (solo modo 'ai'), elegida en el menú.
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
+
+  // Personalización de la partida local/IA
+  const [mapId, setMapId] = useState<MapId>('classic');
+  const [powerups, setPowerups] = useState(false);
 
   // La página requiere sesión.
   useEffect(() => {
@@ -66,7 +70,6 @@ export default function GamePage() {
     setWinner(null);
 
     let snapshot: GameSnapshot | null = null;
-    // Mutable local: el estado React `side` no se refleja en el closure del rAF.
     let mySide: Side | null = null;
     const socket: Socket = connectGameSocket();
 
@@ -90,7 +93,6 @@ export default function GamePage() {
     });
     socket.on('opponentLeft', () => setOnlineStatus('opponent-left'));
 
-    // Solo controlamos NUESTRA pala: enviamos up / down / stop al servidor.
     const pressed = new Set<string>();
     let currentDir: 'up' | 'down' | 'stop' = 'stop';
     const refresh = () => {
@@ -122,7 +124,6 @@ export default function GamePage() {
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
 
-    // Bucle de render: solo dibuja el último snapshot del servidor.
     let raf: number;
     const loop = () => {
       if (snapshot) renderer.draw(ctx, snapshot, mySide ?? undefined);
@@ -137,85 +138,6 @@ export default function GamePage() {
       socket.disconnect();
     };
   }, [mode, onlineRound]);
-
-  // ------------------------------------------------------------------ LOCAL
-  useEffect(() => {
-    if (mode !== 'local' && mode !== 'ai') return;
-    const isAi = mode === 'ai';
-
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const renderer = rendererRef.current;
-    const engine = new PongEngine();
-    const ai = isAi ? new PongAi(difficulty) : null;
-    setLocalWinner(null);
-
-    // Dos jugadores en el mismo teclado: izquierda W/S, derecha ↑/↓.
-    const pressed = new Set<string>();
-    const refresh = () => {
-      if (isAi) {
-        // 1 jugador: el humano controla la IZQUIERDA con W/S o flechas; la IA la derecha.
-        const up = pressed.has('w') || pressed.has('ArrowUp');
-        const down = pressed.has('s') || pressed.has('ArrowDown');
-        engine.setInput('left', up && !down ? 'up' : down && !up ? 'down' : 'stop');
-      } else {
-        const lUp = pressed.has('w');
-        const lDown = pressed.has('s');
-        engine.setInput('left', lUp && !lDown ? 'up' : lDown && !lUp ? 'down' : 'stop');
-        const rUp = pressed.has('ArrowUp');
-        const rDown = pressed.has('ArrowDown');
-        engine.setInput('right', rUp && !rDown ? 'up' : rDown && !rUp ? 'down' : 'stop');
-      }
-    };
-    const norm = (k: string): string | null => {
-      if (k === 'w' || k === 'W') return 'w';
-      if (k === 's' || k === 'S') return 's';
-      if (k === 'ArrowUp' || k === 'ArrowDown') return k;
-      return null;
-    };
-    const onKeyDown = (e: KeyboardEvent) => {
-      const k = norm(e.key);
-      if (!k) return;
-      if (k.startsWith('Arrow')) e.preventDefault();
-      pressed.add(k);
-      refresh();
-    };
-    const onKeyUp = (e: KeyboardEvent) => {
-      const k = norm(e.key);
-      if (!k) return;
-      pressed.delete(k);
-      refresh();
-    };
-    window.addEventListener('keydown', onKeyDown);
-    window.addEventListener('keyup', onKeyUp);
-
-    // Física a paso fijo (TICK_RATE Hz), igual que el servidor.
-    const stepTimer = setInterval(() => {
-      if (ai) ai.update(engine); // la IA decide su input ANTES del step
-      engine.step();
-      if (engine.status === 'finished' && engine.winner) {
-        setLocalWinner(engine.winner);
-      }
-    }, 1000 / TICK_RATE);
-
-    // Render a la tasa del navegador.
-    let raf: number;
-    const loop = () => {
-      renderer.draw(ctx, engine.getSnapshot(), isAi ? 'left' : undefined);
-      raf = requestAnimationFrame(loop);
-    };
-    loop();
-
-    return () => {
-      clearInterval(stepTimer);
-      cancelAnimationFrame(raf);
-      window.removeEventListener('keydown', onKeyDown);
-      window.removeEventListener('keyup', onKeyUp);
-    };
-  }, [mode, localRound, difficulty]);
 
   // --------------------------------------------------------------- UI helpers
   const onlineStatusText = (() => {
@@ -235,6 +157,12 @@ export default function GamePage() {
     }
   })();
 
+  const startLocal = (m: Mode) => {
+    setLocalWinner(null);
+    setLocalRound((r) => r + 1);
+    setMode(m);
+  };
+
   if (loading || !user) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-900">
@@ -243,12 +171,12 @@ export default function GamePage() {
     );
   }
 
-  // Menú de selección de modo
+  // ------------------------------------------------------------------ MENÚ
   if (mode === 'menu') {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 gap-8">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 gap-8 py-10">
         <h1 className="text-4xl font-bold text-white">Pong</h1>
-        <div className="flex flex-col gap-4 w-64">
+        <div className="flex flex-col gap-4 w-72">
           <button
             type="button"
             onClick={() => {
@@ -261,53 +189,94 @@ export default function GamePage() {
           </button>
           <button
             type="button"
-            onClick={() => {
-              setLocalRound((r) => r + 1);
-              setMode('local');
-            }}
+            onClick={() => startLocal('local')}
             className="h-12 rounded-full border border-zinc-500 text-white font-semibold hover:bg-zinc-800 transition-colors"
           >
             Jugar Local (2 jugadores)
           </button>
-          <div className="flex flex-col gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setLocalRound((r) => r + 1);
-                setMode('ai');
-              }}
-              className="h-12 rounded-full border border-zinc-500 text-white font-semibold hover:bg-zinc-800 transition-colors"
-            >
-              Jugar vs IA (1 jugador)
-            </button>
-            <div className="flex gap-2">
-              {(['easy', 'medium', 'hard'] as Difficulty[]).map((d) => (
-                <button
-                  key={d}
-                  type="button"
-                  onClick={() => setDifficulty(d)}
-                  className={`flex-1 h-9 rounded-full text-sm font-medium transition-colors ${
-                    difficulty === d
-                      ? 'bg-white text-black'
-                      : 'border border-zinc-500 text-zinc-300 hover:bg-zinc-800'
-                  }`}
-                >
-                  {DIFF_LABEL[d]}
-                </button>
-              ))}
-            </div>
+          <button
+            type="button"
+            onClick={() => startLocal('ai')}
+            className="h-12 rounded-full border border-zinc-500 text-white font-semibold hover:bg-zinc-800 transition-colors"
+          >
+            Jugar vs IA (1 jugador)
+          </button>
+          <div className="flex gap-2">
+            {(['easy', 'medium', 'hard'] as Difficulty[]).map((d) => (
+              <button
+                key={d}
+                type="button"
+                onClick={() => setDifficulty(d)}
+                className={`flex-1 h-9 rounded-full text-sm font-medium transition-colors ${
+                  difficulty === d
+                    ? 'bg-white text-black'
+                    : 'border border-zinc-500 text-zinc-300 hover:bg-zinc-800'
+                }`}
+              >
+                {DIFF_LABEL[d]}
+              </button>
+            ))}
           </div>
+          <button
+            type="button"
+            onClick={() => setMode('tournament')}
+            className="h-12 rounded-full border border-zinc-500 text-white font-semibold hover:bg-zinc-800 transition-colors"
+          >
+            Torneo local
+          </button>
         </div>
+
+        {/* Personalización (solo local / IA) */}
+        <div className="flex flex-col gap-3 w-72 border-t border-zinc-800 pt-5">
+          <p className="text-xs uppercase tracking-wider text-zinc-500">
+            Personalización (local / IA)
+          </p>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-zinc-400 w-16">Mapa</span>
+            {(['classic', 'obstacles'] as MapId[]).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setMapId(m)}
+                className={`flex-1 h-9 rounded-full text-sm font-medium transition-colors ${
+                  mapId === m
+                    ? 'bg-white text-black'
+                    : 'border border-zinc-500 text-zinc-300 hover:bg-zinc-800'
+                }`}
+              >
+                {MAP_LABEL[m]}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => setPowerups((p) => !p)}
+            className={`h-9 rounded-full text-sm font-medium transition-colors ${
+              powerups
+                ? 'bg-white text-black'
+                : 'border border-zinc-500 text-zinc-300 hover:bg-zinc-800'
+            }`}
+          >
+            Power-ups: {powerups ? 'ON' : 'OFF'}
+          </button>
+        </div>
+
         <p className="text-sm text-zinc-500 text-center max-w-xs">
-          Online: te emparejamos con otro jugador. Local: dos jugadores en el
-          mismo teclado.
+          Online: te emparejamos con otro jugador. Local/IA/Torneo: en este mismo
+          equipo.
         </p>
       </div>
     );
   }
 
+  // --------------------------------------------------------------- TORNEO
+  if (mode === 'tournament') {
+    return <TournamentView onExit={() => setMode('menu')} />;
+  }
+
   const backToMenu = () => setMode('menu');
 
+  // ------------------------------------------------------ ONLINE / LOCAL / IA
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 gap-4">
       <h1 className="text-3xl font-bold text-white">
@@ -330,12 +299,22 @@ export default function GamePage() {
               : 'Primer jugador en llegar a 5 gana'}
       </p>
 
-      <canvas
-        ref={canvasRef}
-        width={WIDTH}
-        height={HEIGHT}
-        className="border-4 border-white shadow-lg max-w-full"
-      />
+      {mode === 'online' ? (
+        <canvas
+          ref={canvasRef}
+          width={WIDTH}
+          height={HEIGHT}
+          className="border-4 border-white shadow-lg max-w-full"
+        />
+      ) : (
+        <PongMatch
+          key={localRound}
+          config={{ map: mapId, powerups }}
+          vsAi={mode === 'ai'}
+          difficulty={difficulty}
+          onFinish={(w) => setLocalWinner(w)}
+        />
+      )}
 
       <p className="text-sm text-zinc-400">
         {mode === 'online'
@@ -356,10 +335,13 @@ export default function GamePage() {
               Buscar otra partida
             </button>
           )}
-        {(mode === 'local' || mode === 'ai') && localWinner && (
+        {mode !== 'online' && localWinner && (
           <button
             type="button"
-            onClick={() => setLocalRound((r) => r + 1)}
+            onClick={() => {
+              setLocalWinner(null);
+              setLocalRound((r) => r + 1);
+            }}
             className="h-11 px-6 rounded-full bg-white text-black font-medium hover:bg-zinc-300 transition-colors"
           >
             Revancha
