@@ -91,18 +91,34 @@ export class GameService {
     server.to(roomId).emit('opponentDisconnected', { userId, gracePeriodMs: RECONNECT_GRACE_MS });
 
     room.disconnectTimer = setTimeout(() => {
-      if (room.disconnectedUserId === userId) {
-        const winnerId = userId === room.leftUserId ? room.rightUserId : room.leftUserId;
-        server.to(roomId).emit('gameOver', { reason: 'forfeit', winnerId, forfeitedBy: userId });
-
-        void this.matchService.record({
-          homeId: room.leftUserId,
-          awayId: room.rightUserId,
-          homeScore: room.engine.scoreLeft,
-          awayScore: room.engine.scoreRight,
-          winnerId,
-        });
-
+      try {
+        if (room.disconnectedUserId === userId) {
+          const winnerSide: Side = userId === room.leftUserId ? 'right' : 'left';
+          const winnerId = winnerSide === 'left' ? room.leftUserId : room.rightUserId;
+      
+          server.to(roomId).emit('gameOver', {
+            reason: 'forfeit',
+            winner: winnerSide,   // <-- this is what the frontend actually reads
+            winnerId,             // keep for your matchService.record() call below
+            forfeitedBy: userId,
+          });
+  
+          this.logger.log(`💾 Guardando partida por abandono. Ganador: ${winnerId}`);
+      
+          void this.matchService.record({
+            homeId: room.leftUserId || '',
+            awayId: room.rightUserId || '',
+            homeScore: room.engine.scoreLeft,
+            awayScore: room.engine.scoreRight,
+            winnerId: winnerId || '',
+          });
+      
+          this.removeGame(roomId);
+        }
+      } catch (dbError: any) {
+        // 3. Si la base de datos falla por tipado, atrapamos el error para que NO congele la cola
+        this.logger.error(`❌ Error al guardar registro en la BD: ${dbError.message}`);
+        // Forzamos la limpieza de la sala de todos modos para no romper la app
         this.removeGame(roomId);
       }
     }, RECONNECT_GRACE_MS);
@@ -142,12 +158,16 @@ export class GameService {
     const room = this.rooms.get(roomId);
     if (!room) return;
     const { engine, leftUserId, rightUserId } = room;
-    void this.matchService.record({
-      homeId: leftUserId,
-      awayId: rightUserId,
+    
+    // Envolvemos el guardado normal también en un hilo seguro controlado
+    this.matchService.record({
+      homeId: leftUserId || '',
+      awayId: rightUserId || '',
       homeScore: engine.scoreLeft,
       awayScore: engine.scoreRight,
       winnerId: winner === 'left' ? leftUserId : rightUserId,
+    }).catch((err) => {
+      this.logger.error(`❌ Error persistiendo partida normal: ${err.message}`);
     });
   }
 }
