@@ -18,15 +18,25 @@ import {
   @WebSocketGateway({
 	cors: {
 	  origin: (origin, callback) => {
-		if (!origin) return callback(null, true); // same-machine/non-browser clients
+		// 1. Allow if origin is missing or coming from internal Docker networks
+		if (!origin || origin.includes('frontend') || origin.includes('backend')) {
+		  return callback(null, true);
+		}
   
+		// 2. Comprehensive validation rule checks
 		const allowed =
 		  /^https?:\/\/localhost(:\d+)?$/.test(origin) ||
 		  /^https?:\/\/127\.0\.0\.1(:\d+)?$/.test(origin) ||
+		  /^https?:\/\/[a-zA-Z0-9_-]+(:\d+)?$/.test(origin) || // Matches raw hostname mappings
 		  /^https?:\/\/192\.168\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(origin) ||
 		  /^https?:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(origin);
   
-		callback(allowed ? null : new Error('Not allowed by CORS'), allowed);
+		if (allowed) {
+		  callback(null, true);
+		} else {
+		  console.warn(`⚠️ WebSocket connection blocked by CORS from origin: ${origin}`);
+		  callback(new Error('Not allowed by CORS'), false);
+		}
 	  },
 	  credentials: true,
 	},
