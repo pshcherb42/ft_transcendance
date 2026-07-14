@@ -9,55 +9,95 @@ datasource db {
   provider = "postgresql"
 }
 
+enum AuthProvider {
+  LOCAL
+  GOOGLE
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+  BLOCKED
+}
+
 
 model User {
-  id            String      @id @default(uuid())
-  email         String   @unique
-  username      String   @unique
-  name          String?
+  id                  String            @id @default(uuid())
+  email               String            @unique
+  username            String            @unique
+  name                String?
 
-  password      String?  // hashed password (bcrypt/argon2)
-  avatar        String?  // URL or path
+  password            String?           // hashed password (bcrypt/argon2)
+  avatar              String?  
 
-  refreshToken  String?  // hashed refresh token (NOT raw token)
+  refreshToken        String?           // hashed refresh token (NOT raw token)
 
-  createdAt     DateTime @default(now())
+  createdAt           DateTime          @default(now())
 
-  friends       User[]   @relation("UserFriends")
-  friendOf      User[]   @relation("UserFriends")
+  sentFriendships     Friendship[]      @relation("Sender")
+  receivedFriendships Friendship[]      @relation("Receiver")
 
-  matchesHome   Match[]  @relation("HomePlayer")
-  matchesAway   Match[]  @relation("AwayPlayer")
+  matchesHome         Match[]           @relation("HomePlayer")
+  matchesAway         Match[]           @relation("AwayPlayer")
 
-  stats         Stats?
+  authProvider        AuthProvider      @default(LOCAL)
+  providerId          String?           @unique
+
+  stats               Stats?
 }
 
 model Match {
-  id         String   @id @default(uuid())
-  homePlayer User     @relation("HomePlayer", fields: [homeId], references: [id])
-  homeId     String
-  awayPlayer User     @relation("AwayPlayer", fields: [awayId], references: [id])
-  awayId     String
-  homeScore  Int
-  awayScore  Int
-  winnerId   String
-  createdAt  DateTime @default(now())
-  tournament   Tournament? @relation(fields: [tournamentId], references: [id])
-  tournamentId String?
+  id                  String            @id @default(uuid())
+  homePlayer          User?             @relation("HomePlayer", fields: [homeId], references: [id], onDelete: SetNull)
+  homeId              String?
+  awayPlayer          User?             @relation("AwayPlayer", fields: [awayId], references: [id], onDelete: SetNull)
+  awayId              String?
+  isAIGame            Boolean           @default(false)
+  homeScore           Int
+  awayScore           Int
+  winnerId            String?
+  createdAt           DateTime          @default(now())
+  round               Int?     
+  bracketPosition     Int?
+  tournament          Tournament?       @relation(fields: [tournamentId], references: [id], onDelete: SetNull)
+  tournamentId        String?
+
+  @@index([homeId])
+  @@index([awayId])
+  @@index([tournamentId])
 }
 
 model Stats {
-  id      String @id @default(uuid())
-  user    User   @relation(fields: [userId], references: [id])
-  userId  String @unique
-  wins    Int    @default(0)
-  losses  Int    @default(0)
-  level   Int    @default(1)
+  id                  String            @id @default(uuid())
+  user                User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId              String            @unique
+  wins                Int               @default(0)
+  losses              Int               @default(0)
+  level               Int               @default(1)
 }
 
 model Tournament {
-  id        String   @id @default(uuid())
-  name      String
-  createdAt DateTime @default(now())
-  matches   Match[]
+  id                  String            @id @default(uuid())
+  name                String
+  createdAt           DateTime          @default(now())
+  matches             Match[]
+}
+
+model Friendship {
+  id                  String            @id @default(uuid())
+  status              FriendshipStatus  @default(PENDING)
+  createdAt           DateTime          @default(now())
+
+  senderId            String
+  sender              User              @relation("Sender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  receiverId          String
+  receiver            User              @relation("Receiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  // Enforces that user A and user B only have one relationship line entry together
+  @@unique([senderId, receiverId])
+
+  @@index([senderId])
+  @@index([receiverId])
+
 }
