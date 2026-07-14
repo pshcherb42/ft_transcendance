@@ -19,7 +19,7 @@ export default function PrivacyPolicyPage() {
           <h1 className="text-3xl font-semibold tracking-tight text-white">
             Privacy Policy
           </h1>
-          <p className="mt-2 text-sm text-neutral-500">Last updated [DATE]</p>
+          <p className="mt-2 text-sm text-neutral-500">Last updated 14.07.2026</p>
         </header>
 
         <article
@@ -46,8 +46,8 @@ export default function PrivacyPolicyPage() {
             <p>
               ft_transcendence is a student project developed as part of the 42
               School curriculum. It is not a commercial product. Contact:{' '}
-              <a href="mailto:[TEAM EMAIL]">[TEAM EMAIL]</a> ·{' '}
-              <a href="[GITHUB REPO LINK]">GitHub repo</a>.
+              <a href="mailto:[TEAM EMAIL]">polin14896@gmail.com</a> ·{' '}
+              <a href="[GITHUB REPO LINK]">https://github.com/pshcherb42/ft_transcendance</a>.
             </p>
           </section>
 
@@ -69,7 +69,7 @@ export default function PrivacyPolicyPage() {
                 </tr>
                 <tr>
                   <td>Email address</td>
-                  <td>Account login, password recovery</td>
+                  <td>Account login</td>
                   <td>You, at registration</td>
                 </tr>
                 <tr>
@@ -143,8 +143,7 @@ export default function PrivacyPolicyPage() {
             </ul>
             <p>
               To exercise these rights, contact{' '}
-              <a href="mailto:[TEAM EMAIL]">[TEAM EMAIL]</a> or use the in-app
-              account deletion feature, if available.
+              <a href="mailto:[TEAM EMAIL]">polin14896@gmail.com</a>
             </p>
           </section>
 
@@ -153,7 +152,7 @@ export default function PrivacyPolicyPage() {
             <p>
               We retain your account data for as long as your account is active.
               If you delete your account, your personal data is removed from our
-              active database within [X days], except where retention is
+              active database within 7 bussiness days, except where retention is
               required for legitimate security logging.
             </p>
           </section>
@@ -179,8 +178,12 @@ export default function PrivacyPolicyPage() {
           <section>
             <h2>9. Children&apos;s Privacy</h2>
             <p>
-              This Service is not directed at children under 16. We do not
-              knowingly collect data from children under this age.
+            Our Service is not intended for or directed to children under the age of 13. 
+            We do not knowingly collect or solicit personal information from anyone under 13. 
+            If we discover that a child under 13 has registered and provided us with personal 
+            data, we will delete their account and wipe their information from our databases 
+            immediately. If you believe that a child under 13 has provided data to us, please 
+            contact us immediately.
             </p>
           </section>
 
@@ -196,7 +199,7 @@ export default function PrivacyPolicyPage() {
             <h2>11. Contact</h2>
             <p>
               Questions about this policy or your data:{' '}
-              <a href="mailto:[TEAM EMAIL]">[TEAM EMAIL]</a>
+              <a href="mailto:[TEAM EMAIL]">polin14896@gmail.com</a>
             </p>
           </section>
         </article>

@@ -19,7 +19,7 @@ export default function TermsOfServicePage() {
           <h1 className="text-3xl font-semibold tracking-tight text-white">
             Terms of Service
           </h1>
-          <p className="mt-2 text-sm text-neutral-500">Last updated [DATE]</p>
+          <p className="mt-2 text-sm text-neutral-500">Last updated 14.07.2026</p>
         </header>
 
         <article
@@ -43,7 +43,7 @@ export default function TermsOfServicePage() {
           <section>
             <h2>1. Eligibility</h2>
             <p>
-              You must be at least 16 years old to create an account. By
+              You must be at least 13 years old to create an account. By
               registering, you confirm that the information you provide is
               accurate.
             </p>
@@ -56,8 +56,7 @@ export default function TermsOfServicePage() {
               <li>You are responsible for all activity that occurs under your account.</li>
               <li>You may log in via email/password or Google OAuth.</li>
               <li>
-                You may delete your account at any time via your profile
-                settings, if available, or by contacting us.
+                You may delete your account at any time by contacting us.
               </li>
             </ul>
           </section>
@@ -170,7 +169,7 @@ export default function TermsOfServicePage() {
             <h2>12. Contact</h2>
             <p>
               Questions about these Terms:{' '}
-              <a href="mailto:[TEAM EMAIL]">[TEAM EMAIL]</a>
+              <a href="mailto:[TEAM EMAIL]">polin14896@gmail.com</a>
             </p>
           </section>
         </article>
