@@ -31,6 +31,9 @@ export default function GamePage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef(new PongRenderer());
 
+  const [reconnectSecondsLeft, setReconnectSecondsLeft] = useState<number | null>(null);
+  const disconnectTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   const [mode, setMode] = useState<Mode>('menu');
 
   // Estado del modo ONLINE
@@ -57,10 +60,10 @@ export default function GamePage() {
 
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d'); // initiate rendering
     if (!ctx) return;
 
-    const renderer = rendererRef.current;
+    const renderer = rendererRef.current; // reinitiate game state 
     setOnlineStatus('connecting');
     setSide(null);
     setWinner(null);
@@ -70,12 +73,30 @@ export default function GamePage() {
     let mySide: Side | null = null;
     const socket: Socket = connectGameSocket();
 
-    socket.on('connect', () => {
+    socket.on('connect', () => { // native automatic event
       setOnlineStatus('waiting');
-      socket.emit('joinQueue');
+      socket.emit('joinQueue'); // join queue
     });
-    socket.on('waiting', () => setOnlineStatus('waiting'));
+    socket.on('waiting', () => setOnlineStatus('waiting')); // custom event
+    socket.on('rejoinedGame', (data: { roomId: string; side: Side }) => {
+      if (disconnectTimerRef.current) {
+        clearInterval(disconnectTimerRef.current);
+        disconnectTimerRef.current = null;
+      }
+      setReconnectSecondsLeft(null);
+      
+      mySide = data.side;
+      setSide(data.side);
+      setWinner(null);
+      setOnlineStatus('playing');
+    });
     socket.on('matchFound', (data: { side: Side }) => {
+      if (disconnectTimerRef.current) {
+        clearInterval(disconnectTimerRef.current);
+        disconnectTimerRef.current = null;
+      }
+      setReconnectSecondsLeft(null);
+    
       mySide = data.side;
       setSide(data.side);
       setWinner(null);
@@ -87,8 +108,48 @@ export default function GamePage() {
     socket.on('gameOver', (data: { winner: Side }) => {
       setWinner(data.winner);
       setOnlineStatus('gameover');
+      // Limpieza del intervalo al terminar el juego
+      if (disconnectTimerRef.current) {
+        clearInterval(disconnectTimerRef.current);
+        disconnectTimerRef.current = null;
+      }
     });
     socket.on('opponentLeft', () => setOnlineStatus('opponent-left'));
+    socket.on('opponentDisconnected', (data: { userId: string; gracePeriodMs: number }) => {
+      const deadline = Date.now() + data.gracePeriodMs;
+      if (disconnectTimerRef.current) clearInterval(disconnectTimerRef.current);
+      disconnectTimerRef.current = setInterval(() => {
+        const msLeft = deadline - Date.now();
+        setReconnectSecondsLeft(Math.max(0, Math.ceil(msLeft / 1000)));
+        if (msLeft <= 0 && disconnectTimerRef.current) {
+          clearInterval(disconnectTimerRef.current);
+          disconnectTimerRef.current = null;
+        }
+      }, 250);
+    });
+    socket.on('matchVoided', () => {
+      if (disconnectTimerRef.current) {
+        clearInterval(disconnectTimerRef.current);
+        disconnectTimerRef.current = null;
+      }
+      setReconnectSecondsLeft(null);
+      setOnlineStatus('opponent-left'); // or your dedicated 'match-voided' status
+      setWinner(null);
+    });
+    socket.on('opponentReconnected', () => {
+      if (disconnectTimerRef.current) {
+        clearInterval(disconnectTimerRef.current);
+        disconnectTimerRef.current = null;
+      }
+      setReconnectSecondsLeft(null);
+    });
+    socket.on('disconnect', () => {
+      if (disconnectTimerRef.current) {
+        clearInterval(disconnectTimerRef.current);
+        disconnectTimerRef.current = null;
+      }
+      setReconnectSecondsLeft(null);
+    });
 
     // Solo controlamos NUESTRA pala: enviamos up / down / stop al servidor.
     const pressed = new Set<string>();
@@ -134,6 +195,11 @@ export default function GamePage() {
       cancelAnimationFrame(raf);
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
+      // Limpieza del intervalo al desmontar o cambiar de ronda
+      if (disconnectTimerRef.current) {
+        clearInterval(disconnectTimerRef.current);
+        disconnectTimerRef.current = null;
+      }
       socket.disconnect();
     };
   }, [mode, onlineRound]);
@@ -224,7 +290,7 @@ export default function GamePage() {
         return 'Conectando…';
       case 'waiting':
         return 'Buscando rival…';
-      case 'playing':
+      case 'playing':                                                                                                                                                         
         return side === 'left'
           ? 'Eres el jugador IZQUIERDA'
           : 'Eres el jugador DERECHA';
@@ -329,6 +395,12 @@ export default function GamePage() {
               ? `Tú (izquierda) vs IA · ${DIFF_LABEL[difficulty]} — primero a 5 gana`
               : 'Primer jugador en llegar a 5 gana'}
       </p>
+
+      {mode === 'online' && reconnectSecondsLeft !== null && (
+        <p className="text-sm font-semibold text-amber-400 animate-pulse h-5">
+          Rival desconectado — ganas en {reconnectSecondsLeft}s si no vuelve
+        </p>
+      )}
 
       <canvas
         ref={canvasRef}
