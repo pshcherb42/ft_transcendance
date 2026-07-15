@@ -81,21 +81,32 @@ export class GameService {
     const room = this.rooms.get(roomId);
     if (!room) return;
 
-    room.disconnectedUserId = userId;
-
-    if (room.loop) {
-      clearInterval(room.loop);
-      room.loop = null;
+    // Ya hay un jugador desconectado (y no es este mismo) -> los DOS se fueron.
+    // No hay forfeit posible, no hay nadie para "ganar". Cancelamos la partida
+    // como si nunca hubiera pasado: sin persistir, sin declarar ganador.
+    if (room.disconnectedUserId && room.disconnectedUserId !== userId) {
+      if (room.disconnectTimer) clearTimeout(room.disconnectTimer);
+      server.to(roomId).emit('matchVoided', { reason: 'both-disconnected' });
+      this.removeGame(roomId);
+      return;
     }
 
-    server.to(roomId).emit('opponentDisconnected', { userId, gracePeriodMs: RECONNECT_GRACE_MS });
+    room.disconnectedUserId = userId; // assign disconnected user
 
+    if (room.loop) {
+      clearInterval(room.loop); // stop room timer and clear
+      room.loop = null;
+    }
+    // warn the opponent that the user was disconnected
+    server.to(roomId).emit('opponentDisconnected', { userId, gracePeriodMs: RECONNECT_GRACE_MS });
+    // initialize the timer
     room.disconnectTimer = setTimeout(() => {
       try {
         if (room.disconnectedUserId === userId) {
+          // determine the disconnected side
           const winnerSide: Side = userId === room.leftUserId ? 'right' : 'left';
           const winnerId = winnerSide === 'left' ? room.leftUserId : room.rightUserId;
-      
+          // notify the other user that the game is over
           server.to(roomId).emit('gameOver', {
             reason: 'forfeit',
             winner: winnerSide,   // <-- this is what the frontend actually reads
@@ -104,7 +115,7 @@ export class GameService {
           });
   
           this.logger.log(`💾 Guardando partida por abandono. Ganador: ${winnerId}`);
-      
+          // write match result to the database
           void this.matchService.record({
             homeId: room.leftUserId || '',
             awayId: room.rightUserId || '',
@@ -112,7 +123,7 @@ export class GameService {
             awayScore: room.engine.scoreRight,
             winnerId: winnerId || '',
           });
-      
+          // clear the room
           this.removeGame(roomId);
         }
       } catch (dbError: any) {
@@ -127,20 +138,20 @@ export class GameService {
   // Llamado cuando un usuario reconecta con un JWT válido antes de que
   // expire el periodo de gracia. Devuelve el roomId si había una sala activa.
   handleReconnect(userId: string, server: Server): string | null {
-    const roomId = this.userToRoom.get(userId);
+    const roomId = this.userToRoom.get(userId); // find the right room
     if (!roomId) return null;
-    const room = this.rooms.get(roomId);
+    const room = this.rooms.get(roomId); // assign the room
     if (!room || room.disconnectedUserId !== userId) return null;
 
-    room.disconnectedUserId = null;
+    room.disconnectedUserId = null; // clean this variable
     if (room.disconnectTimer) {
-      clearTimeout(room.disconnectTimer);
+      clearTimeout(room.disconnectTimer); // clear the timer
       room.disconnectTimer = null;
     }
-    if (!room.loop) this.startLoop(roomId, server);
+    if (!room.loop) this.startLoop(roomId, server); // start room loop again
 
-    server.to(roomId).emit('opponentReconnected', { userId });
-    return roomId;
+    server.to(roomId).emit('opponentReconnected', { userId }); // emit notification to server that the user reconnected
+    return roomId; // return roomId
   }
 
   removeGame(roomId: string) {
