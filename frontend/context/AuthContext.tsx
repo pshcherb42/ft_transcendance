@@ -8,8 +8,8 @@ import {
   useCallback,
   ReactNode,
 } from 'react';
-import { storeTokens, clearTokens, isLoggedIn } from '@/app/lib/auth';
-import { apiFetch } from '@/app/lib/api';
+import { storeTokens, clearTokens, isLoggedIn, getAccessToken } from '@/app/lib/auth';
+import { apiFetch, tryRefresh } from '@/app/lib/api';
 
 interface User {
   id:         string;
@@ -48,6 +48,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => { fetchUser(); }, [fetchUser]);
+
+  // 🔄 🟢 NUEVO: Efecto para el refresco automático en segundo plano
+  useEffect(() => {
+    if (!user) return; // Solo ejecutamos si el usuario tiene sesión activa
+
+    // Opción A: Intervalo fijo conservador (ej. cada 4 minutos si tu Access Token dura 5-10 minutos)
+    const REFRESH_INTERVAL_MS = 12 * 60 * 1000; 
+
+    const interval = setInterval(async () => {
+      console.log('🔄 Verificando y refrescando sesión en segundo plano...');
+      
+      // Llamamos a tu función existente. Si falla, limpiará los tokens
+      const success = await tryRefresh(); 
+      
+      if (!success) {
+        setUser(null);
+        window.location.href = '/login';
+      }
+    }, REFRESH_INTERVAL_MS);
+
+    return () => clearInterval(interval); // Limpieza crucial al desmontar o desloguear
+  }, [user]);
 
   const login = useCallback(async (access: string, refresh: string) => {
     storeTokens(access, refresh);
