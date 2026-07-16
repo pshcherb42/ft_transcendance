@@ -371,12 +371,24 @@ export default function GamePage() {
         </p>
       )}
 
-      <canvas
-        ref={canvasRef}
-        width={WIDTH}
-        height={HEIGHT}
-        className="border-4 border-white shadow-lg max-w-full"
-      />
+      {/* Online: el canvas lo pinta el effect con los snapshots del servidor.
+          Local / IA: PongMatch trae su propio motor, bucle y teclado. */}
+      {mode === 'online' ? (
+        <canvas
+          ref={canvasRef}
+          width={WIDTH}
+          height={HEIGHT}
+          className="border-4 border-white shadow-lg max-w-full"
+        />
+      ) : (
+        <PongMatch
+          key={localRound}
+          config={{ map: mapId, powerups }}
+          vsAi={mode === 'ai'}
+          difficulty={difficulty}
+          onFinish={(w) => setLocalWinner(w)}
+        />
+      )}
 
       <p className="text-sm text-zinc-400">
         {mode === 'online'
