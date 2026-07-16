@@ -7,7 +7,7 @@ curl -X POST http://localhost:3001/auth/register \
   -d '{"username":"userB","email":"userB@test.com","password":"yourpassword"}'
 
 
- jsut checking email
+ jsut checking email other email
 
 ## Disconection logic
 
