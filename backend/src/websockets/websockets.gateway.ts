@@ -47,6 +47,8 @@ import {
 
 	// Cola de matchmaking: sockets esperando rival.
 	private queue: Socket[] = [];
+	private userSockets = new Map<string, string>(); // userId -> current socketId
+  	private kickedSockets = new Set<string>(); // sockets we deliberately disconnected
 
 	constructor(
 	  private jwtService: JwtService,
@@ -57,42 +59,79 @@ import {
 	// Este método salta automáticamente cuando un cliente intenta conectarse
 	async handleConnection(client: Socket) {
 		try {
-		  const token = client.handshake.auth.token;
-		  if (!token) throw new Error('No token provided');
+			const token = client.handshake.auth.token;
+			if (!token) throw new Error('No token provided'); // clients want to open a socket and sends a secret credential
+		
+			const payload = await this.jwtService.verifyAsync(token, {
+				secret: this.configService.get<string>('JWT_SECRET'),
+			}); // backend checks if the token is real and then discifer it 
+		
+			client.data.user = payload; // identify this connection with users identity
+			const userId = payload.sub;
+			console.log(`Client connected: ${client.id} | User ID: ${payload.sub}`);
 	  
-		  const payload = await this.jwtService.verifyAsync(token, {
-			secret: this.configService.get<string>('JWT_SECRET'),
-		  });
-	  
-		  client.data.user = payload;
-		  console.log(`Client connected: ${client.id} | User ID: ${payload.sub}`);
-	  
-		  // Reconexión: si este usuario tenía una sala activa en periodo de gracia,
-		  // la retoma antes de que expiren los 15s.
-		  const roomId = this.gameService.handleReconnect(payload.sub, this.server);
-		  if (roomId) {
-			const players = this.gameService.getRoomPlayers(roomId);
-			if (players) {
-			  const side: Side = players.leftUserId === payload.sub ? 'left' : 'right';
-			  this.assignToRoom(client, roomId, side);
-			  client.emit('rejoinedGame', { roomId, side });
+			// --- Single-session enforcement: special case, same userId reconnecting ---
+			const existingSocketId = this.userSockets.get(userId);
+			if (existingSocketId && existingSocketId !== client.id) {
+				const existingSocket = this.server.sockets.sockets.get(existingSocketId);
+				if (existingSocket) {
+				console.log(`Kicking previous session ${existingSocketId} for user ${userId}`);
+				// Flag it BEFORE disconnecting, so handleDisconnect knows to skip
+				// all game/reconnect logic for this socket entirely.
+				this.kickedSockets.add(existingSocketId);
+				existingSocket.emit('forceDisconnect', {
+					reason: 'Logged in from another location',
+				});
+				existingSocket.disconnect(true);
+				}
 			}
-		  }
+			this.userSockets.set(userId, client.id);
+			// --- end single-session enforcement ---
+
+			// Room takeover: if the user has a live room, rejoin instantly.
+			// This is a direct lookup, NOT handleReconnect — no grace-period
+			// state was ever touched, so there's nothing to "reconnect" from.
+			
+			// Genuine drop-and-reconnect path (different scenario entirely —
+			// real network loss, grace timer already running).
+			this.gameService.handleReconnect(userId, this.server);
 		} catch (error) {
-		  console.log(`Connection rejected: ${client.id} | Error: ${error.message}`);
-		  client.disconnect();
+			console.log(`Connection rejected: ${client.id} | Error: ${error.message}`);
+			client.disconnect();
 		}
 	}
 
 	// Este método salta cuando un cliente cierra la pestaña o pierde internet
 	handleDisconnect(client: Socket) {
 		console.log(`Client disconnected: ${client.id}`);
-	  
-		this.queue = this.queue.filter((s) => s.id !== client.id);
-	  
+		console.log(
+			"DISCONNECT",
+			client.id,
+			client.data.roomId
+		);
+		// checks sockets, if finds one identical, eliminates it
+		this.queue = this.queue.filter((s) => s.id !== client.id); // delete the user from the queue
+		// Special case: this socket was deliberately kicked by a new login.
+		// Skip gameService entirely — no forfeit, no grace timer, nothing.
+		// The new socket already took over the room, if any, in handleConnection.
+		if (this.kickedSockets.has(client.id)) {
+			this.kickedSockets.delete(client.id);
+			const userId: string | undefined = client.data.user?.sub;
+			// Only clean the map if it's not already pointing to a newer socket.
+			if (userId && this.userSockets.get(userId) === client.id) {
+			this.userSockets.delete(userId);
+			}
+			return; // <-- stop here, no gameService.handleDisconnect call
+		}
+		
+		// extract and guard the actual player state
 		const userId: string | undefined = client.data.user?.sub;
 		const roomId: string | undefined = client.data.roomId;
 	  
+		if (userId && this.userSockets.get(userId) === client.id) {
+			this.userSockets.delete(userId);
+		}
+
 		if (roomId && userId) {
 		  // Periodo de gracia en vez de forfeit instantáneo — se avisa al rival y
 		  // se pausa el bucle hasta reconexión o hasta que expiren los 15s.
@@ -104,6 +143,13 @@ import {
 	// El frontend pide entrar en la cola. Si hay rival esperando, empezamos partida.
 	@SubscribeMessage('joinQueue')
 	handleJoinQueue(@ConnectedSocket() client: Socket) {
+		console.log("JOIN QUEUE", client.id);
+		console.log({
+			socket: client.id,
+			roomId: client.data.roomId,
+			side: client.data.side,
+			queue: this.queue.map(s => s.id),
+		});
 		// Evitar duplicados o entrar en cola mientras ya se juega.
 		if (client.data.roomId || this.queue.some((s) => s.id === client.id)) {
 			return;
@@ -166,9 +212,15 @@ import {
 	}
 
 	private assignToRoom(client: Socket, roomId: string, side: Side) {
-	  client.join(roomId);
-	  client.data.roomId = roomId;
-	  client.data.side = side;
+		console.log(
+			"ASSIGN",
+			client.id,
+			roomId,
+			side
+		);
+		client.join(roomId);
+		client.data.roomId = roomId;
+		client.data.side = side;
 	}
 
 	// ---- EVENTO DE PRUEBA (depuración) ----
@@ -180,4 +232,35 @@ import {
 	  // Respondemos solo a ese cliente
 	  client.emit('pong', { message: `Hola ${userEmail}, conexión WebSocket exitosa!` });
 	}
+
+	@SubscribeMessage('leaveGame')
+	handleLeaveGame(@ConnectedSocket() client: Socket) {
+		const userId = client.data.user?.sub;
+		const roomId: string | undefined = client.data.roomId;
+		if (!userId || !roomId) return;
+
+		this.gameService.forfeitImmediately(userId, this.server);
+		client.leave(roomId);
+		client.data.roomId = undefined;
+		client.data.side = undefined;
+	}
+
+	@SubscribeMessage('checkRoom')
+	handleCheckRoom(@ConnectedSocket() client: Socket) {
+		const userId = client.data.user?.sub;
+		if (!userId) return;
+
+		const roomId = this.gameService.getRoomIdByUserId(userId);
+		if (roomId) {
+			const players = this.gameService.getRoomPlayers(roomId);
+			if (players) {
+				const side: Side = players.leftUserId === userId ? 'left' : 'right';
+				this.assignToRoom(client, roomId, side);
+				client.emit('rejoinedGame', { roomId, side });
+				return;
+			}
+		}
+		client.emit('noActiveGame');
+	}
+
   }
