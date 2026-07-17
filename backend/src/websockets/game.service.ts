@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Server } from 'socket.io';
 import { PongEngine, Side, Dir, TICK_RATE } from './pong-engine';
 import { MatchService } from './match.service';
+import { encode } from '@msgpack/msgpack';
 
 const RECONNECT_GRACE_MS = 15_000;
 
@@ -49,7 +50,7 @@ export class GameService {
 
     room.loop = setInterval(() => {
       room.engine.step();
-      server.to(roomId).emit('gameState', room.engine.getSnapshot());
+      server.to(roomId).emit('gameState', encode(room.engine.getSnapshot()));
 
       if (room.engine.status === 'finished' && room.engine.winner) {
         const winnerId = room.engine.winner === 'left' ? room.leftUserId : room.rightUserId;

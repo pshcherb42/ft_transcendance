@@ -11,6 +11,7 @@ import { PongRenderer } from './renderer';
 import { WIDTH, HEIGHT, TICK_RATE } from './constants';
 import type { GameSnapshot, Mode, Side } from './types';
 import { useSocket } from '@/context/SocketContext';
+import { decode } from '@msgpack/msgpack';
 
 type OnlineStatus =
   | 'connecting'
@@ -133,7 +134,8 @@ export default function GamePage() {
       setOnlineStatus('playing');
     };
 
-    const onGameState = (state: GameSnapshot) => {
+    const onGameState = (payload: Uint8Array) => {
+      const state = decode(payload) as GameSnapshot;
       snapshot = state;
     };
 
