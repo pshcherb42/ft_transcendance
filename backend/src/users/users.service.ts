@@ -99,8 +99,13 @@ export class UsersService {
     const { password, refreshToken, avatar, ...rest } = user;
     return {
       ...rest,
-      avatarPath:  avatar ?? null,   // now a base64 data URL or null
+      avatarPath:  avatar ?? this.defaultAvatar(user.username),   // now a base64 data URL or null
       hasPassword: password !== null,
     };
   }
+
+  private defaultAvatar(username: string): string {
+    return `https://api.dicebear.com/9.x/pixel-art/png?seed=${encodeURIComponent(username)}`;
+  }
+
 }
