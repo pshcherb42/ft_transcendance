@@ -57,6 +57,25 @@ export default function GamePage() {
     if (!loading && !user) router.replace('/login');
   }, [loading, user, router]);
 
+  // Auto-resume: if this session already has an active online match (e.g.
+  // after a mid-game refresh), jump straight into it instead of making the
+  // user click "Jugar Online" again and lose time sitting on the menu.
+  useEffect(() => {
+    if (!socket || mode !== 'menu') return;
+
+    const onAutoRejoin = () => {
+      setOnlineRound((r) => r + 1);
+      setMode('online');
+    };
+
+    socket.on('rejoinedGame', onAutoRejoin);
+    socket.emit('checkRoom');
+
+    return () => {
+      socket.off('rejoinedGame', onAutoRejoin);
+    };
+  }, [socket, mode]);
+
   // ----------------------------------------------------------------- ONLINE
   useEffect(() => {
     if (mode !== 'online' || !socket) return;
@@ -232,6 +251,7 @@ export default function GamePage() {
         clearInterval(disconnectTimerRef.current);
         disconnectTimerRef.current = null;
       }
+      setReconnectSecondsLeft(null); 
       // Remove ONLY this effect's listeners — do NOT disconnect the socket,
       // it's shared app-wide and owned by SocketProvider.
       socket.off('connect', onConnect);
@@ -421,7 +441,12 @@ export default function GamePage() {
     if (mode === 'online' && socket) {
       socket.emit('leaveGame');
     }
-  
+    // Clear immediately so no stale countdown flashes when re-entering.
+    if (disconnectTimerRef.current) {
+      clearInterval(disconnectTimerRef.current);
+      disconnectTimerRef.current = null;
+    }
+    setReconnectSecondsLeft(null);
     backToMenu();
   };
 
