@@ -13,6 +13,14 @@ import type { GameSnapshot, Mode, Side } from './types';
 import { useSocket } from '@/context/SocketContext';
 import { decode } from '@msgpack/msgpack';
 
+// --- NUEVO INTERFAZ DE AMIGOS ---
+interface Friend {
+  id: string;
+  username: string;
+  avatarUrl: string;
+  status: 'online' | 'offline';
+}
+
 type OnlineStatus =
   | 'connecting'
   | 'waiting'
@@ -50,6 +58,9 @@ export default function GamePage() {
 
   // Dificultad de la IA (solo modo 'ai'), elegida en el menú.
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
+
+  // --- NUEVO ESTADO DE AMIGOS ---
+  const [friends, setFriends] = useState<Friend[]>([]);
 
   const socket = useSocket();
 
@@ -349,6 +360,45 @@ export default function GamePage() {
     };
   }, [mode, localRound, difficulty]);
 
+    // ---------------------------------------------------- SINCRO AMIGOS ONLINE
+    useEffect(() => {
+      if (!socket || !user) return;
+  
+      // 1. Cargar la lista inicial de amigos por HTTP desde tu NestJS
+      fetch('/api/friends', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}`
+        }
+      })
+        .then((res) => res.json())
+        .then((data) => setFriends(data))
+        .catch((err) => console.error('Error al cargar amigos:', err));
+  
+      // 2. Escuchar cuando un amigo pasa a estar online
+      const onFriendOnline = (data: { userId: string }) => {
+        setFriends((prev) =>
+          prev.map((f) => f.id === data.userId ? { ...f, status: 'online' } : f)
+        );
+      };
+  
+      // 3. Escuchar cuando un amigo pasa a estar offline de forma genuina
+      const onFriendOffline = (data: { userId: string }) => {
+        setFriends((prev) =>
+          prev.map((f) => f.id === data.userId ? { ...f, status: 'offline' } : f)
+        );
+      };
+  
+      socket.on('friendOnline', onFriendOnline);
+      socket.on('friendOffline', onFriendOffline);
+  
+      // Limpieza al desmontar la página para evitar fugas de memoria
+      return () => {
+        socket.off('friendOnline', onFriendOnline);
+        socket.off('friendOffline', onFriendOffline);
+      };
+    }, [socket, user]);
+  
+
   // --------------------------------------------------------------- UI helpers
   const onlineStatusText = (() => {
     switch (onlineStatus) {
@@ -391,6 +441,7 @@ export default function GamePage() {
           >
             Jugar Online
           </button>
+
           <button
             type="button"
             onClick={() => {
@@ -401,6 +452,7 @@ export default function GamePage() {
           >
             Jugar Local (2 jugadores)
           </button>
+
           <div className="flex flex-col gap-2">
             <button
               type="button"
@@ -434,6 +486,43 @@ export default function GamePage() {
           Online: te emparejamos con otro jugador. Local: dos jugadores en el
           mismo teclado.
         </p>
+        {/* --- NUEVO: LISTA DE AMIGOS EN TIEMPO REAL (INTEGRADA EN EL MENÚ) --- */}
+        <div className="w-64 p-4 bg-zinc-950 border border-zinc-800 rounded-2xl flex flex-col gap-3 shadow-md">
+          <h3 className="text-xs font-semibold tracking-wider text-zinc-500 uppercase font-mono flex justify-between items-center">
+            <span>Amigos</span>
+            <span className={friends.filter((f) => f.status === 'online').length > 0 ? "text-green-500 animate-pulse" : "text-zinc-600"}>
+              ({friends.filter((f) => f.status === 'online').length} online)
+            </span>
+          </h3>
+          
+          {friends.length === 0 ? (
+            <p className="text-xs text-zinc-600 font-mono text-center py-2">No tienes amigos añadidos.</p>
+          ) : (
+            <ul className="flex flex-col gap-2 max-h-40 overflow-y-auto pr-1">
+              {friends.map((friend) => (
+                <li key={friend.id} className="flex items-center justify-between py-1 border-b border-zinc-900 last:border-0">
+                  <div className="flex items-center gap-2">
+                    <img 
+                      src={friend.avatarUrl} 
+                      alt={friend.username} 
+                      className="w-6 h-6 rounded-full border border-zinc-800 object-cover"
+                    />
+                    <span className="text-sm text-zinc-300 font-mono truncate max-w-[140px]">
+                      {friend.username}
+                    </span>
+                  </div>
+                  <span 
+                    className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                      friend.status === 'online' 
+                        ? 'bg-green-500 shadow-[0_0_8px_#22c55e]' 
+                        : 'bg-zinc-700'
+                    }`} 
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
     );
   }

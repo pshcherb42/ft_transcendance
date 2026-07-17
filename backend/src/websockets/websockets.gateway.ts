@@ -12,6 +12,8 @@ import {
   import { ConfigService } from '@nestjs/config';
   import { GameService } from './game.service';
   import { Side, Dir } from './pong-engine';
+  import { PresenceService } from '../presence/presence.service';
+  import { FriendsService } from '../friends/friends.service';
 
   // Habilitamos CORS igual que en HTTP para que el frontend pueda conectarse.
   // 8080 = acceso vía nginx (mismo origen que la app); 3000 = frontend directo en dev.
@@ -54,6 +56,8 @@ import {
 	  private jwtService: JwtService,
 	  private configService: ConfigService,
 	  private gameService: GameService,
+	  private presence: PresenceService,
+	  private friendsService: FriendsService
 	) {}
 
 	// Este método salta automáticamente cuando un cliente intenta conectarse
@@ -71,7 +75,7 @@ import {
 			console.log(`Client connected: ${client.id} | User ID: ${payload.sub}`);
 	  
 			// --- Single-session enforcement: special case, same userId reconnecting ---
-			const existingSocketId = this.userSockets.get(userId);
+			const existingSocketId = this.presence.getSocketId(userId);
 			if (existingSocketId && existingSocketId !== client.id) {
 				const existingSocket = this.server.sockets.sockets.get(existingSocketId);
 				if (existingSocket) {
@@ -85,7 +89,8 @@ import {
 				existingSocket.disconnect(true);
 				}
 			}
-			this.userSockets.set(userId, client.id);
+			this.presence.setOnline(userId, client.id);
+			void this.friendsService.notifyFriendsOfPresence(userId, true, this.server, this.presence);
 			// --- end single-session enforcement ---
 
 			// Room takeover: if the user has a live room, rejoin instantly.
@@ -118,8 +123,8 @@ import {
 			this.kickedSockets.delete(client.id);
 			const userId: string | undefined = client.data.user?.sub;
 			// Only clean the map if it's not already pointing to a newer socket.
-			if (userId && this.userSockets.get(userId) === client.id) {
-			this.userSockets.delete(userId);
+			if (userId && this.presence.getSocketId(userId) === client.id) {
+				this.userSockets.delete(userId);
 			}
 			return; // <-- stop here, no gameService.handleDisconnect call
 		}
@@ -128,8 +133,9 @@ import {
 		const userId: string | undefined = client.data.user?.sub;
 		const roomId: string | undefined = client.data.roomId;
 	  
-		if (userId && this.userSockets.get(userId) === client.id) {
-			this.userSockets.delete(userId);
+		if (userId && this.presence.getSocketId(userId) === client.id) {
+			this.presence.setOffline(userId, client.id);
+			void this.friendsService.notifyFriendsOfPresence(userId, false, this.server, this.presence);
 		}
 
 		if (roomId && userId) {
