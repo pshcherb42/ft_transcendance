@@ -31,9 +31,20 @@ export class FriendsService {
       throw new BadRequestException('Friendship already exists or is pending');
     }
 
-    return this.prisma.friendship.create({
+    const friendship = await this.prisma.friendship.create({
       data: { senderId, receiverId: receiver.id, status: 'PENDING' },
+      include: { sender: { select: { id: true, username: true, avatar: true } } },
     });
+
+
+    this.presence.emitToUser(receiver.id, 'friendRequestReceived', {
+      id: friendship.id,
+      sender: friendship.sender,
+      createdAt: friendship.createdAt,
+    });
+
+    return friendship;
+
   }
 
   async respondToRequest(userId: string, friendshipId: string, action: 'accept' | 'decline') {
@@ -44,13 +55,27 @@ export class FriendsService {
 
     if (action === 'decline') {
       await this.prisma.friendship.delete({ where: { id: friendshipId } });
+      this.presence.emitToUser(friendship.senderId, 'friendRequestDeclined', { friendshipId });
       return { status: 'declined' };
     }
 
-    return this.prisma.friendship.update({
+    const updated = await this.prisma.friendship.update({
       where: { id: friendshipId },
       data: { status: 'ACCEPTED' },
+      include: {
+        sender: { select: { id: true, username: true, avatar: true } },
+        receiver: { select: { id: true, username: true, avatar: true } },
+      },
     });
+
+    // ADD THIS — tell the original sender their request was accepted,
+    // include the receiver's info since that's the "friend" from sender's POV
+    this.presence.emitToUser(friendship.senderId, 'friendRequestAccepted', {
+      friendshipId: updated.id,
+      friend: { ...updated.receiver, online: this.presence.isOnline(updated.receiver.id) },
+    });
+
+    return updated;
   }
 
   async removeFriend(userId: string, friendshipId: string) {
@@ -60,6 +85,9 @@ export class FriendsService {
       throw new ForbiddenException('Not your friendship');
     }
     await this.prisma.friendship.delete({ where: { id: friendshipId } });
+    const otherUserId = friendship.senderId === userId ? friendship.receiverId : friendship.senderId;
+    this.presence.emitToUser(otherUserId, 'friendRemoved', { friendshipId });
+
     return { status: 'removed' };
   }
 

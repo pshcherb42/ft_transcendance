@@ -11,36 +11,37 @@ export class FriendsController {
 
   @Post('request/:username')
   sendRequest(@Req() req, @Param('username') username: string) {
-    return this.friendsService.sendRequest(req.user.sub, username);
+    console.log('req.user:', req.user); // TEMP — remove after confirming sha
+    return this.friendsService.sendRequest(req.user.id, username);
   }
 
   @Post('respond/:friendshipId')
   respond(@Req() req, @Param('friendshipId') friendshipId: string, @Body() dto: RespondRequestDto) {
-    return this.friendsService.respondToRequest(req.user.sub, friendshipId, dto.action);
+    return this.friendsService.respondToRequest(req.user.id, friendshipId, dto.action);
   }
 
   @Delete(':friendshipId')
   remove(@Req() req, @Param('friendshipId') friendshipId: string) {
-    return this.friendsService.removeFriend(req.user.sub, friendshipId);
+    return this.friendsService.removeFriend(req.user.id, friendshipId);
   }
 
   @Post('block/:username')
   block(@Req() req, @Param('username') username: string) {
-    return this.friendsService.blockUser(req.user.sub, username);
+    return this.friendsService.blockUser(req.user.id, username);
   }
 
   @Get()
   list(@Req() req) {
-    return this.friendsService.listFriends(req.user.sub);
+    return this.friendsService.listFriends(req.user.id);
   }
 
   @Get('pending/incoming')
   incoming(@Req() req) {
-    return this.friendsService.listPendingIncoming(req.user.sub);
+    return this.friendsService.listPendingIncoming(req.user.id);
   }
 
   @Get('pending/outgoing')
   outgoing(@Req() req) {
-    return this.friendsService.listPendingOutgoing(req.user.sub);
+    return this.friendsService.listPendingOutgoing(req.user.id);
   }
 }

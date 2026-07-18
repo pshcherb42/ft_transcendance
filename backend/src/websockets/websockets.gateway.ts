@@ -14,6 +14,7 @@ import {
   import { Side, Dir } from './pong-engine';
   import { PresenceService } from '../presence/presence.service';
   import { FriendsService } from '../friends/friends.service';
+  import { OnGatewayInit } from '@nestjs/websockets';
 
   // Habilitamos CORS igual que en HTTP para que el frontend pueda conectarse.
   // 8080 = acceso vía nginx (mismo origen que la app); 3000 = frontend directo en dev.
@@ -43,7 +44,7 @@ import {
 	  credentials: true,
 	},
   })
-  export class WebsocketsGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  export class WebsocketsGateway implements OnGatewayConnection, OnGatewayDisconnect , OnGatewayInit {
 	@WebSocketServer()
 	server: Server;
 
@@ -268,5 +269,9 @@ import {
 		}
 		client.emit('noActiveGame');
 	}
+
+	afterInit(server: Server) {
+    	this.presence.setServer(server);
+  	}
 
   }
