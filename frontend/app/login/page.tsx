@@ -172,8 +172,8 @@ export default function LoginPage() {
         </div>
 
         {/* правая часть — форма */}
-        <div className="w-full max-w-[550px] bg-white rounded-[10px] p-10 shadow-sm">
-        <h2 className="font-display text-[48px] uppercase text-brand-red mb-8">
+        <div className="w-full max-w-[550px] bg-white rounded-[10px] px-[70px] py-[50px] shadow-[-8px_8px_32px_0_rgba(193,168,163,0.25)]">
+        <h2 className="font-display text-[48px] uppercase text-brand-red mb-[32]">
           Log in
         </h2>
 
@@ -184,9 +184,9 @@ export default function LoginPage() {
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                placeholder="anna@gmail.com"
+                placeholder="example@gmail.com"
                 required
-                className="w-full h-11 rounded-lg border border-zinc-200 px-4 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#e8391d]"
+                className="w-full h-[46px] rounded-[6] border border-zinc-200 px-4 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#e8391d]"
               />
             </div>
 
@@ -196,9 +196,9 @@ export default function LoginPage() {
                 type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                placeholder="••••••••••••••"
+                placeholder="•••••••••"
                 required
-                className="w-full h-11 rounded-lg border border-zinc-200 px-4 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#e8391d]"
+                className="w-full h-[46px] rounded-[6] border border-zinc-200 px-4 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#e8391d]"
               />
             </div>
 
@@ -216,7 +216,7 @@ export default function LoginPage() {
           </form>
 
           {/* разделитель */}
-          <div className="relative flex items-center my-6">
+          <div className="relative flex items-center my-[20px]">
             <div className="flex-1 border-t border-zinc-200" />
             <span className="mx-3 text-xs text-zinc-400">or</span>
             <div className="flex-1 border-t border-zinc-200" />
@@ -231,7 +231,7 @@ export default function LoginPage() {
           Continue with Google
         </a>
 
-          <p className="mt-6 text-sm text-zinc-400">
+          <p className="mt-[20px] text-sm text-zinc-400">
             Don't have an account?{' '}
             <a href="/register" className="font-bold text-zinc-900 hover:underline">
               Register
