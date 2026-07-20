@@ -11,7 +11,9 @@ BACKEND_PACKS = @nestjs/passport \
                 multer \
 				@nestjs/websockets \
                 @nestjs/platform-socket.io \
-                socket.io
+                socket.io \
+				@types/passport-google-oauth20 \
+				browser-image-compression
 
 all: up
 
@@ -28,6 +30,8 @@ build:
 install-deps:
 	@echo "Installing dependencies... (This might take a while)"
 	@docker compose run --rm backend npm install $(BACKEND_PACKS) || (echo "\n[!] Error: Installation failed. If it's a 'no space' error, run 'make clean-docker' first." && exit 1)
+	@docker compose run --rm backend npx prisma generate
+	@docker compose run --rm backend npx prisma migrate deploy
 
 clean-docker:
 	@echo "Cleaning Docker cache, unused items..."

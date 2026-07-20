@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import imageCompression from 'browser-image-compression';
 import { useAuth } from '@/context/AuthContext';
 import { apiFetch } from '@/app/lib/api';
+import { updateProfileSchema } from '@/validation/auth.schema';
+import { toast } from 'sonner';
 
 export default function ProfilePage() {
   const { user, loading, logout, refetchUser } = useAuth();
@@ -18,6 +20,7 @@ export default function ProfilePage() {
   const [saveError,     setSaveError]     = useState('');
   const [avatarStatus,  setAvatarStatus]  = useState<'idle'|'uploading'|'done'|'error'>('idle');
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -31,21 +34,24 @@ export default function ProfilePage() {
   async function handleSave(e: FormEvent) {
     e.preventDefault();
     setSaveError('');
+    setFieldErrors({});
 
-    // Client-side validation for password change
-    if (newPassword || currentPassword) {
-      if (!currentPassword) {
-        setSaveError('Enter your current password');
-        return;
+    // 2. Run Zod validation schema on form inputs
+    const result = updateProfileSchema.safeParse({
+      username,
+      currentPassword,
+      newPassword,
+      confirmPassword,
+    });
+
+    if (!result.success) {
+      const errors: Record<string, string> = {};
+      for (const issue of result.error.issues) {
+        errors[issue.path[0] as string] = issue.message;
       }
-      if (newPassword.length < 8) {
-        setSaveError('New password must be at least 8 characters');
-        return;
-      }
-      if (newPassword !== confirmPassword) {
-        setSaveError('New passwords do not match');
-        return;
-      }
+      setFieldErrors(errors);
+      toast.error('Por favor, revisa los campos con errores.');
+      return; // 3. Stop submission if validation fails
     }
 
     setSaveStatus('saving');
@@ -66,11 +72,14 @@ export default function ProfilePage() {
         const data = await res.json().catch(() => ({}));
         setSaveError(data?.message ?? 'Save failed — try again');
         setSaveStatus('error');
+        toast.error(errorMessage);
         return;
       }
 
       await refetchUser();
       setSaveStatus('saved');
+
+      toast.success('¡Perfil actualizado con éxito!');
 
       // Clear password fields and redirect
       setCurrentPassword('');
@@ -82,8 +91,12 @@ export default function ProfilePage() {
       }, 1000);
 
     } catch {
-      setSaveError('Save failed — try again');
+      const fallbackError = 'Save failed — try again';
+      setSaveError(fallbackError);
       setSaveStatus('error');
+      
+      // UBICACIÓN DE ERROR 2: Error de red o servidor caído
+      toast.error(fallbackError);
     }
   }
 
@@ -177,7 +190,6 @@ export default function ProfilePage() {
 
         {/* Edit form */}
         <form onSubmit={handleSave} className="space-y-4">
-
           {/* Username */}
           <div className="space-y-1">
             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">Username</label>
@@ -188,6 +200,9 @@ export default function ProfilePage() {
               required
               className="w-full h-10 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 text-sm text-zinc-900 dark:text-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50"
             />
+            {fieldErrors.username && (
+              <p className="text-xs text-red-600 dark:text-red-400">{fieldErrors.username}</p>
+            )}
           </div>
 
           {/* Password change — hidden for OAuth users */}
@@ -204,6 +219,9 @@ export default function ProfilePage() {
                   autoComplete="current-password"
                   className="w-full h-10 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 text-sm text-zinc-900 dark:text-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50"
                 />
+                {fieldErrors.currentPassword && (
+                  <p className="text-xs text-red-600 dark:text-red-400">{fieldErrors.currentPassword}</p>
+                )}
               </div>
 
               <div className="space-y-1">
@@ -215,6 +233,9 @@ export default function ProfilePage() {
                   autoComplete="new-password"
                   className="w-full h-10 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 text-sm text-zinc-900 dark:text-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50"
                 />
+                {fieldErrors.newPassword && (
+                  <p className="text-xs text-red-600 dark:text-red-400">{fieldErrors.newPassword}</p>
+                )}
               </div>
 
               <div className="space-y-1">
@@ -226,6 +247,9 @@ export default function ProfilePage() {
                   autoComplete="new-password"
                   className="w-full h-10 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 text-sm text-zinc-900 dark:text-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50"
                 />
+                {fieldErrors.confirmPassword && (
+                  <p className="text-xs text-red-600 dark:text-red-400">{fieldErrors.confirmPassword}</p>
+                )}
               </div>
             </div>
           )}

@@ -2,12 +2,17 @@ import { io, Socket } from 'socket.io-client';
 import { getAccessToken } from './auth';
 
 // Crea la conexión Socket.IO con el backend.
-// Sin URL → usa el mismo origen que la página (http://localhost:8080), y nginx
-// enruta /socket.io hacia backend:3001. El JWT viaja en el handshake para que
-// el gateway pueda autenticar en handleConnection.
 export function connectGameSocket(): Socket {
-  return io({
+  return io(`${window.location.origin}`, {
     path: '/socket.io',
-    auth: { token: getAccessToken() },
+    // 1. Transformamos auth en una función para que el token se lea en tiempo real
+    auth: (cb) => {
+      cb({ token: getAccessToken() || '' });
+    },
+    reconnection: true,
+    reconnectionAttempts: 5,
+    reconnectionDelay: 1000,
+    forceNew: true, // 2. Fuerza una nueva conexión limpia en lugar de reutilizar una rechazada
   });
 }
+

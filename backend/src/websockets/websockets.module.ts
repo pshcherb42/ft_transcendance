@@ -4,11 +4,15 @@ import { ConfigModule } from '@nestjs/config';
 import { WebsocketsGateway } from './websockets.gateway';
 import { GameService } from './game.service';
 import { MatchService } from './match.service';
+import { PresenceModule } from '../presence/presence.module';
+import { FriendsModule } from 'src/friends/friends.module';
 
 @Module({
   imports: [
     ConfigModule,
     JwtModule,
+    PresenceModule,
+    FriendsModule
   ],
   providers: [WebsocketsGateway, GameService, MatchService],
 })

@@ -7,6 +7,7 @@ import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
+import { RegisterDto } from './dto/register.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -14,7 +15,7 @@ export class AuthController {
 
   // POST /auth/register
   @Post('register')
-  async register(@Body() body: { email: string; username: string; password: string }) {
+  async register(@Body() body: RegisterDto) {
     return this.authService.register(body.email, body.username, body.password);
   }
 
