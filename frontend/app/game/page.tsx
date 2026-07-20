@@ -58,6 +58,23 @@ export default function GamePage() {
     if (!loading && !user) router.replace('/login');
   }, [loading, user, router]);
 
+  // Fires only if the user is already sitting on /game (menu or mid-queue)
+  // when an invite gets accepted — router.push('/game') is a no-op in that
+  // case since the route doesn't change, so nothing else would pick this up.
+  useEffect(() => {
+    if (!socket) return;
+
+    const onInviteAccepted = () => {
+      setOnlineRound((r) => r + 1);
+      setMode('online');
+    };
+
+    socket.on('gameInviteAccepted', onInviteAccepted);
+    return () => {
+      socket.off('gameInviteAccepted', onInviteAccepted);
+    };
+  }, [socket]);
+
   // Auto-resume: if this session already has an active online match (e.g.
   // after a mid-game refresh), jump straight into it instead of making the
   // user click "Jugar Online" again and lose time sitting on the menu.

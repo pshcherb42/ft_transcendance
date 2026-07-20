@@ -41,6 +41,7 @@ export class FriendsService {
       id: friendship.id,
       sender: friendship.sender,
       createdAt: friendship.createdAt,
+      message: `${friendship.sender.username} sent you a friend request`,
     });
 
     return friendship;
@@ -73,6 +74,7 @@ export class FriendsService {
     this.presence.emitToUser(friendship.senderId, 'friendRequestAccepted', {
       friendshipId: updated.id,
       friend: { ...updated.receiver, online: this.presence.isOnline(updated.receiver.id) },
+      message: `${updated.receiver.username} accepted your friend request`,
     });
 
     return updated;
@@ -86,7 +88,10 @@ export class FriendsService {
     }
     await this.prisma.friendship.delete({ where: { id: friendshipId } });
     const otherUserId = friendship.senderId === userId ? friendship.receiverId : friendship.senderId;
-    this.presence.emitToUser(otherUserId, 'friendRemoved', { friendshipId });
+    this.presence.emitToUser(otherUserId, 'friendRemoved', { 
+      friendshipId,
+      message: 'A friend has removed you from their list'
+    });
 
     return { status: 'removed' };
   }
@@ -155,17 +160,22 @@ export class FriendsService {
   // Called by the gateway on connect/disconnect to push presence updates
   // only to this user's accepted friends (not a global broadcast).
   async notifyFriendsOfPresence(userId: string, online: boolean, server: Server, presence: PresenceService) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { username: true },
+    });
+  
     const rows = await this.prisma.friendship.findMany({
       where: { status: 'ACCEPTED', OR: [{ senderId: userId }, { receiverId: userId }] },
       select: { senderId: true, receiverId: true },
     });
-
+  
     const friendIds = rows.map((f) => (f.senderId === userId ? f.receiverId : f.senderId));
     const event = online ? 'friendOnline' : 'friendOffline';
-
+  
     for (const friendId of friendIds) {
       const socketId = presence.getSocketId(friendId);
-      if (socketId) server.to(socketId).emit(event, { userId });
+      if (socketId) server.to(socketId).emit(event, { userId, username: user?.username });
     }
   }
 }

@@ -3,11 +3,55 @@
 
 import { useState } from 'react';
 import { useFriends } from '@/hooks/useFriends';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+import { useSocket } from '@/context/SocketContext';
+import { useAuth } from '@/context/AuthContext';
 
 export default function FriendsPanel() {
   const { friends, incoming, outgoing, loading, error, sendRequest, respondToRequest, removeFriend } = useFriends();
+  const socket = useSocket();
+  const { user } = useAuth();
+  const router = useRouter();
   const [username, setUsername] = useState('');
   const [sendError, setSendError] = useState<string | null>(null);
+
+  const handleInviteToPlay = (friendId: string, friendUsername: string) => {
+    if (!socket || !user) return;
+
+    socket.emit('sendGameInvite', { receiverId: friendId, senderUsername: user.username });
+
+    const toastId = toast.loading(`Invitación enviada a ${friendUsername}...`, { duration: 15000 });
+
+    const onSent = (payload: { inviteId: string; gameRoomId: string }) => {
+      const onAccepted = (p: { roomId: string }) => {
+        if (p.roomId !== payload.gameRoomId) return;
+        toast.success(`${friendUsername} aceptó!`, { id: toastId, duration: 3000 });
+        cleanup();
+        router.push('/game');
+      };
+      const onExpired = (p: { inviteId: string }) => {
+        if (p.inviteId !== payload.inviteId) return;
+        toast.error(`${friendUsername} no respondió a tiempo`, { id: toastId, duration: 3000 });
+        cleanup();
+      };
+      const onDeclined = (p: { inviteId: string }) => {
+        if (p.inviteId !== payload.inviteId) return;
+        toast.error(`${friendUsername} rechazó la invitación`, { id: toastId, duration: 3000 });
+        cleanup();
+      };
+      const cleanup = () => {
+        socket.off('gameInviteAccepted', onAccepted);
+        socket.off('gameInviteExpired', onExpired);
+        socket.off('gameInviteDeclined', onDeclined);
+      };
+      socket.on('gameInviteAccepted', onAccepted);
+      socket.on('gameInviteExpired', onExpired);
+      socket.on('gameInviteDeclined', onDeclined);
+    };
+
+    socket.once('gameInviteSent', onSent);
+  };
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,20 +127,30 @@ export default function FriendsPanel() {
         <ul className="flex flex-col gap-2">
           {friends.map((f) => (
             <li key={f.friendshipId} className="flex items-center justify-between bg-zinc-800 rounded-lg px-3 py-2">
-              <div className="flex items-center gap-2">
-                <span className={`w-2 h-2 rounded-full ${f.online ? 'bg-emerald-400' : 'bg-zinc-500'}`} />
-                <span className="text-white text-sm">{f.username}</span>
-              </div>
+            <div className="flex items-center gap-2">
+              <span className={`w-2 h-2 rounded-full ${f.online ? 'bg-emerald-400' : 'bg-zinc-500'}`} />
+              <span className="text-white text-sm">{f.username}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              {f.online && (
+                <button
+                  onClick={() => handleInviteToPlay(f.id, f.username)}
+                  className="text-xs px-2 py-1 rounded bg-indigo-600 text-white hover:bg-indigo-500"
+                >
+                  Jugar
+                </button>
+              )}
               <button
                 onClick={() => removeFriend(f.friendshipId)}
                 className="text-xs text-zinc-400 hover:text-red-400"
               >
                 Eliminar
               </button>
-            </li>
+            </div>
+          </li>
           ))}
         </ul>
-      </div>
+      </div> 
     </div>
   );
 }

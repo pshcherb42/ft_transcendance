@@ -67,17 +67,17 @@ export function useFriends() {
 
     socket.on('friendOnline', onFriendOnline);
     socket.on('friendOffline', onFriendOffline);
-    socket.on('friendRequestReceived', onRequestReceived);   // ADD
-    socket.on('friendRequestAccepted', onRequestAccepted);   // ADD
-    socket.on('friendRequestDeclined', onRequestDeclined);   // ADD
+    socket.on('friendRequestReceived', onRequestReceived);   
+    socket.on('friendRequestAccepted', onRequestAccepted);   
+    socket.on('friendRequestDeclined', onRequestDeclined);  
     socket.on('friendRemoved', onFriendRemoved);
 
     return () => {
       socket.off('friendOnline', onFriendOnline);
       socket.off('friendOffline', onFriendOffline);
-      socket.off('friendRequestReceived', onRequestReceived);   // ADD
-      socket.off('friendRequestAccepted', onRequestAccepted);   // ADD
-      socket.off('friendRequestDeclined', onRequestDeclined);   // ADD
+      socket.off('friendRequestReceived', onRequestReceived);   
+      socket.off('friendRequestAccepted', onRequestAccepted);   
+      socket.off('friendRequestDeclined', onRequestDeclined);   
       socket.off('friendRemoved', onFriendRemoved);
     };
   }, [socket]);

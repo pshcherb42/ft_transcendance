@@ -15,6 +15,7 @@ import {
   import { PresenceService } from '../presence/presence.service';
   import { FriendsService } from '../friends/friends.service';
   import { OnGatewayInit } from '@nestjs/websockets';
+  import { randomUUID } from 'crypto';
 
   // Habilitamos CORS igual que en HTTP para que el frontend pueda conectarse.
   // 8080 = acceso vía nginx (mismo origen que la app); 3000 = frontend directo en dev.
@@ -52,6 +53,15 @@ import {
 	private queue: Socket[] = [];
 	private userSockets = new Map<string, string>(); // userId -> current socketId
   	private kickedSockets = new Set<string>(); // sockets we deliberately disconnected
+
+	private pendingInvites = new Map<string, {
+		inviteId: string;
+		senderId: string;
+		senderUsername: string;
+		receiverId: string;
+		gameRoomId: string;
+		timeout: NodeJS.Timeout;
+	}>();
 
 	constructor(
 	  private jwtService: JwtService,
@@ -273,5 +283,98 @@ import {
 	afterInit(server: Server) {
     	this.presence.setServer(server);
   	}
+
+	//---INVITE PLAYER TO A ROOM---
+	@SubscribeMessage('sendGameInvite')
+	handleSendGameInvite(
+	@ConnectedSocket() client: Socket,
+	@MessageBody() data: { receiverId: string; senderUsername: string },
+	) {
+	const senderId = client.data.user?.sub;
+	if (!senderId || !data?.receiverId) return;
+
+	const inviteId = randomUUID();
+	const gameRoomId = `invite-${inviteId}`;
+
+	const timeout = setTimeout(() => {
+		this.pendingInvites.delete(inviteId);
+		client.emit('gameInviteExpired', { inviteId });
+		const receiverSocketId = this.presence.getSocketId(data.receiverId);
+		if (receiverSocketId) this.server.to(receiverSocketId).emit('gameInviteExpired', { inviteId });
+	}, 15000);
+
+	this.pendingInvites.set(inviteId, {
+		inviteId,
+		senderId,
+		senderUsername: data.senderUsername,
+		receiverId: data.receiverId,
+		gameRoomId,
+		timeout,
+	});
+
+	this.presence.emitToUser(data.receiverId, 'gameInviteReceived', {
+		inviteId,
+		senderId,
+		senderUsername: data.senderUsername,
+		gameRoomId,
+	});
+
+	client.emit('gameInviteSent', { inviteId, gameRoomId });
+	}
+
+	@SubscribeMessage('acceptGameInvite')
+	handleAcceptGameInvite(
+	@ConnectedSocket() client: Socket,
+	@MessageBody() data: { inviteId: string },
+	) {
+	const invite = this.pendingInvites.get(data.inviteId);
+	if (!invite) {
+		client.emit('gameInviteExpired', { inviteId: data.inviteId });
+		return;
+	}
+
+	const receiverId = client.data.user?.sub;
+	if (receiverId !== invite.receiverId) return; // not this user's invite to accept
+
+	clearTimeout(invite.timeout);
+	this.pendingInvites.delete(data.inviteId);
+
+	// Both players are entering a game now — pull them out of matchmaking
+	// so a stale queue entry can't pair them into a second, orphaned match.
+	this.queue = this.queue.filter(
+		(s) => s.id !== client.id && s.data.user?.sub !== invite.senderId,
+	);
+
+	this.gameService.createGame(invite.gameRoomId, invite.senderId, receiverId, this.server);
+
+	// Both sides just get told "go to the game" — the game page's own
+	// checkRoom flow handles the actual socket join/side assignment,
+	// same as it does on a hard refresh.
+	client.emit('gameInviteAccepted', { roomId: invite.gameRoomId });
+	const senderSocketId = this.presence.getSocketId(invite.senderId);
+	if (senderSocketId) {
+		this.server.to(senderSocketId).emit('gameInviteAccepted', { roomId: invite.gameRoomId });
+	}
+	}
+
+	@SubscribeMessage('declineGameInvite')
+	handleDeclineGameInvite(
+	@ConnectedSocket() client: Socket,
+	@MessageBody() data: { inviteId: string },
+	) {
+	const invite = this.pendingInvites.get(data.inviteId);
+	if (!invite) return; // already expired/handled, nothing to do
+
+	const receiverId = client.data.user?.sub;
+	if (receiverId !== invite.receiverId) return;
+
+	clearTimeout(invite.timeout);
+	this.pendingInvites.delete(data.inviteId);
+
+	const senderSocketId = this.presence.getSocketId(invite.senderId);
+	if (senderSocketId) {
+		this.server.to(senderSocketId).emit('gameInviteDeclined', { inviteId: data.inviteId });
+	}
+	}
 
   }

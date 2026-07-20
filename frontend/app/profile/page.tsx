@@ -6,6 +6,7 @@ import imageCompression from 'browser-image-compression';
 import { useAuth } from '@/context/AuthContext';
 import { apiFetch } from '@/app/lib/api';
 import { updateProfileSchema } from '@/validation/auth.schema';
+import { toast } from 'sonner';
 
 export default function ProfilePage() {
   const { user, loading, logout, refetchUser } = useAuth();
@@ -49,6 +50,7 @@ export default function ProfilePage() {
         errors[issue.path[0] as string] = issue.message;
       }
       setFieldErrors(errors);
+      toast.error('Por favor, revisa los campos con errores.');
       return; // 3. Stop submission if validation fails
     }
 
@@ -70,11 +72,14 @@ export default function ProfilePage() {
         const data = await res.json().catch(() => ({}));
         setSaveError(data?.message ?? 'Save failed — try again');
         setSaveStatus('error');
+        toast.error(errorMessage);
         return;
       }
 
       await refetchUser();
       setSaveStatus('saved');
+
+      toast.success('¡Perfil actualizado con éxito!');
 
       // Clear password fields and redirect
       setCurrentPassword('');
@@ -86,8 +91,12 @@ export default function ProfilePage() {
       }, 1000);
 
     } catch {
-      setSaveError('Save failed — try again');
+      const fallbackError = 'Save failed — try again';
+      setSaveError(fallbackError);
       setSaveStatus('error');
+      
+      // UBICACIÓN DE ERROR 2: Error de red o servidor caído
+      toast.error(fallbackError);
     }
   }
 
