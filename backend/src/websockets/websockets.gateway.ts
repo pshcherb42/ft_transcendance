@@ -327,34 +327,48 @@ import {
 	@ConnectedSocket() client: Socket,
 	@MessageBody() data: { inviteId: string },
 	) {
-	const invite = this.pendingInvites.get(data.inviteId);
-	if (!invite) {
-		client.emit('gameInviteExpired', { inviteId: data.inviteId });
-		return;
+		const invite = this.pendingInvites.get(data.inviteId);
+		if (!invite) {
+			client.emit('gameInviteExpired', { inviteId: data.inviteId });
+			return;
+		}
+
+		const receiverId = client.data.user?.sub;
+		if (receiverId !== invite.receiverId) return; // not this user's invite to accept
+
+		clearTimeout(invite.timeout);
+		this.pendingInvites.delete(data.inviteId);
+
+		// Both players are entering a game now — pull them out of matchmaking
+		// so a stale queue entry can't pair them into a second, orphaned match.
+		this.queue = this.queue.filter(
+			(s) => s.id !== client.id && s.data.user?.sub !== invite.senderId,
+		);
+
+		// Only the receiver can possibly be mid-game — the friends-page invite
+		// button is unreachable without having already left any active match.
+		this.forfeitExistingGameIfAny(receiverId, client);
+
+		this.gameService.createGame(invite.gameRoomId, invite.senderId, receiverId, this.server);
+
+		// Both sides just get told "go to the game" — the game page's own
+		// checkRoom flow handles the actual socket join/side assignment,
+		// same as it does on a hard refresh.
+		client.emit('gameInviteAccepted', { roomId: invite.gameRoomId });
+		const senderSocketId = this.presence.getSocketId(invite.senderId);
+		if (senderSocketId) {
+			this.server.to(senderSocketId).emit('gameInviteAccepted', { roomId: invite.gameRoomId });
+		}
 	}
 
-	const receiverId = client.data.user?.sub;
-	if (receiverId !== invite.receiverId) return; // not this user's invite to accept
-
-	clearTimeout(invite.timeout);
-	this.pendingInvites.delete(data.inviteId);
-
-	// Both players are entering a game now — pull them out of matchmaking
-	// so a stale queue entry can't pair them into a second, orphaned match.
-	this.queue = this.queue.filter(
-		(s) => s.id !== client.id && s.data.user?.sub !== invite.senderId,
-	);
-
-	this.gameService.createGame(invite.gameRoomId, invite.senderId, receiverId, this.server);
-
-	// Both sides just get told "go to the game" — the game page's own
-	// checkRoom flow handles the actual socket join/side assignment,
-	// same as it does on a hard refresh.
-	client.emit('gameInviteAccepted', { roomId: invite.gameRoomId });
-	const senderSocketId = this.presence.getSocketId(invite.senderId);
-	if (senderSocketId) {
-		this.server.to(senderSocketId).emit('gameInviteAccepted', { roomId: invite.gameRoomId });
-	}
+	private forfeitExistingGameIfAny(userId: string, socket: Socket) {
+		const existingRoomId = this.gameService.getRoomIdByUserId(userId);
+		if (!existingRoomId) return;
+	  
+		this.gameService.forfeitImmediately(userId, this.server);
+		socket.leave(existingRoomId);
+		socket.data.roomId = undefined;
+		socket.data.side = undefined;
 	}
 
 	@SubscribeMessage('declineGameInvite')
