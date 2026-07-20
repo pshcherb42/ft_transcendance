@@ -118,6 +118,7 @@ function Field({
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import Input from '@/components/input';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -128,9 +129,40 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    setEmailError('');
+    setPasswordError('');
     setError(null);
+
+    let hasError = false;
+
+    const trimmedEmail = email.trim();
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!trimmedEmail) {
+      setEmailError('Email is required');
+      hasError = true;
+    } else if (!emailPattern.test(trimmedEmail)) {
+      setEmailError('Please enter a valid email');
+      hasError = true;
+    }
+
+    if (!password) {
+      setPasswordError('Password is required');
+      hasError = true;
+    } else if (password.length < 8) {
+      setPasswordError('Password must be at least 8 characters');
+      hasError = true;
+    }
+
+    if (hasError) {
+      return;
+    }
     setLoading(true);
     try {
       const res = await fetch('/api/auth/login', {
@@ -166,7 +198,7 @@ export default function LoginPage() {
           <span className="text-brand-red block">Our Pong</span>
           <span className="text-foreground block">Game!</span>
         </h1>
-          <p className="mt-6 text-[28px] text-foreground">
+          <p className="mt-6 text-[28px] font-light text-foreground">
             Built for the 42 Transcendence project <br /> by the best team.
           </p>
         </div>
@@ -177,43 +209,71 @@ export default function LoginPage() {
           Log in
         </h2>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-1">
-              <label className="text-sm text-zinc-700">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="example@gmail.com"
-                required
-                className="w-full h-[46px] rounded-[6] border border-zinc-200 px-4 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#e8391d]"
-              />
-            </div>
+        <form
+          onSubmit={handleSubmit}
+          noValidate
+          className="space-y-[20px]"
+        >
+          <Input
+            id="email"
+            name="email"
+            label="Email"
+            type="email"
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
 
-            <div className="space-y-1">
-              <label className="text-sm text-zinc-700">Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                placeholder="•••••••••"
-                required
-                className="w-full h-[46px] rounded-[6] border border-zinc-200 px-4 text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#e8391d]"
-              />
-            </div>
+              if (emailError) {
+                setEmailError('');
+              }
+            }}
+            placeholder="example@gmail.com"
+            error={emailError}
+          />
 
-            {error && (
-              <p className="text-sm text-red-600">{error}</p>
-            )}
+          <Input
+            id="password"
+            name="password"
+            label="Password"
+            type="password"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full h-12 rounded-full bg-[#e8391d] text-white font-bold uppercase tracking-widest hover:bg-[#c82d14] disabled:opacity-50 transition-colors"
-            >
-              {loading ? 'Signing in…' : 'Log in'}
-            </button>
-          </form>
+              if (passwordError) {
+                setPasswordError('');
+              }
+            }}
+            placeholder="Enter your password"
+            error={passwordError}
+          />
+
+          {error && (
+            <p className="text-[12px] leading-[16px] text-[#EE4424]">
+              {error}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="
+              h-[46px]
+              w-full
+              rounded-[24px]
+              bg-[#EE4424]
+              text-[14px]
+              font-medium
+              text-white
+              transition-colors
+              hover:bg-[#D6381C]
+              disabled:cursor-not-allowed
+              disabled:opacity-60
+            "
+          >
+            {loading ? 'Logging in...' : 'Log in'}
+          </button>
+        </form>
 
           {/* разделитель */}
           <div className="relative flex items-center my-[20px]">
