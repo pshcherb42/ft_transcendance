@@ -185,27 +185,25 @@ export default function LoginPage() {
     <div className="min-h-screen bg-background flex flex-col">
 
       {/* основной контент */}
-      <div className="flex flex-1 items-center px-[108px] gap-16">
-
+      <div className="flex flex-1 items-center justify-center px-8 md:px-16 xl:px-[108px] gap-16 max-w-[1440px] mx-auto w-full">
         {/* левая часть — заголовок */}
         <div className="flex-1">
         <span className="text-s font-bold tracking-widest text-brand-green uppercase">
           42 Transcendence
         </span>
-        <h1 className="font-display uppercase leading-[106px] text-[clamp(4rem,10vw,92px)]">
+        <h1 className="font-display uppercase leading-tight text-[clamp(2.5rem,7vw,92px)]">
           <span className="text-foreground block">Welcome</span>
           <span className="text-foreground block">to</span>
           <span className="text-brand-red block">Our Pong</span>
           <span className="text-foreground block">Game!</span>
         </h1>
-          <p className="mt-6 text-[28px] font-light text-foreground">
+        <p className="mt-6 text-[clamp(1rem,2vw,28px)] font-light text-foreground">
             Built for the 42 Transcendence project <br /> by the best team.
           </p>
         </div>
 
         {/* правая часть — форма */}
-        <div className="w-full max-w-[550px] bg-white rounded-[10px] px-[70px] py-[50px] shadow-[-8px_8px_32px_0_rgba(193,168,163,0.25)]">
-        <h2 className="font-display text-[48px] uppercase text-brand-red mb-[32]">
+        <div className="w-full max-w-[550px] bg-white rounded-[10px] px-8 xl:px-[70px] py-[50px] shadow-[-8px_8px_32px_0_rgba(193,168,163,0.25)]">        <h2 className="font-display text-[48px] uppercase text-brand-red mb-[32]">
           Log in
         </h2>
 
@@ -301,8 +299,7 @@ export default function LoginPage() {
       </div>
 
       {/* футер */}
-      <div className="h-[48px] bg-[#EDECE8] flex justify-end items-center px-[108px] gap-[34px]">
-        <a href="/terms" className="text-xs text-[#615050] uppercase tracking-widest hover:text-zinc-600">
+      <div className="h-[48px] bg-[#EDECE8] flex justify-end items-center px-8 md:px-16 xl:px-[108px] gap-[34px]">        <a href="/terms" className="text-xs text-[#615050] uppercase tracking-widest hover:text-zinc-600">
           Terms of Service
         </a>
         <span className="text-[#B5ACAC]">|</span>
