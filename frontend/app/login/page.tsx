@@ -3,6 +3,7 @@
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { loginSchema } from '@/validation/auth.schema';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -12,10 +13,20 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error,    setError]    = useState<string | null>(null);
   const [loading,  setLoading]  = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    setFieldErrors({});
+
+    const result = loginSchema.safeParse({ email, password });
+    if (!result.success) {
+      const errors: Record<string, string> = {};
+      for (const issue of result.error.issues) errors[issue.path[0] as string] = issue.message;
+      setFieldErrors(errors);
+      return;
+    }
     setLoading(true);
     try {
       const res = await fetch('/api/auth/login', {
@@ -42,8 +53,19 @@ export default function LoginPage() {
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Field label="Email"    type="email"    value={email}    onChange={setEmail}    />
-          <Field label="Password" type="password" value={password} onChange={setPassword} />
+          <div>
+            <Field label="Email" type="email" value={email} onChange={setEmail} />
+            {fieldErrors.email && (
+              <p className="text-sm text-red-600 dark:text-red-400 mt-1">{fieldErrors.email}</p>
+            )}
+          </div>
+
+          <div>
+            <Field label="Password" type="password" value={password} onChange={setPassword} />
+            {fieldErrors.password && (
+              <p className="text-sm text-red-600 dark:text-red-400 mt-1">{fieldErrors.password}</p>
+            )}
+          </div>
 
           {error && (
             <p className="text-sm text-red-600 dark:text-red-400">{error}</p>

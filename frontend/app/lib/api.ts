@@ -2,7 +2,7 @@ import { getAccessToken, getRefreshToken, storeTokens, clearTokens } from './aut
 
 const BASE = '/api';  // nginx proxies /api → backend:3001
 
-async function tryRefresh(): Promise<boolean> {
+export async function tryRefresh(): Promise<boolean> {
   const refresh = getRefreshToken();
   if (!refresh) return false;
 

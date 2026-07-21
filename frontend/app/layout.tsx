@@ -2,6 +2,10 @@ import type { Metadata } from 'next';
 import { Gasoek_One, Manrope } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
+import { SocketProvider } from '@/context/SocketContext';
+import Footer from "@/components/Footer";
+import { Toaster } from 'sonner';
+import  { NotificationListener } from "@/components/NotificationListener";
 
 const gasoekOne = Gasoek_One({
   weight: '400',
@@ -30,7 +34,14 @@ export default function RootLayout({
       className={`${gasoekOne.variable} ${manrope.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <SocketProvider>
+          <NotificationListener />
+            <div className="flex flex-1 flex-col">{children}</div>
+            <Footer />
+            <Toaster position="top-right" richColors />
+          </SocketProvider>
+        </AuthProvider>
       </body>
     </html>
   );

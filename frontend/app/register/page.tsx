@@ -3,6 +3,9 @@
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { registerSchema } from '@/validation/auth.schema';
+
+
 
 export default function RegisterPage() {
   const { login } = useAuth();
@@ -13,10 +16,24 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [error,    setError]    = useState<string | null>(null);
   const [loading,  setLoading]  = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    setFieldErrors({}); // Clear old errors before validating again
+
+    // 3. Run the client-side Zod validation check
+    const result = registerSchema.safeParse({ email, username, password });
+    
+    if (!result.success) {
+      const errors: Record<string, string> = {};
+      for (const issue of result.error.issues) {
+        errors[issue.path[0] as string] = issue.message;
+      }
+      setFieldErrors(errors);
+      return; // Stop the execution here so fetch is never sent
+    }
     setLoading(true);
 
     try {
@@ -38,6 +55,8 @@ export default function RegisterPage() {
     }
   }
 
+  
+
   return (
     <main className="flex flex-1 items-center justify-center bg-zinc-50 dark:bg-black px-4">
       <div className="w-full max-w-sm space-y-6">
@@ -46,9 +65,26 @@ export default function RegisterPage() {
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Field label="Username" type="text"     value={username} onChange={setUsername} />
-          <Field label="Email"    type="email"    value={email}    onChange={setEmail}    />
-          <Field label="Password" type="password" value={password} onChange={setPassword} />
+          <div>
+            <Field label="Username" type="text" value={username} onChange={setUsername} />
+            {fieldErrors.username && (
+              <p className="text-sm text-red-600 dark:text-red-400 mt-1">{fieldErrors.username}</p>
+            )}
+          </div>
+
+          <div>
+            <Field label="Email" type="email" value={email} onChange={setEmail} />
+            {fieldErrors.email && (
+              <p className="text-sm text-red-600 dark:text-red-400 mt-1">{fieldErrors.email}</p>
+            )}
+          </div>
+
+          <div>
+            <Field label="Password" type="password" value={password} onChange={setPassword} />
+            {fieldErrors.password && (
+              <p className="text-sm text-red-600 dark:text-red-400 mt-1">{fieldErrors.password}</p>
+            )}
+          </div>
 
           {error && (
             <p className="text-sm text-red-600 dark:text-red-400">{error}</p>

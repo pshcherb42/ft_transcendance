@@ -16,6 +16,7 @@ docker compose exec backend npx prisma migrate deploy
 docker compose exec backend npm install passport-google-oauth20
 docker compose exec backend npm install --save-dev @types/passport-google-oauth20
 docker compose exec frontend npm install browser-image-compression
+docker compose exec backend npm install @nestjs/throttler @nestjs/swagger
 ```
 
 The app runs at **http://localhost:8080**
