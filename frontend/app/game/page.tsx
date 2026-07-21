@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import type { Socket } from 'socket.io-client';
 import { useAuth } from '@/context/AuthContext';
 import { connectGameSocket } from '@/app/lib/socket';
@@ -29,6 +29,10 @@ const DIFF_LABEL: Record<Difficulty, string> = {
 export default function GamePage() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const modeParam = searchParams.get('mode');
+  const difficultyParam = searchParams.get('difficulty');
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef(new PongRenderer());
@@ -36,7 +40,17 @@ export default function GamePage() {
   const [reconnectSecondsLeft, setReconnectSecondsLeft] = useState<number | null>(null);
   const disconnectTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const [mode, setMode] = useState<Mode>('menu');
+  const [mode, setMode] = useState<Mode>(() => {
+    if (
+      modeParam === 'online' ||
+      modeParam === 'local' ||
+      modeParam === 'ai'
+    ) {
+      return modeParam;
+    }
+  
+    return 'local';
+  });
 
   // Estado del modo ONLINE
   const [onlineStatus, setOnlineStatus] = useState<OnlineStatus>('connecting');
@@ -49,7 +63,18 @@ export default function GamePage() {
   const [localRound, setLocalRound] = useState(0);
 
   // Dificultad de la IA (solo modo 'ai'), elegida en el menú.
-  const [difficulty, setDifficulty] = useState<Difficulty>('medium');
+  const [difficulty, setDifficulty] =
+  useState<Difficulty>(() => {
+    if (
+      difficultyParam === 'easy' ||
+      difficultyParam === 'medium' ||
+      difficultyParam === 'hard'
+    ) {
+      return difficultyParam;
+    }
+
+    return 'medium';
+  });
 
   const socket = useSocket();
 
@@ -75,7 +100,7 @@ export default function GamePage() {
     };
   }, [socket]);
 
-  // Auto-resume: if this session already has an active online match (e.g.
+  /*// Auto-resume: if this session already has an active online match (e.g.
   // after a mid-game refresh), jump straight into it instead of making the
   // user click "Jugar Online" again and lose time sitting on the menu.
   useEffect(() => {
@@ -92,7 +117,7 @@ export default function GamePage() {
     return () => {
       socket.off('rejoinedGame', onAutoRejoin);
     };
-  }, [socket, mode]);
+  }, [socket, mode]);*/
 
   // ----------------------------------------------------------------- ONLINE
   useEffect(() => {
@@ -392,72 +417,6 @@ export default function GamePage() {
     );
   }
 
-  // Menú de selección de modo
-  if (mode === 'menu') {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 gap-8">
-        <h1 className="text-4xl font-bold text-white">Pong</h1>
-        <div className="flex flex-col gap-4 w-64">
-          <button
-            type="button"
-            onClick={() => {
-              setOnlineRound((r) => r + 1);
-              setMode('online');
-            }}
-            className="h-12 rounded-full bg-white text-black font-semibold hover:bg-zinc-300 transition-colors"
-          >
-            Jugar Online
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setLocalRound((r) => r + 1);
-              setMode('local');
-            }}
-            className="h-12 rounded-full border border-zinc-500 text-white font-semibold hover:bg-zinc-800 transition-colors"
-          >
-            Jugar Local (2 jugadores)
-          </button>
-          
-          <div className="flex flex-col gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setLocalRound((r) => r + 1);
-                setMode('ai');
-              }}
-              className="h-12 rounded-full border border-zinc-500 text-white font-semibold hover:bg-zinc-800 transition-colors"
-            >
-              Jugar vs IA (1 jugador)
-            </button>
-            <div className="flex gap-2">
-              {(['easy', 'medium', 'hard'] as Difficulty[]).map((d) => (
-                <button
-                  key={d}
-                  type="button"
-                  onClick={() => setDifficulty(d)}
-                  className={`flex-1 h-9 rounded-full text-sm font-medium transition-colors ${
-                    difficulty === d
-                      ? 'bg-white text-black'
-                      : 'border border-zinc-500 text-zinc-300 hover:bg-zinc-800'
-                  }`}
-                >
-                  {DIFF_LABEL[d]}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-        <p className="text-sm text-zinc-500 text-center max-w-xs">
-          Online: te emparejamos con otro jugador. Local: dos jugadores en el
-          mismo teclado.
-        </p>
-      </div>
-    );
-  }
-
-  const backToMenu = () => setMode('menu');
   const handleBackToMenu = () => {
     if (mode === 'online' && socket) {
       socket.emit('leaveGame');
@@ -468,7 +427,7 @@ export default function GamePage() {
       disconnectTimerRef.current = null;
     }
     setReconnectSecondsLeft(null);
-    backToMenu();
+    router.push('/');
   };
 
   return (

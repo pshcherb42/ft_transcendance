@@ -298,11 +298,11 @@ export default function RegisterPage() {
 
       {/* футер */}
       <div className="h-[48px] bg-[#EDECE8] flex justify-end items-center px-8 md:px-16 xl:px-[108px] gap-[34px]">
-        <a href="/terms" className="text-xs text-[#615050] uppercase tracking-widest hover:text-zinc-600">
+        <a href="/terms" className="text-xs text-[#615050] uppercase tracking-widest hover:underline underline-offset-4">
           Terms of Service
         </a>
         <span className="text-[#B5ACAC]">|</span>
-        <a href="/privacy" className="text-xs text-[#615050] uppercase tracking-widest hover:text-zinc-600">
+        <a href="/privacy" className="text-xs text-[#615050] uppercase tracking-widest hover:underline underline-offset-4">
           Privacy Policy
         </a>
       </div>
