@@ -99,6 +99,7 @@ import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Input from '@/components/input';
+import BouncingBall from '@/components/bouncingBall';
 
 export default function RegisterPage() {
   const { login } = useAuth();
@@ -166,10 +167,11 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="relative min-h-screen bg-background flex flex-col">
+      <BouncingBall />
 
       {/* основной контент */}
-      <div className="flex flex-1 items-center justify-center px-8 md:px-16 xl:px-[108px] gap-16 max-w-[1440px] mx-auto w-full">
+      <div className="relative z-10 flex flex-1 items-center justify-center px-8 md:px-16 xl:px-[108px] gap-16 max-w-[1440px] mx-auto w-full">
 
         {/* левая часть — заголовок */}
         <div className="flex-1">
