@@ -21,17 +21,17 @@ export function NotificationListener() {
     const onFriendOffline = (data: { userId: string; username?: string }) => {
       toast.info(t('notification.friendOffline', { username: data.username ?? t('notification.friendOfflineDefault') }));
     };
-    const onRequestReceived = (data: { message: string }) => {
-      toast.info(data.message);
+    const onRequestReceived = (data: { messageKey: string; username: string }) => {
+      toast.info(t(data.messageKey, { username: data.username }));
     };
-    const onRequestAccepted = (data: { message: string }) => {
-      toast.success(data.message);
+    const onRequestAccepted = (data: { messageKey: string; username: string }) => {
+      toast.success(t(data.messageKey, { username: data.username }));
     };
     const onRequestDeclined = () => {
       toast.error(t('notification.requestDeclined'));
     };
-    const onFriendRemoved = (data: { message: string }) => {
-      toast.warning(data.message);
+    const onFriendRemoved = (data: { messageKey: string }) => {
+      toast.warning(t(data.messageKey));
     };
 
     const onGameInviteReceived = (data: { inviteId: string; senderUsername: string; gameRoomId: string }) => {

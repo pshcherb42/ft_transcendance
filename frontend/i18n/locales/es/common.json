@@ -54,6 +54,11 @@
         "respondFailed": "No se pudo responder a la solicitud",
         "removeFailed": "No se pudo eliminar al amigo",
         "blockFailed": "No se pudo bloquear al usuario"
+      },
+      "notify": {
+        "requestReceived": "{{username}} te envió una solicitud de amistad",
+        "requestAccepted": "{{username}} aceptó tu solicitud de amistad",
+        "removed": "Un amigo te ha eliminado de su lista"
       }
     },
     "game": {

@@ -54,6 +54,11 @@
         "respondFailed": "Could not respond to request",
         "removeFailed": "Could not remove friend",
         "blockFailed": "Could not block user"
+      },
+      "notify": {
+        "requestReceived": "{{username}} sent you a friend request",
+        "requestAccepted": "{{username}} accepted your friend request",
+        "removed": "A friend has removed you from their list"
       }
     },
     "game": {
