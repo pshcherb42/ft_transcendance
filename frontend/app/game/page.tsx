@@ -62,6 +62,11 @@ export default function GamePage() {
   const [localWinner, setLocalWinner] = useState<Side | null>(null);
   const [localRound, setLocalRound] = useState(0);
 
+  const [score, setScore] = useState({
+    left: 0,
+    right: 0,
+  });
+
   // Dificultad de la IA (solo modo 'ai'), elegida en el menú.
   const [difficulty, setDifficulty] =
   useState<Difficulty>(() => {
@@ -132,6 +137,10 @@ export default function GamePage() {
     setOnlineStatus('connecting');
     setSide(null);
     setWinner(null);
+    setScore({
+      left: 0,
+      right: 0,
+    });
 
     let snapshot: GameSnapshot | null = null;
     // Mutable local: el estado React `side` no se refleja en el closure del rAF.
@@ -179,6 +188,20 @@ export default function GamePage() {
     const onGameState = (payload: Uint8Array) => {
       const state = decode(payload) as GameSnapshot;
       snapshot = state;
+    
+      setScore((currentScore) => {
+        if (
+          currentScore.left === state.scoreLeft &&
+          currentScore.right === state.scoreRight
+        ) {
+          return currentScore;
+        }
+    
+        return {
+          left: state.scoreLeft,
+          right: state.scoreRight,
+        };
+      });
     };
 
     const onGameOver = (data: { winner: Side }) => {
@@ -327,6 +350,12 @@ export default function GamePage() {
     const ai = isAi ? new PongAi(difficulty) : null;
     setLocalWinner(null);
 
+    setLocalWinner(null);
+    setScore({
+      left: 0,
+      right: 0,
+    });
+
     // Dos jugadores en el mismo teclado: izquierda W/S, derecha ↑/↓.
     const pressed = new Set<string>();
     const refresh = () => {
@@ -368,8 +397,26 @@ export default function GamePage() {
 
     // Física a paso fijo (TICK_RATE Hz), igual que el servidor.
     const stepTimer = setInterval(() => {
-      if (ai) ai.update(engine); // la IA decide su input ANTES del step
+      if (ai) ai.update(engine);
+    
       engine.step();
+    
+      const snapshot = engine.getSnapshot();
+    
+      setScore((currentScore) => {
+        if (
+          currentScore.left === snapshot.scoreLeft &&
+          currentScore.right === snapshot.scoreRight
+        ) {
+          return currentScore;
+        }
+    
+        return {
+          left: snapshot.scoreLeft,
+          right: snapshot.scoreRight,
+        };
+      });
+    
       if (engine.status === 'finished' && engine.winner) {
         setLocalWinner(engine.winner);
       }
@@ -430,7 +477,23 @@ export default function GamePage() {
     router.push('/');
   };
 
-  return (
+  const gameTitle =
+  mode === 'online'
+    ? 'ONLINE GAME'
+    : mode === 'ai'
+      ? 'GAME VS AI'
+      : 'LOCAL GAME';
+
+  const leftPlayerName = user.username || 'Player one';
+
+  const rightPlayerName =
+  mode === 'ai'
+    ? 'AI'
+    : mode === 'online'
+      ? 'Opponent'
+      : 'Player two';
+
+  /*return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 gap-4">
       <h1 className="text-3xl font-bold text-white">
         {mode === 'online' ? 'Pong Online' : mode === 'ai' ? 'Pong vs IA' : 'Pong Local'}
@@ -503,4 +566,279 @@ export default function GamePage() {
       </div>
     </div>
   );
+}*/
+
+return (
+  <div className="flex min-h-screen flex-col bg-[#E7E7E7]">
+    <main className="flex flex-1 px-4 py-6 md:px-8">
+      <section
+        className="
+          mx-auto
+          flex
+          w-full
+          max-w-[1440px]
+          flex-col
+          bg-[#F7F5F1]
+          px-6
+          pb-10
+          pt-12
+          md:px-16
+          md:pt-16
+        "
+      >
+        {/* Верхняя часть */}
+        <div className="relative flex min-h-[70px] items-start justify-center">
+          <button
+            type="button"
+            onClick={handleBackToMenu}
+            className="
+              absolute
+              left-0
+              top-0
+              h-[46px]
+              min-w-[185px]
+              rounded-full
+              border-[1.5px]
+              border-[#D9D5D1]
+              px-7
+              text-[13px]
+              font-medium
+              uppercase
+              text-[#615050]
+              transition-colors
+              hover:border-[#615050]
+              hover:bg-[#D9D9D9]/20
+            "
+          >
+            Back to menu
+          </button>
+
+          <h1
+            className="
+              font-display
+              text-[clamp(2.8rem,5vw,64px)]
+              uppercase
+              leading-none
+              text-brand-red
+            "
+          >
+            {gameTitle}
+          </h1>
+        </div>
+
+        {/* Карточка игры */}
+        <div
+          className="
+            mx-auto
+            mt-4
+            w-full
+            max-w-[1085px]
+            rounded-[14px]
+            bg-white
+            px-5
+            pb-5
+            pt-4
+            md:px-6
+          "
+        >
+          {/* Игроки и счёт */}
+          <div
+            className="
+              grid
+              grid-cols-[1fr_auto_1fr]
+              items-end
+              gap-4
+              pb-4
+            "
+          >
+            <div>
+              <p
+                className="
+                  text-[12px]
+                  font-medium
+                  uppercase
+                  tracking-[0.12em]
+                  text-[#262121]
+                "
+              >
+                Player one
+              </p>
+
+              <p className="mt-2 text-[20px] font-semibold text-black">
+                {leftPlayerName}
+              </p>
+            </div>
+
+            <div
+              className="
+                flex
+                items-center
+                gap-4
+                text-[44px]
+                font-semibold
+                leading-none
+                text-black
+              "
+            >
+              <span>{score.left}</span>
+              <span className="text-[30px] text-[#777171]">:</span>
+              <span>{score.right}</span>
+            </div>
+
+            <div className="text-right">
+              <p
+                className="
+                  text-[12px]
+                  font-medium
+                  uppercase
+                  tracking-[0.12em]
+                  text-[#262121]
+                "
+              >
+                Player two
+              </p>
+
+              <p className="mt-2 text-[20px] font-semibold text-black">
+                {rightPlayerName}
+              </p>
+            </div>
+          </div>
+
+          {/* Canvas */}
+          <div className="overflow-hidden rounded-[14px] bg-[#171717]">
+            <canvas
+              ref={canvasRef}
+              width={WIDTH}
+              height={HEIGHT}
+              className="
+                block
+                h-auto
+                w-full
+                bg-[#171717]
+              "
+            />
+          </div>
+        </div>
+
+        {/* Статус игры */}
+        <div className="mx-auto mt-5 min-h-[28px] text-center">
+          <p className="text-[14px] text-[#615050]">
+            {mode === 'online'
+              ? onlineStatusText
+              : localWinner
+                ? mode === 'ai'
+                  ? localWinner === 'left'
+                    ? 'You won!'
+                    : 'AI won'
+                  : localWinner === 'left'
+                    ? 'Player one won!'
+                    : 'Player two won!'
+                : mode === 'ai'
+                  ? `Difficulty: ${DIFF_LABEL[difficulty]}`
+                  : 'Player one: W / S · Player two: ↑ / ↓'}
+          </p>
+
+          {mode === 'online' && reconnectSecondsLeft !== null && (
+            <p className="mt-2 text-[13px] font-medium text-brand-red">
+              Opponent disconnected — victory in {reconnectSecondsLeft}s
+            </p>
+          )}
+        </div>
+
+        {/* Кнопки после завершения */}
+        <div className="mt-4 flex justify-center gap-4">
+          {mode === 'online' &&
+            (onlineStatus === 'gameover' ||
+              onlineStatus === 'opponent-left') && (
+              <button
+                type="button"
+                onClick={() => setOnlineRound((round) => round + 1)}
+                className="
+                  h-[46px]
+                  min-w-[210px]
+                  rounded-full
+                  bg-brand-green
+                  px-8
+                  text-[13px]
+                  font-medium
+                  uppercase
+                  text-white
+                  transition-colors
+                  hover:bg-[#808979]
+                "
+              >
+                Find another game
+              </button>
+            )}
+
+          {(mode === 'local' || mode === 'ai') && localWinner && (
+            <button
+              type="button"
+              onClick={() => setLocalRound((round) => round + 1)}
+              className="
+                h-[46px]
+                min-w-[190px]
+                rounded-full
+                bg-brand-green
+                px-8
+                text-[13px]
+                font-medium
+                uppercase
+                text-white
+                transition-colors
+                hover:bg-[#808979]
+              "
+            >
+              Rematch
+            </button>
+          )}
+        </div>
+      </section>
+    </main>
+
+    <footer
+      className="
+        flex
+        h-[48px]
+        items-center
+        justify-end
+        gap-[34px]
+        bg-[#EDECE8]
+        px-8
+        md:px-16
+        xl:px-[108px]
+      "
+    >
+      <a
+        href="/terms"
+        className="
+          text-xs
+          uppercase
+          tracking-widest
+          text-[#615050]
+          underline-offset-4
+          hover:underline
+        "
+      >
+        Terms of Service
+      </a>
+
+      <span className="text-[#B5ACAC]">|</span>
+
+      <a
+        href="/privacy"
+        className="
+          text-xs
+          uppercase
+          tracking-widest
+          text-[#615050]
+          underline-offset-4
+          hover:underline
+        "
+      >
+        Privacy Policy
+      </a>
+    </footer>
+  </div>
+);
 }

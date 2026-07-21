@@ -39,22 +39,32 @@ export class PongRenderer {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Marcador
-    ctx.fillStyle = COLOR_FG;
-    ctx.font = FONT_SCORE;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillText(String(s.scoreLeft), WIDTH / 4, 64);
-    ctx.fillText(String(s.scoreRight), (WIDTH / 4) * 3, 64);
+    // Левая ракетка
+    ctx.fillStyle = '#EDECE8';
+    ctx.beginPath();
+    ctx.roundRect(
+      LEFT_PADDLE_X,
+      s.leftPaddleY,
+      12,
+      90,
+      6,
+    );
+    ctx.fill();
 
-    // Palas — resalta la del jugador (solo online, cuando llega `side`).
-    ctx.fillStyle = side === 'left' ? COLOR_ACCENT : COLOR_FG;
-    ctx.fillRect(LEFT_PADDLE_X, s.leftPaddleY, PADDLE_WIDTH, PADDLE_HEIGHT);
-    ctx.fillStyle = side === 'right' ? COLOR_ACCENT : COLOR_FG;
-    ctx.fillRect(RIGHT_PADDLE_X, s.rightPaddleY, PADDLE_WIDTH, PADDLE_HEIGHT);
-    ctx.fillStyle = COLOR_FG; // restaura para la pelota
+    // Правая ракетка
+    ctx.fillStyle = '#9DA995';
+    ctx.beginPath();
+    ctx.roundRect(
+      RIGHT_PADDLE_X,
+      s.rightPaddleY,
+      12,
+      90,
+      6,
+    );
+    ctx.fill();
 
     // Pelota
+    ctx.fillStyle = '#EE4424';
     ctx.beginPath();
     ctx.arc(s.ballX, s.ballY, BALL_RADIUS, 0, Math.PI * 2);
     ctx.fill();
