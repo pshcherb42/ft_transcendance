@@ -22,7 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AuthProvider>
           <SocketProvider>
           <NotificationListener />
-            <main className="flex-1">{children}</main>
+            <div className="flex flex-1 flex-col">{children}</div>
             <Footer />
             <Toaster position="top-right" richColors />
           </SocketProvider>

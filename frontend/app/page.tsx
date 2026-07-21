@@ -77,6 +77,12 @@ export default function HomePage() {
             >
               Amigos
             </Link>
+            <Link
+              href="/stats"
+              className="flex h-10 flex-1 items-center justify-center rounded-full border border-zinc-200 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-50 dark:hover:bg-zinc-800"
+            >
+              Stats
+            </Link>
           </div>
 
          <button

@@ -95,11 +95,77 @@ export class UsersService {
     });
   }
 
+  async getStats(userId: string) {
+    const [stats, matches] = await Promise.all([
+      this.prisma.stats.findUnique({ where: { userId } }),
+      this.prisma.match.findMany({
+        where: { OR: [{ homeId: userId }, { awayId: userId }] },
+        orderBy: { createdAt: 'desc' },
+        take: 50,
+        include: {
+          homePlayer: { select: { username: true } },
+          awayPlayer: { select: { username: true } },
+        },
+      }),
+    ]);
+
+    const wins = stats?.wins ?? 0;
+    const losses = stats?.losses ?? 0;
+    const totalMatches = wins + losses;
+
+    const history = matches.map((match) => {
+      const isHome = match.homeId === userId;
+      const opponent = isHome ? match.awayPlayer : match.homePlayer;
+      return {
+        id: match.id,
+        opponent: match.isAIGame && !opponent ? 'CPU' : (opponent?.username ?? 'Unknown'),
+        myScore: isHome ? match.homeScore : match.awayScore,
+        opponentScore: isHome ? match.awayScore : match.homeScore,
+        won: match.winnerId === userId,
+        createdAt: match.createdAt,
+      };
+    });
+
+    return {
+      wins,
+      losses,
+      level: stats?.level ?? 1,
+      totalMatches,
+      winRate: totalMatches ? wins / totalMatches : 0,
+      matches: history,
+    };
+  }
+
+  async getLeaderboard(userIds?: string[]) {
+    const stats = await this.prisma.stats.findMany({
+      where: userIds ? { userId: { in: userIds } } : undefined,
+      include: { user: { select: { username: true, avatar: true } } },
+    });
+
+    return stats
+      .map((s) => {
+        const totalMatches = s.wins + s.losses;
+        return {
+          userId: s.userId,
+          username: s.user.username,
+          avatarPath: s.user.avatar ?? this.defaultAvatar(s.user.username),
+          wins: s.wins,
+          losses: s.losses,
+          totalMatches,
+          winRate: totalMatches ? s.wins / totalMatches : 0,
+          level: s.level,
+        };
+      })
+      .filter((row) => row.totalMatches > 0)
+      .sort((a, b) => b.winRate - a.winRate || b.totalMatches - a.totalMatches)
+      .map((row, i) => ({ rank: i + 1, ...row }));
+  }
+
   sanitize(user: User) {
     const { password, refreshToken, avatar, ...rest } = user;
     return {
       ...rest,
-      avatarPath:  avatar ?? this.defaultAvatar(user.username),   // now a base64 data URL or null
+      avatarPath:  avatar ?? this.defaultAvatar(user.username),
       hasPassword: password !== null,
     };
   }
