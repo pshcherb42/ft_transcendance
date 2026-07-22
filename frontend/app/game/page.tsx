@@ -39,14 +39,16 @@ export default function GamePage() {
 
   const socket = useSocket();
 
-  // La página requiere sesión.
+  const DIFF_LABEL: Record<Difficulty, string> = {
+    easy: t('game.difficulty.easy'),
+    medium: t('game.difficulty.medium'),
+    hard: t('game.difficulty.hard'),
+  };
+
   useEffect(() => {
     if (!loading && !user) router.replace('/login');
   }, [loading, user, router]);
 
-  // Fires only if the user is already sitting on /game (menu or mid-queue)
-  // when an invite gets accepted — router.push('/game') is a no-op in that
-  // case since the route doesn't change, so nothing else would pick this up.
   useEffect(() => {
     if (!socket) return;
     const onInviteAccepted = () => {
@@ -77,7 +79,14 @@ export default function GamePage() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const renderer = rendererRef.current; // reinitiate game state 
+    const renderer = rendererRef.current;
+    const canvasLabels = {
+      getReady: t('game.canvas.getReady'),
+      youWin: t('game.canvas.youWin'),
+      youLose: t('game.canvas.youLose'),
+      leftWins: t('game.canvas.leftWins'),
+      rightWins: t('game.canvas.rightWins'),
+    };
     setOnlineStatus('connecting');
     setSide(null);
     setWinner(null);
@@ -85,8 +94,6 @@ export default function GamePage() {
     let snapshot: GameSnapshot | null = null;
     let mySide: Side | null = null;
 
-    // Socket is already connected (app-wide) — just join the queue directly,
-    // and re-join if we ever reconnect mid-session.
     const onConnect = () => {
       setOnlineStatus('connecting');
       socket.emit('checkRoom');
@@ -104,7 +111,6 @@ export default function GamePage() {
         disconnectTimerRef.current = null;
       }
       setReconnectSecondsLeft(null);
-      
       mySide = data.side;
       setSide(data.side);
       setWinner(null);
@@ -226,7 +232,6 @@ export default function GamePage() {
       cancelAnimationFrame(raf);
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
-      // Limpieza del intervalo al desmontar o cambiar de ronda
       if (disconnectTimerRef.current) {
         clearInterval(disconnectTimerRef.current);
         disconnectTimerRef.current = null;
@@ -244,7 +249,7 @@ export default function GamePage() {
       socket.off('opponentReconnected', onOpponentReconnected);
       socket.off('noActiveGame', onNoActiveGame);
     };
-  }, [mode, onlineRound, socket]);
+  }, [mode, onlineRound, socket, t]);
 
   // ------------------------------------------------------------------ LOCAL
   useEffect(() => {
@@ -331,14 +336,10 @@ export default function GamePage() {
   // --------------------------------------------------------------- UI helpers
   const onlineStatusText = (() => {
     switch (onlineStatus) {
-      case 'connecting':
-        return 'Conectando…';
-      case 'waiting':
-        return 'Buscando rival…';
-      case 'playing':                                                                                                                                                         
-        return side === 'left'
-          ? 'Eres el jugador IZQUIERDA'
-          : 'Eres el jugador DERECHA';
+      case 'connecting': return t('game.status.connecting');
+      case 'waiting': return t('game.status.waiting');
+      case 'playing':
+        return side === 'left' ? t('game.status.playingLeft') : t('game.status.playingRight');
       case 'gameover':
         return winner === side ? t('game.status.won') : t('game.status.lost');
       case 'opponent-left':
@@ -374,7 +375,7 @@ export default function GamePage() {
           >
             {t('game.menu.playLocal')}
           </button>
-          
+
           <div className="flex flex-col gap-2">
             <button
               type="button"

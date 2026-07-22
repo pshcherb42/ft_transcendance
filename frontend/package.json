@@ -11,6 +11,8 @@
   "dependencies": {
     "@types/browser-image-compression": "^1.0.1",
     "browser-image-compression": "^2.0.2",
+    "chart.js": "^4.4.7",
+    "i18next": "^26.3.6",
     "next": "^16.2.10",
     "react": "^19.2.7",
     "react-chartjs-2": "^5.2.0",

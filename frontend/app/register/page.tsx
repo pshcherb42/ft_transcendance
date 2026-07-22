@@ -6,8 +6,6 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/AuthContext';
 import { registerSchema } from '@/validation/auth.schema';
 
-
-
 export default function RegisterPage() {
   const { t } = useTranslation();
   const { login } = useAuth();
@@ -23,7 +21,7 @@ export default function RegisterPage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    setFieldErrors({}); // Clear old errors before validating again
+    setFieldErrors({});
 
     const result = registerSchema.safeParse({ email, username, password });
 
@@ -55,8 +53,6 @@ export default function RegisterPage() {
       setLoading(false);
     }
   }
-
-  
 
   return (
     <main className="flex flex-1 items-center justify-center bg-zinc-50 dark:bg-black px-4">

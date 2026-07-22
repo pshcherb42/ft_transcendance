@@ -165,7 +165,7 @@ export class UsersService {
     const { password, refreshToken, avatar, ...rest } = user;
     return {
       ...rest,
-      avatarPath:  avatar ?? this.defaultAvatar(user.username),   // now a base64 data URL or null
+      avatarPath:  avatar ?? this.defaultAvatar(user.username),
       hasPassword: password !== null,
     };
   }

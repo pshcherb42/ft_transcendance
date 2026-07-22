@@ -20,14 +20,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-        <AuthProvider>
-          <SocketProvider>
-          <NotificationListener />
-            <main className="flex-1">{children}</main>
-            <Footer />
-            <Toaster position="top-right" richColors />
-          </SocketProvider>
-        </AuthProvider>
+        <I18nProvider>
+          <AuthProvider>
+            <SocketProvider>
+            <NotificationListener />
+              <div className="flex flex-1 flex-col">{children}</div>
+              <Footer />
+              <Toaster position="top-right" richColors />
+            </SocketProvider>
+          </AuthProvider>
+        </I18nProvider>
       </body>
     </html>
   );

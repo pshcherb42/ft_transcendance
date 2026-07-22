@@ -51,8 +51,8 @@ export default function ProfilePage() {
         errors[issue.path[0] as string] = issue.message;
       }
       setFieldErrors(errors);
-      toast.error('Por favor, revisa los campos con errores.');
-      return; // 3. Stop submission if validation fails
+      toast.error(t('profile.fixFieldErrors'));
+      return;
     }
 
     setSaveStatus('saving');
@@ -81,9 +81,8 @@ export default function ProfilePage() {
       await refetchUser();
       setSaveStatus('saved');
 
-      toast.success('¡Perfil actualizado con éxito!');
+      toast.success(t('profile.profileUpdated'));
 
-      // Clear password fields and redirect
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
@@ -93,7 +92,7 @@ export default function ProfilePage() {
       }, 1000);
 
     } catch {
-      const fallbackError = 'Save failed — try again';
+      const fallbackError = t('profile.saveFailed');
       setSaveError(fallbackError);
       setSaveStatus('error');
       toast.error(fallbackError);
@@ -185,7 +184,6 @@ export default function ProfilePage() {
         <p className="text-center text-sm text-zinc-500 dark:text-zinc-400">{user.email}</p>
 
         <form onSubmit={handleSave} className="space-y-4">
-          {/* Username */}
           <div className="space-y-1">
             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">{t('profile.username')}</label>
             <input
