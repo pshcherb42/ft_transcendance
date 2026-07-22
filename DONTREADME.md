@@ -8,7 +8,6 @@ curl -X POST http://localhost:3001/auth/register \
 
 
 
-
 ## Disconection logic
 
 Cuando un jugador pierda la conexión, el juego se pausará durante 15 segundos. Si el jugador regresa con un token válido dentro de ese tiempo, el juego continuará; de lo contrario, el rival que se mantuvo conectado ganará automáticamente.

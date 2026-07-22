@@ -12,6 +12,8 @@ import { type Difficulty } from './ai';
 import { WIDTH, HEIGHT } from './constants';
 import { MAP_LABEL, type MapId } from './config';
 import type { GameSnapshot, Mode, Side } from './types';
+import { useSocket } from '@/context/SocketContext';
+import { decode } from '@msgpack/msgpack';
 
 type OnlineStatus =
   | 'connecting'
@@ -52,15 +54,52 @@ export default function GamePage() {
   // Personalización de la partida local/IA
   const [mapId, setMapId] = useState<MapId>('classic');
   const [powerups, setPowerups] = useState(false);
+  const socket = useSocket();
 
   // La página requiere sesión.
   useEffect(() => {
     if (!loading && !user) router.replace('/login');
   }, [loading, user, router]);
 
+  // Fires only if the user is already sitting on /game (menu or mid-queue)
+  // when an invite gets accepted — router.push('/game') is a no-op in that
+  // case since the route doesn't change, so nothing else would pick this up.
+  useEffect(() => {
+    if (!socket) return;
+
+    const onInviteAccepted = () => {
+      setOnlineRound((r) => r + 1);
+      setMode('online');
+    };
+
+    socket.on('gameInviteAccepted', onInviteAccepted);
+    return () => {
+      socket.off('gameInviteAccepted', onInviteAccepted);
+    };
+  }, [socket]);
+
+  // Auto-resume: if this session already has an active online match (e.g.
+  // after a mid-game refresh), jump straight into it instead of making the
+  // user click "Jugar Online" again and lose time sitting on the menu.
+  useEffect(() => {
+    if (!socket || mode !== 'menu') return;
+
+    const onAutoRejoin = () => {
+      setOnlineRound((r) => r + 1);
+      setMode('online');
+    };
+
+    socket.on('rejoinedGame', onAutoRejoin);
+    socket.emit('checkRoom');
+
+    return () => {
+      socket.off('rejoinedGame', onAutoRejoin);
+    };
+  }, [socket, mode]);
+
   // ----------------------------------------------------------------- ONLINE
   useEffect(() => {
-    if (mode !== 'online') return;
+    if (mode !== 'online' || !socket) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -74,7 +113,6 @@ export default function GamePage() {
 
     let snapshot: GameSnapshot | null = null;
     let mySide: Side | null = null;
-    const socket: Socket = connectGameSocket();
 
     socket.on('connect', () => { // native automatic event
       setOnlineStatus('waiting');
@@ -82,6 +120,20 @@ export default function GamePage() {
     });
     socket.on('waiting', () => setOnlineStatus('waiting')); // custom event
     socket.on('rejoinedGame', (data: { roomId: string; side: Side }) => {
+    // Socket is already connected (app-wide) — just join the queue directly,
+    // and re-join if we ever reconnect mid-session.
+    const onConnect = () => {
+      setOnlineStatus('connecting');
+      socket.emit('checkRoom');
+    };
+    
+    const onNoActiveGame = () => {
+      setOnlineStatus('waiting');
+      socket.emit('joinQueue');
+    };
+
+    const onWaiting = () => setOnlineStatus('waiting');
+    const onRejoined = (data: { roomId: string; side: Side }) => {
       if (disconnectTimerRef.current) {
         clearInterval(disconnectTimerRef.current);
         disconnectTimerRef.current = null;
@@ -104,11 +156,27 @@ export default function GamePage() {
       setSide(data.side);
       setWinner(null);
       setOnlineStatus('playing');
-    });
-    socket.on('gameState', (state: GameSnapshot) => {
+    };
+
+    const onMatchFound = (data: { side: Side }) => {
+      if (disconnectTimerRef.current) {
+        clearInterval(disconnectTimerRef.current);
+        disconnectTimerRef.current = null;
+      }
+      setReconnectSecondsLeft(null);
+    
+      mySide = data.side;
+      setSide(data.side);
+      setWinner(null);
+      setOnlineStatus('playing');
+    };
+
+    const onGameState = (payload: Uint8Array) => {
+      const state = decode(payload) as GameSnapshot;
       snapshot = state;
-    });
-    socket.on('gameOver', (data: { winner: Side }) => {
+    };
+
+    const onGameOver = (data: { winner: Side }) => {
       setWinner(data.winner);
       setOnlineStatus('gameover');
       // Limpieza del intervalo al terminar el juego
@@ -201,9 +269,22 @@ export default function GamePage() {
         clearInterval(disconnectTimerRef.current);
         disconnectTimerRef.current = null;
       }
-      socket.disconnect();
+      setReconnectSecondsLeft(null); 
+      // Remove ONLY this effect's listeners — do NOT disconnect the socket,
+      // it's shared app-wide and owned by SocketProvider.
+      socket.off('connect', onConnect);
+      socket.off('waiting', onWaiting);
+      socket.off('rejoinedGame', onRejoined);
+      socket.off('matchFound', onMatchFound);
+      socket.off('gameState', onGameState);
+      socket.off('gameOver', onGameOver);
+      socket.off('opponentLeft', onOpponentLeft);
+      socket.off('opponentDisconnected', onOpponentDisconnected);
+      socket.off('matchVoided', onMatchVoided);
+      socket.off('opponentReconnected', onOpponentReconnected);
+      socket.off('noActiveGame', onNoActiveGame);
     };
-  }, [mode, onlineRound]);
+  }, [mode, onlineRound, socket]);
 
   // --------------------------------------------------------------- UI helpers
   const onlineStatusText = (() => {
@@ -253,6 +334,7 @@ export default function GamePage() {
           >
             Jugar Online
           </button>
+
           <button
             type="button"
             onClick={() => startLocal('local')}
@@ -260,28 +342,34 @@ export default function GamePage() {
           >
             Jugar Local (2 jugadores)
           </button>
-          <button
-            type="button"
-            onClick={() => startLocal('ai')}
-            className="h-12 rounded-full border border-zinc-500 text-white font-semibold hover:bg-zinc-800 transition-colors"
-          >
-            Jugar vs IA (1 jugador)
-          </button>
-          <div className="flex gap-2">
-            {(['easy', 'medium', 'hard'] as Difficulty[]).map((d) => (
-              <button
-                key={d}
-                type="button"
-                onClick={() => setDifficulty(d)}
-                className={`flex-1 h-9 rounded-full text-sm font-medium transition-colors ${
-                  difficulty === d
-                    ? 'bg-white text-black'
-                    : 'border border-zinc-500 text-zinc-300 hover:bg-zinc-800'
-                }`}
-              >
-                {DIFF_LABEL[d]}
-              </button>
-            ))}
+          
+          <div className="flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setLocalRound((r) => r + 1);
+                setMode('ai');
+              }}
+              className="h-12 rounded-full border border-zinc-500 text-white font-semibold hover:bg-zinc-800 transition-colors"
+            >
+              Jugar vs IA (1 jugador)
+            </button>
+            <div className="flex gap-2">
+              {(['easy', 'medium', 'hard'] as Difficulty[]).map((d) => (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => setDifficulty(d)}
+                  className={`flex-1 h-9 rounded-full text-sm font-medium transition-colors ${
+                    difficulty === d
+                      ? 'bg-white text-black'
+                      : 'border border-zinc-500 text-zinc-300 hover:bg-zinc-800'
+                  }`}
+                >
+                  {DIFF_LABEL[d]}
+                </button>
+              ))}
+            </div>
           </div>
           <button
             type="button"
@@ -341,6 +429,18 @@ export default function GamePage() {
   }
 
   const backToMenu = () => setMode('menu');
+  const handleBackToMenu = () => {
+    if (mode === 'online' && socket) {
+      socket.emit('leaveGame');
+    }
+    // Clear immediately so no stale countdown flashes when re-entering.
+    if (disconnectTimerRef.current) {
+      clearInterval(disconnectTimerRef.current);
+      disconnectTimerRef.current = null;
+    }
+    setReconnectSecondsLeft(null);
+    backToMenu();
+  };
 
   // ------------------------------------------------------ ONLINE / LOCAL / IA
   return (
@@ -423,7 +523,7 @@ export default function GamePage() {
         )}
         <button
           type="button"
-          onClick={backToMenu}
+          onClick={handleBackToMenu}
           className="h-11 px-6 rounded-full border border-zinc-500 text-zinc-200 font-medium hover:bg-zinc-800 transition-colors"
         >
           Volver al menú

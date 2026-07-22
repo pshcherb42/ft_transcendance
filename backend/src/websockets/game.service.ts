@@ -2,6 +2,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Server } from 'socket.io';
 import { PongEngine, Side, Dir, TICK_RATE } from './pong-engine';
 import { MatchService } from './match.service';
+import { encode } from '@msgpack/msgpack';
+
+const RECONNECT_GRACE_MS = 15_000;
 
 const RECONNECT_GRACE_MS = 15_000;
 
@@ -49,13 +52,13 @@ export class GameService {
 
     room.loop = setInterval(() => {
       room.engine.step();
-      server.to(roomId).emit('gameState', room.engine.getSnapshot());
+      server.to(roomId).emit('gameState', encode(room.engine.getSnapshot()));
 
       if (room.engine.status === 'finished' && room.engine.winner) {
         const winnerId = room.engine.winner === 'left' ? room.leftUserId : room.rightUserId;
         server.to(roomId).emit('gameOver', { reason: 'score', winner: room.engine.winner, winnerId });
         this.persist(roomId, room.engine.winner);
-        this.removeGame(roomId);
+        this.removeGame(roomId, server);
       }
     }, 1000 / TICK_RATE);
   }
@@ -73,9 +76,56 @@ export class GameService {
     return room ? { leftUserId: room.leftUserId, rightUserId: room.rightUserId } : undefined;
   }
 
+  // Llamado cuando un usuario abandona voluntariamente (leaveGame) — a
+  // diferencia de handleDisconnect, no hay periodo de gracia: se declara
+  // forfeit al instante porque sabemos que fue una salida deliberada, no
+  // una caída de red.
+  forfeitImmediately(userId: string, server: Server) {
+    const roomId = this.userToRoom.get(userId);
+    if (!roomId) return;
+    const room = this.rooms.get(roomId);
+    if (!room) return;
+
+    // Cancel any grace-period timer that might already be running for this
+    // room (e.g. opponent had briefly dropped) — we're ending the match now
+    // regardless of that state.
+    if (room.disconnectTimer) {
+      clearTimeout(room.disconnectTimer);
+      room.disconnectTimer = null;
+    }
+    if (room.loop) {
+      clearInterval(room.loop);
+      room.loop = null;
+    }
+
+    const winnerSide: Side = userId === room.leftUserId ? 'right' : 'left';
+    const winnerId = winnerSide === 'left' ? room.leftUserId : room.rightUserId;
+
+    server.to(roomId).emit('gameOver', {
+      reason: 'forfeit',
+      winner: winnerSide,
+      winnerId,
+      forfeitedBy: userId,
+    });
+
+    this.logger.log(`💾 Guardando partida por abandono voluntario. Ganador: ${winnerId}`);
+    this.matchService.record({
+      homeId: room.leftUserId || '',
+      awayId: room.rightUserId || '',
+      homeScore: room.engine.scoreLeft,
+      awayScore: room.engine.scoreRight,
+      winnerId: winnerId || '',
+    }).catch((err) => {
+      this.logger.error(`❌ Error persistiendo forfeit voluntario: ${err.message}`);
+    });
+
+    this.removeGame(roomId, server);
+  }
+
   // Llamado al desconectarse un socket: pausa el bucle y arranca un timer de
   // gracia. Si expira sin reconexión, el rival gana por abandono.
   handleDisconnect(userId: string, server: Server) {
+      
     const roomId = this.userToRoom.get(userId);
     if (!roomId) return;
     const room = this.rooms.get(roomId);
@@ -87,7 +137,7 @@ export class GameService {
     if (room.disconnectedUserId && room.disconnectedUserId !== userId) {
       if (room.disconnectTimer) clearTimeout(room.disconnectTimer);
       server.to(roomId).emit('matchVoided', { reason: 'both-disconnected' });
-      this.removeGame(roomId);
+      this.removeGame(roomId, server);
       return;
     }
 
@@ -124,13 +174,13 @@ export class GameService {
             winnerId: winnerId || '',
           });
           // clear the room
-          this.removeGame(roomId);
+          this.removeGame(roomId, server);
         }
       } catch (dbError: any) {
         // 3. Si la base de datos falla por tipado, atrapamos el error para que NO congele la cola
         this.logger.error(`❌ Error al guardar registro en la BD: ${dbError.message}`);
         // Forzamos la limpieza de la sala de todos modos para no romper la app
-        this.removeGame(roomId);
+        this.removeGame(roomId, server);
       }
     }, RECONNECT_GRACE_MS);
   }
@@ -154,11 +204,24 @@ export class GameService {
     return roomId; // return roomId
   }
 
-  removeGame(roomId: string) {
-    const room = this.rooms.get(roomId);
-    if (room) {
-      if (room.loop) clearInterval(room.loop);
-      if (room.disconnectTimer) clearTimeout(room.disconnectTimer);
+  removeGame(roomId: string, server?: Server) {
+    const room = this.rooms.get(roomId); // search for roomId
+    if (room) { 
+      if (room.loop) clearInterval(room.loop); // clear room timer
+      if (room.disconnectTimer) clearTimeout(room.disconnectTimer); // disconnect timer
+      if(server){
+        const roomSockets = server.sockets.adapter.rooms.get(roomId); // what sockets are connected to this room
+        if(roomSockets){
+          for(const socketId of roomSockets){
+            const socket = server.sockets.sockets.get(socketId);
+            if(socket){
+              socket.data.roomId = undefined; // clean this socket room
+              socket.data.side = undefined; // clear the side
+              socket.leave(roomId); // takeout socket from the room
+            }
+          }
+        }
+      }
       this.userToRoom.delete(room.leftUserId);
       this.userToRoom.delete(room.rightUserId);
       this.rooms.delete(roomId);
