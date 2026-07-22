@@ -19,127 +19,221 @@
     .hint { color: var(--muted); font-size: 14px; text-align: center; line-height: 1.6; }
     .hint b { color: var(--fg); }
     .tag { color: var(--accent); font-size: 12px; text-transform: uppercase; letter-spacing: 2px; }
+    .legend { color: var(--muted); font-size: 13px; }
+    .legend b { color: var(--fg); }
   </style>
 </head>
 <body>
-  <span class="tag">ft_transcendance · demo sin Docker</span>
+  <span class="tag">ft_transcendance · demo sin Docker · obstáculos + power-ups</span>
   <h1>PONG</h1>
   <canvas id="game" width="800" height="600"></canvas>
   <p class="hint">
-    La IA juega sola (attract mode). <b>Toma el control</b> cuando quieras:<br />
-    Izquierda: <b>W</b> / <b>S</b> &nbsp;·&nbsp; Derecha: <b>↑</b> / <b>↓</b> &nbsp;·&nbsp; primero a 5 gana
+    La IA juega sola (attract mode). <b>Toma el control</b>: Izquierda <b>W</b>/<b>S</b> · Derecha <b>↑</b>/<b>↓</b> · a 5 gana
+  </p>
+  <p class="legend">
+    Power-ups: <b style="color:#4ade80">+</b> agranda tu pala ·
+    <b style="color:#f87171">–</b> encoge la del rival ·
+    <b style="color:#fbbf24">V</b> acelera la bola ·
+    <b style="color:#60a5fa">M</b> multibola
   </p>
 
   <script>
   // ============================================================================
-  // Motor de Pong (puerto en JS plano del motor autoritativo del backend).
-  // Física y constantes IDÉNTICAS a backend/src/websockets/pong-engine.ts y
-  // frontend/app/game/pong-engine.ts. Este HTML es autocontenido a propósito:
-  // se abre con doble clic (file://), sin Next.js ni contenedores.
+  // Port en JS plano del motor CONFIGURABLE de frontend/app/game/pong-engine.ts
+  // (mapa con obstáculos + power-ups + multibola). Autocontenido: doble clic,
+  // sin Next.js ni contenedores. La física base coincide con el motor del juego.
   // ============================================================================
   const C = {
     WIDTH: 800, HEIGHT: 600,
-    PADDLE_WIDTH: 12, PADDLE_HEIGHT: 90, PADDLE_SPEED: 8,
+    PADDLE_WIDTH: 12, PADDLE_HEIGHT: 90, PADDLE_SPEED: 11,
     LEFT_PADDLE_X: 24, RIGHT_PADDLE_X: 800 - 24 - 12, // 764
     BALL_RADIUS: 9, BALL_SPEED_START: 7, BALL_SPEED_MAX: 15, BALL_SPEEDUP: 0.6,
-    MAX_BOUNCE_RAD: Math.PI / 4,
+    MAX_BOUNCE_RAD: Math.PI / 4, SERVE_JITTER_RAD: Math.PI / 36, BALL_SPIN: 0.25,
     WINNING_SCORE: 5, TICK_RATE: 30, COUNTDOWN_TICKS: 90,
-    COLOR_BG: '#0a0a0a', COLOR_FG: '#f4f4f5', COLOR_ACCENT: '#4ade80',
+    POWERUP_RADIUS: 16, POWERUP_SPAWN_TICKS: 30 * 4, POWERUP_MAX: 2, POWERUP_EFFECT_TICKS: 30 * 8,
+    PADDLE_GROW_FACTOR: 1.6, PADDLE_SHRINK_FACTOR: 0.6, PADDLE_MIN_HEIGHT: 45, PADDLE_MAX_HEIGHT: 170,
+    SPEED_POWERUP_FACTOR: 1.4, SPEED_POWERUP_CAP: 15 * 1.4, MAX_BALLS: 4,
+    COLOR_BG: '#0a0a0a', COLOR_FG: '#f4f4f5', COLOR_ACCENT: '#4ade80', COLOR_OBSTACLE: '#52525b',
   };
+  const POWERUP_COLORS = { grow: '#4ade80', shrink: '#f87171', speed: '#fbbf24', multiball: '#60a5fa' };
+  const POWERUP_LETTER = { grow: '+', shrink: '–', speed: 'V', multiball: 'M' };
+  const POWERUP_TYPES = ['grow', 'shrink', 'speed', 'multiball'];
+  const OBSTACLES = [
+    { x: C.WIDTH / 2 - 10, y: 60, w: 20, h: 160 },
+    { x: C.WIDTH / 2 - 10, y: C.HEIGHT - 220, w: 20, h: 160 },
+  ];
   const clamp = (v, min, max) => (v < min ? min : v > max ? max : v);
 
   class PongEngine {
     constructor() {
+      this.obstacles = OBSTACLES;
+      this.powerups = true;
       this.leftPaddleY = (C.HEIGHT - C.PADDLE_HEIGHT) / 2;
       this.rightPaddleY = (C.HEIGHT - C.PADDLE_HEIGHT) / 2;
-      this.ballX = C.WIDTH / 2; this.ballY = C.HEIGHT / 2;
-      this.ballVX = 0; this.ballVY = 0; this.ballSpeed = C.BALL_SPEED_START;
+      this.leftPaddleVY = 0; this.rightPaddleVY = 0;
+      this.leftPaddleH = C.PADDLE_HEIGHT; this.rightPaddleH = C.PADDLE_HEIGHT;
       this.scoreLeft = 0; this.scoreRight = 0;
       this.status = 'countdown'; this.winner = null;
       this.countdownTicks = C.COUNTDOWN_TICKS;
       this.serveDir = Math.random() < 0.5 ? 1 : -1;
       this.leftInput = { up: false, down: false };
       this.rightInput = { up: false, down: false };
+      this.pickups = []; this.spawnTicks = C.POWERUP_SPAWN_TICKS;
+      this.leftEffectTicks = 0; this.rightEffectTicks = 0;
+      this.balls = [this._centerBall()];
     }
-    setInput(side, dir) {
-      const input = side === 'left' ? this.leftInput : this.rightInput;
-      input.up = dir === 'up'; input.down = dir === 'down';
-    }
+    _centerBall() { return { x: C.WIDTH / 2, y: C.HEIGHT / 2, vx: 0, vy: 0, speed: C.BALL_SPEED_START, lastHitBy: null }; }
+    setInput(side, dir) { const i = side === 'left' ? this.leftInput : this.rightInput; i.up = dir === 'up'; i.down = dir === 'down'; }
     step() {
       if (this.status === 'finished') return;
       this._movePaddles();
-      if (this.status === 'countdown') {
-        if (--this.countdownTicks <= 0) this._serve();
-        return;
-      }
-      this._moveBall();
+      if (this.status === 'countdown') { if (--this.countdownTicks <= 0) this._serve(); return; }
+      this._moveBalls();
+      if (this.powerups) { this._tickEffects(); this._trySpawn(); }
     }
     getSnapshot() {
-      return {
+      const m = this.balls[0];
+      const s = {
         status: this.status,
         countdown: this.status === 'countdown' ? Math.ceil(this.countdownTicks / C.TICK_RATE) : 0,
         leftPaddleY: this.leftPaddleY, rightPaddleY: this.rightPaddleY,
-        ballX: this.ballX, ballY: this.ballY,
+        ballX: m ? m.x : C.WIDTH / 2, ballY: m ? m.y : C.HEIGHT / 2,
         scoreLeft: this.scoreLeft, scoreRight: this.scoreRight, winner: this.winner,
+        leftPaddleH: this.leftPaddleH, rightPaddleH: this.rightPaddleH,
+        obstacles: this.obstacles,
+        balls: this.balls.map((b) => ({ x: b.x, y: b.y })),
+        pickups: this.pickups.map((p) => ({ x: p.x, y: p.y, type: p.type })),
       };
+      return s;
     }
     _movePaddles() {
+      const pl = this.leftPaddleY, pr = this.rightPaddleY;
       if (this.leftInput.up) this.leftPaddleY -= C.PADDLE_SPEED;
       if (this.leftInput.down) this.leftPaddleY += C.PADDLE_SPEED;
       if (this.rightInput.up) this.rightPaddleY -= C.PADDLE_SPEED;
       if (this.rightInput.down) this.rightPaddleY += C.PADDLE_SPEED;
-      this.leftPaddleY = clamp(this.leftPaddleY, 0, C.HEIGHT - C.PADDLE_HEIGHT);
-      this.rightPaddleY = clamp(this.rightPaddleY, 0, C.HEIGHT - C.PADDLE_HEIGHT);
+      this.leftPaddleY = clamp(this.leftPaddleY, 0, C.HEIGHT - this.leftPaddleH);
+      this.rightPaddleY = clamp(this.rightPaddleY, 0, C.HEIGHT - this.rightPaddleH);
+      this.leftPaddleVY = this.leftPaddleY - pl; this.rightPaddleVY = this.rightPaddleY - pr;
     }
-    _startCountdown(serveDir) {
-      this.status = 'countdown'; this.countdownTicks = C.COUNTDOWN_TICKS;
-      this.serveDir = serveDir;
-      this.ballX = C.WIDTH / 2; this.ballY = C.HEIGHT / 2;
-      this.ballVX = 0; this.ballVY = 0; this.ballSpeed = C.BALL_SPEED_START;
+    _startCountdown(dir) {
+      this.status = 'countdown'; this.countdownTicks = C.COUNTDOWN_TICKS; this.serveDir = dir;
+      this.balls = [this._centerBall()];
     }
     _serve() {
       this.status = 'playing';
-      const angle = (Math.random() * 2 - 1) * (C.MAX_BOUNCE_RAD * 0.5);
-      this.ballVX = this.serveDir * this.ballSpeed * Math.cos(angle);
-      this.ballVY = this.ballSpeed * Math.sin(angle);
+      const b = this.balls[0];
+      const targetY = this.serveDir === 1 ? this.rightPaddleY + this.rightPaddleH / 2 : this.leftPaddleY + this.leftPaddleH / 2;
+      const dx = this.serveDir === 1 ? C.RIGHT_PADDLE_X - b.x : b.x - (C.LEFT_PADDLE_X + C.PADDLE_WIDTH);
+      const aim = Math.atan2(targetY - b.y, dx);
+      const jitter = (Math.random() * 2 - 1) * C.SERVE_JITTER_RAD;
+      const angle = clamp(aim + jitter, -C.MAX_BOUNCE_RAD, C.MAX_BOUNCE_RAD);
+      b.vx = this.serveDir * b.speed * Math.cos(angle); b.vy = b.speed * Math.sin(angle);
     }
-    _moveBall() {
-      this.ballX += this.ballVX; this.ballY += this.ballVY;
-      if (this.ballY - C.BALL_RADIUS <= 0) { this.ballY = C.BALL_RADIUS; this.ballVY = Math.abs(this.ballVY); }
-      else if (this.ballY + C.BALL_RADIUS >= C.HEIGHT) { this.ballY = C.HEIGHT - C.BALL_RADIUS; this.ballVY = -Math.abs(this.ballVY); }
-      this._bounce('left'); this._bounce('right');
-      if (this.ballX - C.BALL_RADIUS <= 0) { this.scoreRight++; this._afterGoal('right'); }
-      else if (this.ballX + C.BALL_RADIUS >= C.WIDTH) { this.scoreLeft++; this._afterGoal('left'); }
-    }
-    _bounce(side) {
-      const paddleX = side === 'left' ? C.LEFT_PADDLE_X : C.RIGHT_PADDLE_X;
-      const paddleY = side === 'left' ? this.leftPaddleY : this.rightPaddleY;
-      const movingToward = side === 'left' ? this.ballVX < 0 : this.ballVX > 0;
-      if (!movingToward) return;
-      const overlapX = this.ballX - C.BALL_RADIUS < paddleX + C.PADDLE_WIDTH && this.ballX + C.BALL_RADIUS > paddleX;
-      const overlapY = this.ballY + C.BALL_RADIUS > paddleY && this.ballY - C.BALL_RADIUS < paddleY + C.PADDLE_HEIGHT;
-      if (!overlapX || !overlapY) return;
-      const relative = clamp((this.ballY - (paddleY + C.PADDLE_HEIGHT / 2)) / (C.PADDLE_HEIGHT / 2), -1, 1);
-      const angle = relative * C.MAX_BOUNCE_RAD;
-      this.ballSpeed = Math.min(this.ballSpeed + C.BALL_SPEEDUP, C.BALL_SPEED_MAX);
-      const dirX = side === 'left' ? 1 : -1;
-      this.ballVX = dirX * this.ballSpeed * Math.cos(angle);
-      this.ballVY = this.ballSpeed * Math.sin(angle);
-      this.ballX = side === 'left' ? paddleX + C.PADDLE_WIDTH + C.BALL_RADIUS : paddleX - C.BALL_RADIUS;
-    }
-    _afterGoal(scorer) {
-      if (this.scoreLeft >= C.WINNING_SCORE || this.scoreRight >= C.WINNING_SCORE) {
-        this.status = 'finished';
-        this.winner = this.scoreLeft >= C.WINNING_SCORE ? 'left' : 'right';
-        return;
+    _moveBalls() {
+      let scored = null;
+      for (let i = this.balls.length - 1; i >= 0; i--) {
+        const b = this.balls[i];
+        b.x += b.vx; b.y += b.vy;
+        if (b.y - C.BALL_RADIUS <= 0) { b.y = C.BALL_RADIUS; b.vy = Math.abs(b.vy); }
+        else if (b.y + C.BALL_RADIUS >= C.HEIGHT) { b.y = C.HEIGHT - C.BALL_RADIUS; b.vy = -Math.abs(b.vy); }
+        this._bounceObstacles(b);
+        this._bouncePaddle(b, 'left'); this._bouncePaddle(b, 'right');
+        this._collect(b);
+        if (b.x - C.BALL_RADIUS <= 0) { this.scoreRight++; scored = 'right'; this.balls.splice(i, 1); }
+        else if (b.x + C.BALL_RADIUS >= C.WIDTH) { this.scoreLeft++; scored = 'left'; this.balls.splice(i, 1); }
       }
-      this._startCountdown(scorer === 'left' ? 1 : -1);
+      if (!scored) return;
+      if (this.scoreLeft >= C.WINNING_SCORE || this.scoreRight >= C.WINNING_SCORE) {
+        this.status = 'finished'; this.winner = this.scoreLeft >= C.WINNING_SCORE ? 'left' : 'right';
+      } else if (this.balls.length === 0) { this._startCountdown(scored === 'left' ? 1 : -1); }
+    }
+    _bouncePaddle(b, side) {
+      const px = side === 'left' ? C.LEFT_PADDLE_X : C.RIGHT_PADDLE_X;
+      const py = side === 'left' ? this.leftPaddleY : this.rightPaddleY;
+      const ph = side === 'left' ? this.leftPaddleH : this.rightPaddleH;
+      const toward = side === 'left' ? b.vx < 0 : b.vx > 0;
+      if (!toward) return;
+      const ox = b.x - C.BALL_RADIUS < px + C.PADDLE_WIDTH && b.x + C.BALL_RADIUS > px;
+      const oy = b.y + C.BALL_RADIUS > py && b.y - C.BALL_RADIUS < py + ph;
+      if (!ox || !oy) return;
+      const rel = clamp((b.y - (py + ph / 2)) / (ph / 2), -1, 1);
+      const angle = rel * C.MAX_BOUNCE_RAD;
+      b.speed = Math.min(b.speed + C.BALL_SPEEDUP, C.BALL_SPEED_MAX);
+      const dirX = side === 'left' ? 1 : -1;
+      b.vx = dirX * b.speed * Math.cos(angle); b.vy = b.speed * Math.sin(angle);
+      const pvy = side === 'left' ? this.leftPaddleVY : this.rightPaddleVY;
+      b.vy += C.BALL_SPIN * pvy;
+      const mag = Math.hypot(b.vx, b.vy);
+      if (mag > 0) { b.vx = b.vx / mag * b.speed; b.vy = b.vy / mag * b.speed; }
+      b.x = side === 'left' ? px + C.PADDLE_WIDTH + C.BALL_RADIUS : px - C.BALL_RADIUS;
+      b.lastHitBy = side;
+    }
+    _bounceObstacles(b) {
+      for (const o of this.obstacles) {
+        const cx = clamp(b.x, o.x, o.x + o.w), cy = clamp(b.y, o.y, o.y + o.h);
+        const dx = b.x - cx, dy = b.y - cy;
+        if (dx * dx + dy * dy >= C.BALL_RADIUS * C.BALL_RADIUS) continue;
+        const oL = b.x + C.BALL_RADIUS - o.x, oR = o.x + o.w - (b.x - C.BALL_RADIUS);
+        const oT = b.y + C.BALL_RADIUS - o.y, oB = o.y + o.h - (b.y - C.BALL_RADIUS);
+        const mX = Math.min(oL, oR), mY = Math.min(oT, oB);
+        if (mX < mY) {
+          if (oL < oR) { b.x = o.x - C.BALL_RADIUS; if (b.vx > 0) b.vx = -b.vx; }
+          else { b.x = o.x + o.w + C.BALL_RADIUS; if (b.vx < 0) b.vx = -b.vx; }
+        } else {
+          if (oT < oB) { b.y = o.y - C.BALL_RADIUS; if (b.vy > 0) b.vy = -b.vy; }
+          else { b.y = o.y + o.h + C.BALL_RADIUS; if (b.vy < 0) b.vy = -b.vy; }
+        }
+      }
+    }
+    _collect(b) {
+      if (!b.lastHitBy) return;
+      const reach = C.POWERUP_RADIUS + C.BALL_RADIUS;
+      for (let i = this.pickups.length - 1; i >= 0; i--) {
+        const p = this.pickups[i];
+        const dx = b.x - p.x, dy = b.y - p.y;
+        if (dx * dx + dy * dy <= reach * reach) { this._apply(p.type, b.lastHitBy, b); this.pickups.splice(i, 1); }
+      }
+    }
+    _apply(type, side, b) {
+      if (type === 'grow') { this._setH(side, C.PADDLE_HEIGHT * C.PADDLE_GROW_FACTOR); this._timer(side); }
+      else if (type === 'shrink') { const o = side === 'left' ? 'right' : 'left'; this._setH(o, C.PADDLE_HEIGHT * C.PADDLE_SHRINK_FACTOR); this._timer(o); }
+      else if (type === 'speed') {
+        b.speed = Math.min(b.speed * C.SPEED_POWERUP_FACTOR, C.SPEED_POWERUP_CAP);
+        const mag = Math.hypot(b.vx, b.vy); if (mag > 0) { b.vx = b.vx / mag * b.speed; b.vy = b.vy / mag * b.speed; }
+      } else if (type === 'multiball') {
+        if (this.balls.length < C.MAX_BALLS) {
+          const vy = b.vy !== 0 ? -b.vy : b.speed * 0.5;
+          this.balls.push({ x: b.x, y: b.y, vx: b.vx, vy, speed: b.speed, lastHitBy: side });
+        }
+      }
+    }
+    _setH(side, h) {
+      const height = clamp(h, C.PADDLE_MIN_HEIGHT, C.PADDLE_MAX_HEIGHT);
+      if (side === 'left') { this.leftPaddleH = height; this.leftPaddleY = clamp(this.leftPaddleY, 0, C.HEIGHT - height); }
+      else { this.rightPaddleH = height; this.rightPaddleY = clamp(this.rightPaddleY, 0, C.HEIGHT - height); }
+    }
+    _timer(side) { if (side === 'left') this.leftEffectTicks = C.POWERUP_EFFECT_TICKS; else this.rightEffectTicks = C.POWERUP_EFFECT_TICKS; }
+    _tickEffects() {
+      if (this.leftEffectTicks > 0 && --this.leftEffectTicks === 0) this._setH('left', C.PADDLE_HEIGHT);
+      if (this.rightEffectTicks > 0 && --this.rightEffectTicks === 0) this._setH('right', C.PADDLE_HEIGHT);
+    }
+    _trySpawn() {
+      if (this.status !== 'playing') return;
+      if (--this.spawnTicks > 0) return;
+      this.spawnTicks = C.POWERUP_SPAWN_TICKS;
+      if (this.pickups.length >= C.POWERUP_MAX) return;
+      const type = POWERUP_TYPES[Math.floor(Math.random() * POWERUP_TYPES.length)];
+      this.pickups.push({ x: C.WIDTH * 0.3 + Math.random() * C.WIDTH * 0.4, y: 60 + Math.random() * (C.HEIGHT - 120), type });
     }
   }
 
   // --- Renderer (mismo dibujo que frontend/app/game/renderer.ts) ---
   function draw(ctx, s) {
+    const lH = s.leftPaddleH, rH = s.rightPaddleH;
     ctx.fillStyle = C.COLOR_BG; ctx.fillRect(0, 0, C.WIDTH, C.HEIGHT);
+    ctx.fillStyle = C.COLOR_OBSTACLE;
+    for (const o of s.obstacles) ctx.fillRect(o.x, o.y, o.w, o.h);
     ctx.strokeStyle = 'rgba(244,244,245,0.25)'; ctx.lineWidth = 2;
     ctx.setLineDash([12, 18]); ctx.beginPath();
     ctx.moveTo(C.WIDTH / 2, 0); ctx.lineTo(C.WIDTH / 2, C.HEIGHT); ctx.stroke(); ctx.setLineDash([]);
@@ -147,34 +241,48 @@
     ctx.font = '48px "Courier New", monospace';
     ctx.fillText(String(s.scoreLeft), C.WIDTH / 4, 64);
     ctx.fillText(String(s.scoreRight), (C.WIDTH / 4) * 3, 64);
-    ctx.fillRect(C.LEFT_PADDLE_X, s.leftPaddleY, C.PADDLE_WIDTH, C.PADDLE_HEIGHT);
-    ctx.fillRect(C.RIGHT_PADDLE_X, s.rightPaddleY, C.PADDLE_WIDTH, C.PADDLE_HEIGHT);
-    ctx.beginPath(); ctx.arc(s.ballX, s.ballY, C.BALL_RADIUS, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = C.COLOR_FG;
+    ctx.fillRect(C.LEFT_PADDLE_X, s.leftPaddleY, C.PADDLE_WIDTH, lH);
+    ctx.fillRect(C.RIGHT_PADDLE_X, s.rightPaddleY, C.PADDLE_WIDTH, rH);
+    ctx.textBaseline = 'middle';
+    for (const p of s.pickups) {
+      ctx.fillStyle = POWERUP_COLORS[p.type] || C.COLOR_ACCENT;
+      ctx.beginPath(); ctx.arc(p.x, p.y, C.POWERUP_RADIUS, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#0a0a0a'; ctx.font = 'bold 20px "Courier New", monospace';
+      ctx.fillText(POWERUP_LETTER[p.type] || '?', p.x, p.y + 1);
+    }
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = C.COLOR_FG;
+    for (const b of s.balls) { ctx.beginPath(); ctx.arc(b.x, b.y, C.BALL_RADIUS, 0, Math.PI * 2); ctx.fill(); }
     if (s.status === 'countdown' && s.countdown > 0) {
       ctx.fillStyle = C.COLOR_ACCENT; ctx.font = '64px "Courier New", monospace';
-      ctx.textBaseline = 'middle'; ctx.fillText(String(s.countdown), C.WIDTH / 2, C.HEIGHT / 2 - 70);
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(String(s.countdown), C.WIDTH / 2, C.HEIGHT / 2 - 70);
+      ctx.font = '22px "Courier New", monospace'; ctx.fillText('PREPÁRATE', C.WIDTH / 2, C.HEIGHT / 2 - 20);
       ctx.textBaseline = 'alphabetic';
     }
     if (s.status === 'finished') {
       ctx.fillStyle = 'rgba(10,10,10,0.72)'; ctx.fillRect(0, 0, C.WIDTH, C.HEIGHT);
       ctx.fillStyle = C.COLOR_FG; ctx.font = '64px "Courier New", monospace';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(s.winner === 'left' ? 'GANA IZQUIERDA' : 'GANA DERECHA', C.WIDTH / 2, C.HEIGHT / 2);
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(s.winner === 'left' ? 'GANA IZQUIERDA' : 'GANA DERECHA', C.WIDTH / 2, C.HEIGHT / 2 - 24);
+      ctx.font = '48px "Courier New", monospace';
+      ctx.fillText(s.scoreLeft + ' - ' + s.scoreRight, C.WIDTH / 2, C.HEIGHT / 2 + 40);
       ctx.textBaseline = 'alphabetic';
     }
   }
 
-  // --- IA sencilla para el attract mode ---
+  // --- IA sencilla del attract mode (apunta a la bola principal) ---
   function aiDir(engine, side) {
-    const paddleY = side === 'left' ? engine.leftPaddleY : engine.rightPaddleY;
-    const center = paddleY + C.PADDLE_HEIGHT / 2;
-    const dead = 12;
-    if (engine.ballY < center - dead) return 'up';
-    if (engine.ballY > center + dead) return 'down';
+    const b = engine.balls[0]; if (!b) return 'stop';
+    const py = side === 'left' ? engine.leftPaddleY : engine.rightPaddleY;
+    const ph = side === 'left' ? engine.leftPaddleH : engine.rightPaddleH;
+    const center = py + ph / 2, dead = 12;
+    if (b.y < center - dead) return 'up';
+    if (b.y > center + dead) return 'down';
     return 'stop';
   }
 
-  // --- Entrada de teclado (toma el control de un lado al pulsar) ---
   const pressed = new Set();
   let humanLeft = false, humanRight = false;
   addEventListener('keydown', (e) => {
@@ -188,17 +296,12 @@
     else if (k === 'ArrowUp' || k === 'ArrowDown') pressed.delete(k);
   });
   function applyInputs(engine) {
-    if (humanLeft) {
-      const up = pressed.has('w'), down = pressed.has('s');
-      engine.setInput('left', up && !down ? 'up' : down && !up ? 'down' : 'stop');
-    } else engine.setInput('left', aiDir(engine, 'left'));
-    if (humanRight) {
-      const up = pressed.has('ArrowUp'), down = pressed.has('ArrowDown');
-      engine.setInput('right', up && !down ? 'up' : down && !up ? 'down' : 'stop');
-    } else engine.setInput('right', aiDir(engine, 'right'));
+    if (humanLeft) { const up = pressed.has('w'), down = pressed.has('s'); engine.setInput('left', up && !down ? 'up' : down && !up ? 'down' : 'stop'); }
+    else engine.setInput('left', aiDir(engine, 'left'));
+    if (humanRight) { const up = pressed.has('ArrowUp'), down = pressed.has('ArrowDown'); engine.setInput('right', up && !down ? 'up' : down && !up ? 'down' : 'stop'); }
+    else engine.setInput('right', aiDir(engine, 'right'));
   }
 
-  // --- Bucle a paso fijo (física a TICK_RATE Hz, dibujo a la tasa del navegador) ---
   const ctx = document.getElementById('game').getContext('2d');
   let engine = new PongEngine();
   let acc = 0, last = performance.now(), finishedMs = 0;
@@ -206,12 +309,8 @@
   function frame(now) {
     acc = Math.min(acc + (now - last), 250); last = now;
     while (acc >= STEP) {
-      applyInputs(engine);
-      engine.step();
-      if (engine.status === 'finished') {
-        finishedMs += STEP;
-        if (finishedMs >= 2500) { engine = new PongEngine(); finishedMs = 0; }
-      }
+      applyInputs(engine); engine.step();
+      if (engine.status === 'finished') { finishedMs += STEP; if (finishedMs >= 2500) { engine = new PongEngine(); finishedMs = 0; } }
       acc -= STEP;
     }
     draw(ctx, engine.getSnapshot());
