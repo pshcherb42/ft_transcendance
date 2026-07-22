@@ -70,7 +70,7 @@ export class PongRenderer {
     ctx.fill();
 
     // Cuenta atrás antes del saque
-    if (s.status === 'countdown' && s.countdown > 0) {
+    /*if (s.status === 'countdown' && s.countdown > 0) {
       ctx.fillStyle = COLOR_ACCENT;
       ctx.font = FONT_BIG;
       ctx.textBaseline = 'middle';
@@ -79,7 +79,25 @@ export class PongRenderer {
       ctx.font = FONT_SMALL;
       ctx.fillText('PREPÁRATE', WIDTH / 2, HEIGHT / 2 - 20);
       ctx.textBaseline = 'alphabetic';
-    }
+    }*/
+
+      if (s.status === 'countdown' && s.countdown > 0) {
+        ctx.save();
+      
+        ctx.fillStyle = '#EE4424';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+      
+        ctx.font = '400 86px "Gasoek One", sans-serif';
+      
+        ctx.fillText(
+          String(s.countdown),
+          WIDTH / 2,
+          HEIGHT / 2,
+        );
+      
+        ctx.restore();
+      }
 
     // Fin de partida
     /*if (s.status === 'finished') {

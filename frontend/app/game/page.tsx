@@ -67,6 +67,8 @@ export default function GamePage() {
     right: 0,
   });
 
+  const [countdown, setCountdown] = useState(0);
+
   // Dificultad de la IA (solo modo 'ai'), elegida en el menú.
   const [difficulty, setDifficulty] =
   useState<Difficulty>(() => {
@@ -188,6 +190,14 @@ export default function GamePage() {
     const onGameState = (payload: Uint8Array) => {
       const state = decode(payload) as GameSnapshot;
       snapshot = state;
+
+      setCountdown((currentCountdown) => {
+        if (currentCountdown === state.countdown) {
+          return currentCountdown;
+        }
+      
+        return state.status === 'countdown' ? state.countdown : 0;
+      });
     
       setScore((currentScore) => {
         if (
