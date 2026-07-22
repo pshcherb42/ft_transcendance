@@ -2,10 +2,12 @@
 
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/AuthContext';
 import { loginSchema } from '@/validation/auth.schema';
 
 export default function LoginPage() {
+  const { t } = useTranslation();
   const { login } = useAuth();
   const router    = useRouter();
 
@@ -35,11 +37,11 @@ export default function LoginPage() {
         body:    JSON.stringify({ email, password }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.message ?? 'Login failed'); return; }
+      if (!res.ok) { setError(data.message ?? t('auth.loginFailed')); return; }
       await login(data.accessToken, data.refreshToken);
       router.push('/');
     } catch {
-      setError('Network error — is the backend running?');
+      setError(t('auth.networkError'));
     } finally {
       setLoading(false);
     }
@@ -49,21 +51,21 @@ export default function LoginPage() {
     <main className="flex flex-1 items-center justify-center bg-zinc-50 dark:bg-black px-4">
       <div className="w-full max-w-sm space-y-6">
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-          Log in
+          {t('auth.login')}
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Field label="Email" type="email" value={email} onChange={setEmail} />
+            <Field label={t('auth.email')} type="email" value={email} onChange={setEmail} />
             {fieldErrors.email && (
-              <p className="text-sm text-red-600 dark:text-red-400 mt-1">{fieldErrors.email}</p>
+              <p className="text-sm text-red-600 dark:text-red-400 mt-1">{t(fieldErrors.email)}</p>
             )}
           </div>
 
           <div>
-            <Field label="Password" type="password" value={password} onChange={setPassword} />
+            <Field label={t('auth.password')} type="password" value={password} onChange={setPassword} />
             {fieldErrors.password && (
-              <p className="text-sm text-red-600 dark:text-red-400 mt-1">{fieldErrors.password}</p>
+              <p className="text-sm text-red-600 dark:text-red-400 mt-1">{t(fieldErrors.password)}</p>
             )}
           </div>
 
@@ -76,13 +78,13 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full h-11 rounded-full bg-zinc-900 text-white font-medium hover:bg-zinc-700 disabled:opacity-50 transition-colors dark:bg-zinc-50 dark:text-black dark:hover:bg-zinc-300"
           >
-            {loading ? 'Signing in…' : 'Log in'}
+            {loading ? t('auth.signingIn') : t('auth.login')}
           </button>
         </form>
 
         <div className="relative flex items-center">
           <div className="flex-1 border-t border-zinc-200 dark:border-zinc-700" />
-          <span className="mx-3 text-xs text-zinc-400">or</span>
+          <span className="mx-3 text-xs text-zinc-400">{t('auth.or')}</span>
           <div className="flex-1 border-t border-zinc-200 dark:border-zinc-700" />
         </div>
 
@@ -91,13 +93,13 @@ export default function LoginPage() {
           className="flex items-center justify-center gap-3 w-full h-11 rounded-full border border-zinc-200 dark:border-zinc-700 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
         >
           <GoogleIcon />
-          Continue with Google
+          {t('auth.continueWithGoogle')}
         </a>
 
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          No account?{' '}
+          {t('auth.noAccount')}{' '}
           <a href="/register" className="font-medium text-zinc-900 dark:text-zinc-50 hover:underline">
-            Register
+            {t('auth.register')}
           </a>
         </p>
       </div>

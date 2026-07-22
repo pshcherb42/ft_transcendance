@@ -2,12 +2,12 @@
 
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/AuthContext';
 import { registerSchema } from '@/validation/auth.schema';
 
-
-
 export default function RegisterPage() {
+  const { t } = useTranslation();
   const { login } = useAuth();
   const router    = useRouter();
 
@@ -21,18 +21,17 @@ export default function RegisterPage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    setFieldErrors({}); // Clear old errors before validating again
+    setFieldErrors({});
 
-    // 3. Run the client-side Zod validation check
     const result = registerSchema.safeParse({ email, username, password });
-    
+
     if (!result.success) {
       const errors: Record<string, string> = {};
       for (const issue of result.error.issues) {
         errors[issue.path[0] as string] = issue.message;
       }
       setFieldErrors(errors);
-      return; // Stop the execution here so fetch is never sent
+      return;
     }
     setLoading(true);
 
@@ -44,45 +43,43 @@ export default function RegisterPage() {
       });
 
       const data = await res.json();
-      if (!res.ok) { setError(data.message ?? 'Registration failed'); return; }
+      if (!res.ok) { setError(data.message ?? t('auth.registrationFailed')); return; }
 
       await login(data.accessToken, data.refreshToken);
       router.push('/');
     } catch {
-      setError('Network error — is the backend running?');
+      setError(t('auth.networkError'));
     } finally {
       setLoading(false);
     }
   }
 
-  
-
   return (
     <main className="flex flex-1 items-center justify-center bg-zinc-50 dark:bg-black px-4">
       <div className="w-full max-w-sm space-y-6">
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-          Create account
+          {t('auth.createAccount')}
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Field label="Username" type="text" value={username} onChange={setUsername} />
+            <Field label={t('auth.username')} type="text" value={username} onChange={setUsername} />
             {fieldErrors.username && (
-              <p className="text-sm text-red-600 dark:text-red-400 mt-1">{fieldErrors.username}</p>
+              <p className="text-sm text-red-600 dark:text-red-400 mt-1">{t(fieldErrors.username)}</p>
             )}
           </div>
 
           <div>
-            <Field label="Email" type="email" value={email} onChange={setEmail} />
+            <Field label={t('auth.email')} type="email" value={email} onChange={setEmail} />
             {fieldErrors.email && (
-              <p className="text-sm text-red-600 dark:text-red-400 mt-1">{fieldErrors.email}</p>
+              <p className="text-sm text-red-600 dark:text-red-400 mt-1">{t(fieldErrors.email)}</p>
             )}
           </div>
 
           <div>
-            <Field label="Password" type="password" value={password} onChange={setPassword} />
+            <Field label={t('auth.password')} type="password" value={password} onChange={setPassword} />
             {fieldErrors.password && (
-              <p className="text-sm text-red-600 dark:text-red-400 mt-1">{fieldErrors.password}</p>
+              <p className="text-sm text-red-600 dark:text-red-400 mt-1">{t(fieldErrors.password)}</p>
             )}
           </div>
 
@@ -95,14 +92,14 @@ export default function RegisterPage() {
             disabled={loading}
             className="w-full h-11 rounded-full bg-zinc-900 text-white font-medium hover:bg-zinc-700 disabled:opacity-50 transition-colors dark:bg-zinc-50 dark:text-black dark:hover:bg-zinc-300"
           >
-            {loading ? 'Creating…' : 'Register'}
+            {loading ? t('auth.creating') : t('auth.register')}
           </button>
         </form>
 
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          Already have an account?{' '}
+          {t('auth.haveAccount')}{' '}
           <a href="/login" className="font-medium text-zinc-900 dark:text-zinc-50 hover:underline">
-            Log in
+            {t('auth.login')}
           </a>
         </p>
       </div>

@@ -4,9 +4,11 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/AuthContext';
 
 export default function HomePage() {
+  const { t } = useTranslation();
   const { user, loading, logout } = useAuth();
   const router = useRouter();
 
@@ -19,7 +21,7 @@ export default function HomePage() {
   if (loading || !user) {
     return (
       <main className="flex flex-1 items-center justify-center bg-zinc-50 dark:bg-black">
-        <p className="text-zinc-400">Loading</p>
+        <p className="text-zinc-400">{t('home.loading')}</p>
       </main>
     );
   }
@@ -61,7 +63,7 @@ export default function HomePage() {
             href="/game"
             className="flex h-11 w-full items-center justify-center rounded-full bg-zinc-900 text-sm font-semibold text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-50 dark:text-black dark:hover:bg-zinc-300"
           >
-            Jugar
+            {t('home.play')}
           </Link>
 
           <div className="flex w-full gap-3">
@@ -69,19 +71,19 @@ export default function HomePage() {
               href="/profile"
               className="flex h-10 flex-1 items-center justify-center rounded-full border border-zinc-200 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-50 dark:hover:bg-zinc-800"
             >
-              Profile
+              {t('home.profile')}
             </Link>
             <Link
               href="/friends"
               className="flex h-10 flex-1 items-center justify-center rounded-full border border-zinc-200 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-50 dark:hover:bg-zinc-800"
             >
-              Amigos
+              {t('home.friends')}
             </Link>
             <Link
               href="/stats"
               className="flex h-10 flex-1 items-center justify-center rounded-full border border-zinc-200 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-50 dark:hover:bg-zinc-800"
             >
-              Stats
+              {t('home.stats')}
             </Link>
           </div>
 
@@ -89,7 +91,7 @@ export default function HomePage() {
           onClick={handleLogout}
           className="flex h-10 w-full items-center justify-center rounded-full border border-zinc-200 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-50 dark:hover:bg-zinc-800"
         >
-          Log out
+          {t('home.logout')}
         </button>
       </div>
     </main>

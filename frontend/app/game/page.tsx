@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import type { Socket } from 'socket.io-client';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/AuthContext';
-import { connectGameSocket } from '@/app/lib/socket';
+import { PongEngine } from './pong-engine';
+import { PongAi, type Difficulty } from './ai';
 import { PongRenderer } from './renderer';
 import { PongMatch } from './PongMatch';
 import { TournamentView } from './TournamentView';
@@ -15,20 +16,10 @@ import type { GameSnapshot, Mode, Side } from './types';
 import { useSocket } from '@/context/SocketContext';
 import { decode } from '@msgpack/msgpack';
 
-type OnlineStatus =
-  | 'connecting'
-  | 'waiting'
-  | 'playing'
-  | 'gameover'
-  | 'opponent-left';
-
-const DIFF_LABEL: Record<Difficulty, string> = {
-  easy: 'Fácil',
-  medium: 'Normal',
-  hard: 'Difícil',
-};
+type OnlineStatus = 'connecting' | 'waiting' | 'playing' | 'gameover' | 'opponent-left';
 
 export default function GamePage() {
+  const { t } = useTranslation();
   const { user, loading } = useAuth();
   const router = useRouter();
 
@@ -40,7 +31,6 @@ export default function GamePage() {
 
   const [mode, setMode] = useState<Mode>('menu');
 
-  // Modo ONLINE
   const [onlineStatus, setOnlineStatus] = useState<OnlineStatus>('connecting');
   const [side, setSide] = useState<Side | null>(null);
   const [winner, setWinner] = useState<Side | null>(null);
@@ -56,45 +46,35 @@ export default function GamePage() {
   const [powerups, setPowerups] = useState(false);
   const socket = useSocket();
 
-  // La página requiere sesión.
+  const DIFF_LABEL: Record<Difficulty, string> = {
+    easy: t('game.difficulty.easy'),
+    medium: t('game.difficulty.medium'),
+    hard: t('game.difficulty.hard'),
+  };
+
   useEffect(() => {
     if (!loading && !user) router.replace('/login');
   }, [loading, user, router]);
 
-  // Fires only if the user is already sitting on /game (menu or mid-queue)
-  // when an invite gets accepted — router.push('/game') is a no-op in that
-  // case since the route doesn't change, so nothing else would pick this up.
   useEffect(() => {
     if (!socket) return;
-
     const onInviteAccepted = () => {
       setOnlineRound((r) => r + 1);
       setMode('online');
     };
-
     socket.on('gameInviteAccepted', onInviteAccepted);
-    return () => {
-      socket.off('gameInviteAccepted', onInviteAccepted);
-    };
+    return () => { socket.off('gameInviteAccepted', onInviteAccepted); };
   }, [socket]);
 
-  // Auto-resume: if this session already has an active online match (e.g.
-  // after a mid-game refresh), jump straight into it instead of making the
-  // user click "Jugar Online" again and lose time sitting on the menu.
   useEffect(() => {
     if (!socket || mode !== 'menu') return;
-
     const onAutoRejoin = () => {
       setOnlineRound((r) => r + 1);
       setMode('online');
     };
-
     socket.on('rejoinedGame', onAutoRejoin);
     socket.emit('checkRoom');
-
-    return () => {
-      socket.off('rejoinedGame', onAutoRejoin);
-    };
+    return () => { socket.off('rejoinedGame', onAutoRejoin); };
   }, [socket, mode]);
 
   // ----------------------------------------------------------------- ONLINE
@@ -103,10 +83,17 @@ export default function GamePage() {
 
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d'); // initiate rendering
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const renderer = rendererRef.current; // reinitiate game state 
+    const renderer = rendererRef.current;
+    const canvasLabels = {
+      getReady: t('game.canvas.getReady'),
+      youWin: t('game.canvas.youWin'),
+      youLose: t('game.canvas.youLose'),
+      leftWins: t('game.canvas.leftWins'),
+      rightWins: t('game.canvas.rightWins'),
+    };
     setOnlineStatus('connecting');
     setSide(null);
     setWinner(null);
@@ -114,13 +101,11 @@ export default function GamePage() {
     let snapshot: GameSnapshot | null = null;
     let mySide: Side | null = null;
 
-    // Socket is already connected (app-wide) — just join the queue directly,
-    // and re-join if we ever reconnect mid-session.
     const onConnect = () => {
       setOnlineStatus('connecting');
       socket.emit('checkRoom');
     };
-    
+
     const onNoActiveGame = () => {
       setOnlineStatus('waiting');
       socket.emit('joinQueue');
@@ -133,7 +118,6 @@ export default function GamePage() {
         disconnectTimerRef.current = null;
       }
       setReconnectSecondsLeft(null);
-      
       mySide = data.side;
       setSide(data.side);
       setWinner(null);
@@ -146,7 +130,6 @@ export default function GamePage() {
         disconnectTimerRef.current = null;
       }
       setReconnectSecondsLeft(null);
-    
       mySide = data.side;
       setSide(data.side);
       setWinner(null);
@@ -161,7 +144,6 @@ export default function GamePage() {
     const onGameOver = (data: { winner: Side }) => {
       setWinner(data.winner);
       setOnlineStatus('gameover');
-      // Limpieza del intervalo al terminar el juego
       if (disconnectTimerRef.current) {
         clearInterval(disconnectTimerRef.current);
         disconnectTimerRef.current = null;
@@ -189,7 +171,7 @@ export default function GamePage() {
         disconnectTimerRef.current = null;
       }
       setReconnectSecondsLeft(null);
-      setOnlineStatus('opponent-left'); // or your dedicated 'match-voided' status
+      setOnlineStatus('opponent-left');
       setWinner(null);
     };
 
@@ -200,14 +182,6 @@ export default function GamePage() {
       }
       setReconnectSecondsLeft(null);
     };
-    
-    /*socket.on('disconnect', () => {
-      if (disconnectTimerRef.current) {
-        clearInterval(disconnectTimerRef.current);
-        disconnectTimerRef.current = null;
-      }
-      setReconnectSecondsLeft(null);
-    });*/
 
     socket.on('connect', onConnect);
     socket.on('waiting', onWaiting);
@@ -256,7 +230,7 @@ export default function GamePage() {
 
     let raf: number;
     const loop = () => {
-      if (snapshot) renderer.draw(ctx, snapshot, mySide ?? undefined);
+      if (snapshot) renderer.draw(ctx, snapshot, mySide ?? undefined, canvasLabels);
       raf = requestAnimationFrame(loop);
     };
     loop();
@@ -265,14 +239,11 @@ export default function GamePage() {
       cancelAnimationFrame(raf);
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
-      // Limpieza del intervalo al desmontar o cambiar de ronda
       if (disconnectTimerRef.current) {
         clearInterval(disconnectTimerRef.current);
         disconnectTimerRef.current = null;
       }
-      setReconnectSecondsLeft(null); 
-      // Remove ONLY this effect's listeners — do NOT disconnect the socket,
-      // it's shared app-wide and owned by SocketProvider.
+      setReconnectSecondsLeft(null);
       socket.off('connect', onConnect);
       socket.off('waiting', onWaiting);
       socket.off('rejoinedGame', onRejoined);
@@ -285,23 +256,101 @@ export default function GamePage() {
       socket.off('opponentReconnected', onOpponentReconnected);
       socket.off('noActiveGame', onNoActiveGame);
     };
-  }, [mode, onlineRound, socket]);
+  }, [mode, onlineRound, socket, t]);
+
+  // ------------------------------------------------------------------ LOCAL
+  useEffect(() => {
+    if (mode !== 'local' && mode !== 'ai') return;
+    const isAi = mode === 'ai';
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const renderer = rendererRef.current;
+    const canvasLabels = {
+      getReady: t('game.canvas.getReady'),
+      youWin: t('game.canvas.youWin'),
+      youLose: t('game.canvas.youLose'),
+      leftWins: t('game.canvas.leftWins'),
+      rightWins: t('game.canvas.rightWins'),
+    };
+    const engine = new PongEngine();
+    const ai = isAi ? new PongAi(difficulty) : null;
+    setLocalWinner(null);
+
+    const pressed = new Set<string>();
+    const refresh = () => {
+      if (isAi) {
+        const up = pressed.has('w') || pressed.has('ArrowUp');
+        const down = pressed.has('s') || pressed.has('ArrowDown');
+        engine.setInput('left', up && !down ? 'up' : down && !up ? 'down' : 'stop');
+      } else {
+        const lUp = pressed.has('w');
+        const lDown = pressed.has('s');
+        engine.setInput('left', lUp && !lDown ? 'up' : lDown && !lUp ? 'down' : 'stop');
+        const rUp = pressed.has('ArrowUp');
+        const rDown = pressed.has('ArrowDown');
+        engine.setInput('right', rUp && !rDown ? 'up' : rDown && !rUp ? 'down' : 'stop');
+      }
+    };
+    const norm = (k: string): string | null => {
+      if (k === 'w' || k === 'W') return 'w';
+      if (k === 's' || k === 'S') return 's';
+      if (k === 'ArrowUp' || k === 'ArrowDown') return k;
+      return null;
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      const k = norm(e.key);
+      if (!k) return;
+      if (k.startsWith('Arrow')) e.preventDefault();
+      pressed.add(k);
+      refresh();
+    };
+    const onKeyUp = (e: KeyboardEvent) => {
+      const k = norm(e.key);
+      if (!k) return;
+      pressed.delete(k);
+      refresh();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
+
+    const stepTimer = setInterval(() => {
+      if (ai) ai.update(engine);
+      engine.step();
+      if (engine.status === 'finished' && engine.winner) {
+        setLocalWinner(engine.winner);
+      }
+    }, 1000 / TICK_RATE);
+
+    let raf: number;
+    const loop = () => {
+      renderer.draw(ctx, engine.getSnapshot(), isAi ? 'left' : undefined, canvasLabels);
+      raf = requestAnimationFrame(loop);
+    };
+    loop();
+
+    return () => {
+      clearInterval(stepTimer);
+      cancelAnimationFrame(raf);
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('keyup', onKeyUp);
+    };
+  }, [mode, localRound, difficulty, t]);
 
   // --------------------------------------------------------------- UI helpers
   const onlineStatusText = (() => {
     switch (onlineStatus) {
-      case 'connecting':
-        return 'Conectando…';
-      case 'waiting':
-        return 'Buscando rival…';
-      case 'playing':                                                                                                                                                         
-        return side === 'left'
-          ? 'Eres el jugador IZQUIERDA'
-          : 'Eres el jugador DERECHA';
+      case 'connecting': return t('game.status.connecting');
+      case 'waiting': return t('game.status.waiting');
+      case 'playing':
+        return side === 'left' ? t('game.status.playingLeft') : t('game.status.playingRight');
       case 'gameover':
-        return winner === side ? '¡Has ganado! 🎉' : 'Has perdido 😢';
+        return winner === side ? t('game.status.won') : t('game.status.lost');
       case 'opponent-left':
-        return 'El rival abandonó — ganas por abandono';
+        return t('game.status.opponentLeft');
     }
   })();
 
@@ -314,46 +363,39 @@ export default function GamePage() {
   if (loading || !user) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-900">
-        <p className="text-zinc-300 text-sm">Cargando…</p>
+        <p className="text-zinc-300 text-sm">{t('game.loading')}</p>
       </div>
     );
   }
 
-  // ------------------------------------------------------------------ MENÚ
   if (mode === 'menu') {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 gap-8 py-10">
-        <h1 className="text-4xl font-bold text-white">Pong</h1>
-        <div className="flex flex-col gap-4 w-72">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 gap-8">
+        <h1 className="text-4xl font-bold text-white">{t('game.menu.title')}</h1>
+        <div className="flex flex-col gap-4 w-64">
           <button
             type="button"
-            onClick={() => {
-              setOnlineRound((r) => r + 1);
-              setMode('online');
-            }}
+            onClick={() => { setOnlineRound((r) => r + 1); setMode('online'); }}
             className="h-12 rounded-full bg-white text-black font-semibold hover:bg-zinc-300 transition-colors"
           >
-            Jugar Online
+            {t('game.menu.playOnline')}
           </button>
 
           <button
             type="button"
-            onClick={() => startLocal('local')}
+            onClick={() => { setLocalRound((r) => r + 1); setMode('local'); }}
             className="h-12 rounded-full border border-zinc-500 text-white font-semibold hover:bg-zinc-800 transition-colors"
           >
-            Jugar Local (2 jugadores)
+            {t('game.menu.playLocal')}
           </button>
-          
+
           <div className="flex flex-col gap-2">
             <button
               type="button"
-              onClick={() => {
-                setLocalRound((r) => r + 1);
-                setMode('ai');
-              }}
+              onClick={() => { setLocalRound((r) => r + 1); setMode('ai'); }}
               className="h-12 rounded-full border border-zinc-500 text-white font-semibold hover:bg-zinc-800 transition-colors"
             >
-              Jugar vs IA (1 jugador)
+              {t('game.menu.playAi')}
             </button>
             <div className="flex gap-2">
               {(['easy', 'medium', 'hard'] as Difficulty[]).map((d) => (
@@ -417,8 +459,7 @@ export default function GamePage() {
         </div>
 
         <p className="text-sm text-zinc-500 text-center max-w-xs">
-          Online: te emparejamos con otro jugador. Local/IA/Torneo: en este mismo
-          equipo.
+          {t('game.menu.description')}
         </p>
       </div>
     );
@@ -434,7 +475,6 @@ export default function GamePage() {
     if (mode === 'online' && socket) {
       socket.emit('leaveGame');
     }
-    // Clear immediately so no stale countdown flashes when re-entering.
     if (disconnectTimerRef.current) {
       clearInterval(disconnectTimerRef.current);
       disconnectTimerRef.current = null;
@@ -447,7 +487,7 @@ export default function GamePage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 gap-4">
       <h1 className="text-3xl font-bold text-white">
-        {mode === 'online' ? 'Pong Online' : mode === 'ai' ? 'Pong vs IA' : 'Pong Local'}
+        {mode === 'online' ? t('game.title.online') : mode === 'ai' ? t('game.title.ai') : t('game.title.local')}
       </h1>
 
       <p className="text-lg text-zinc-200 h-7">
@@ -455,20 +495,16 @@ export default function GamePage() {
           ? onlineStatusText
           : localWinner
             ? mode === 'ai'
-              ? localWinner === 'left'
-                ? '¡Has ganado! 🎉'
-                : '¡Gana la IA! 🤖'
-              : localWinner === 'left'
-                ? '¡Gana el jugador IZQUIERDA! 🎉'
-                : '¡Gana el jugador DERECHA! 🎉'
+              ? (localWinner === 'left' ? t('game.result.youWin') : t('game.result.aiWins'))
+              : (localWinner === 'left' ? t('game.result.leftWins') : t('game.result.rightWins'))
             : mode === 'ai'
-              ? `Tú (izquierda) vs IA · ${DIFF_LABEL[difficulty]} — primero a 5 gana`
-              : 'Primer jugador en llegar a 5 gana'}
+              ? t('game.subtitle.ai', { difficulty: DIFF_LABEL[difficulty] })
+              : t('game.subtitle.local')}
       </p>
 
       {mode === 'online' && reconnectSecondsLeft !== null && (
         <p className="text-sm font-semibold text-amber-400 animate-pulse h-5">
-          Rival desconectado — ganas en {reconnectSecondsLeft}s si no vuelve
+          {t('game.reconnect', { seconds: reconnectSecondsLeft })}
         </p>
       )}
 
@@ -493,10 +529,10 @@ export default function GamePage() {
 
       <p className="text-sm text-zinc-400">
         {mode === 'online'
-          ? 'Tus controles: ↑ / ↓ (o W / S)'
+          ? t('game.controls.online')
           : mode === 'ai'
-            ? 'Tus controles: W / S  (o ↑ / ↓)'
-            : 'Izquierda: W / S     ·     Derecha: ↑ / ↓'}
+            ? t('game.controls.ai')
+            : t('game.controls.local')}
       </p>
 
       <div className="flex gap-3">
@@ -507,7 +543,7 @@ export default function GamePage() {
               onClick={() => setOnlineRound((r) => r + 1)}
               className="h-11 px-6 rounded-full bg-white text-black font-medium hover:bg-zinc-300 transition-colors"
             >
-              Buscar otra partida
+              {t('game.button.findMatch')}
             </button>
           )}
         {mode !== 'online' && localWinner && (
@@ -519,7 +555,7 @@ export default function GamePage() {
             }}
             className="h-11 px-6 rounded-full bg-white text-black font-medium hover:bg-zinc-300 transition-colors"
           >
-            Revancha
+            {t('game.button.rematch')}
           </button>
         )}
         <button
@@ -527,7 +563,7 @@ export default function GamePage() {
           onClick={handleBackToMenu}
           className="h-11 px-6 rounded-full border border-zinc-500 text-zinc-200 font-medium hover:bg-zinc-800 transition-colors"
         >
-          Volver al menú
+          {t('game.button.backToMenu')}
         </button>
       </div>
     </div>
