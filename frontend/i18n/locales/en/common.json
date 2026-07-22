@@ -101,6 +101,13 @@
         "findMatch": "Find another match",
         "rematch": "Rematch",
         "backToMenu": "Back to menu"
+      },
+      "canvas": {
+        "getReady": "GET READY",
+        "youWin": "YOU WIN!",
+        "youLose": "YOU LOSE",
+        "leftWins": "LEFT WINS",
+        "rightWins": "RIGHT WINS"
       }
     },
     "profile": {

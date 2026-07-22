@@ -101,6 +101,13 @@
         "findMatch": "Найти другую игру",
         "rematch": "Реванш",
         "backToMenu": "В меню"
+      },
+      "canvas": {
+        "getReady": "ПРИГОТОВЬТЕСЬ",
+        "youWin": "ВЫ ПОБЕДИЛИ!",
+        "youLose": "ВЫ ПРОИГРАЛИ",
+        "leftWins": "ПОБЕЖДАЕТ ЛЕВЫЙ",
+        "rightWins": "ПОБЕЖДАЕТ ПРАВЫЙ"
       }
     },
     "profile": {

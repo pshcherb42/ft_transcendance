@@ -80,6 +80,13 @@ export default function GamePage() {
     if (!ctx) return;
 
     const renderer = rendererRef.current;
+    const canvasLabels = {
+      getReady: t('game.canvas.getReady'),
+      youWin: t('game.canvas.youWin'),
+      youLose: t('game.canvas.youLose'),
+      leftWins: t('game.canvas.leftWins'),
+      rightWins: t('game.canvas.rightWins'),
+    };
     setOnlineStatus('connecting');
     setSide(null);
     setWinner(null);
@@ -216,7 +223,7 @@ export default function GamePage() {
 
     let raf: number;
     const loop = () => {
-      if (snapshot) renderer.draw(ctx, snapshot, mySide ?? undefined);
+      if (snapshot) renderer.draw(ctx, snapshot, mySide ?? undefined, canvasLabels);
       raf = requestAnimationFrame(loop);
     };
     loop();
@@ -242,7 +249,7 @@ export default function GamePage() {
       socket.off('opponentReconnected', onOpponentReconnected);
       socket.off('noActiveGame', onNoActiveGame);
     };
-  }, [mode, onlineRound, socket]);
+  }, [mode, onlineRound, socket, t]);
 
   // ------------------------------------------------------------------ LOCAL
   useEffect(() => {
@@ -255,6 +262,13 @@ export default function GamePage() {
     if (!ctx) return;
 
     const renderer = rendererRef.current;
+    const canvasLabels = {
+      getReady: t('game.canvas.getReady'),
+      youWin: t('game.canvas.youWin'),
+      youLose: t('game.canvas.youLose'),
+      leftWins: t('game.canvas.leftWins'),
+      rightWins: t('game.canvas.rightWins'),
+    };
     const engine = new PongEngine();
     const ai = isAi ? new PongAi(difficulty) : null;
     setLocalWinner(null);
@@ -306,7 +320,7 @@ export default function GamePage() {
 
     let raf: number;
     const loop = () => {
-      renderer.draw(ctx, engine.getSnapshot(), isAi ? 'left' : undefined);
+      renderer.draw(ctx, engine.getSnapshot(), isAi ? 'left' : undefined, canvasLabels);
       raf = requestAnimationFrame(loop);
     };
     loop();
@@ -317,7 +331,7 @@ export default function GamePage() {
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
     };
-  }, [mode, localRound, difficulty]);
+  }, [mode, localRound, difficulty, t]);
 
   // --------------------------------------------------------------- UI helpers
   const onlineStatusText = (() => {

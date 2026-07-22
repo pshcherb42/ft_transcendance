@@ -30,7 +30,7 @@
       "email": { "invalid": "Introduce un correo electrónico válido" },
       "confirmPassword": { "mismatch": "Las contraseñas no coinciden" },
       "currentPassword": { "required": "Se requiere la contraseña actual para establecer una nueva" }
-    },
+    }, 
     "friends": {
       "loading": "Cargando amigos…",
       "usernamePlaceholder": "Nombre de usuario",
@@ -101,6 +101,13 @@
         "findMatch": "Buscar otra partida",
         "rematch": "Revancha",
         "backToMenu": "Volver al menú"
+      },
+      "canvas": {
+        "getReady": "PREPÁRATE",
+        "youWin": "¡GANAS!",
+        "youLose": "PIERDES",
+        "leftWins": "GANA IZQUIERDA",
+        "rightWins": "GANA DERECHA"
       }
     },
     "profile": {
