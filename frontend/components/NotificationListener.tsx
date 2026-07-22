@@ -3,10 +3,12 @@
 
 import { useEffect } from 'react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { useSocket } from '@/context/SocketContext';
 import { useRouter } from 'next/navigation';
 
 export function NotificationListener() {
+  const { t } = useTranslation();
   const socket = useSocket();
   const router = useRouter();
 
@@ -14,57 +16,57 @@ export function NotificationListener() {
     if (!socket) return;
 
     const onFriendOnline = (data: { userId: string; username?: string }) => {
-      toast.success(`${data.username ?? 'A friend'} is now online`);
+      toast.success(t('notification.friendOnline', { username: data.username ?? t('notification.friendOfflineDefault') }));
     };
     const onFriendOffline = (data: { userId: string; username?: string }) => {
-      toast.info(`${data.username ?? 'A friend'} went offline`);
+      toast.info(t('notification.friendOffline', { username: data.username ?? t('notification.friendOfflineDefault') }));
     };
-    const onRequestReceived = (data: { message: string }) => {
-      toast.info(data.message);
+    const onRequestReceived = (data: { messageKey: string; username: string }) => {
+      toast.info(t(data.messageKey, { username: data.username }));
     };
-    const onRequestAccepted = (data: { message: string }) => {
-      toast.success(data.message);
+    const onRequestAccepted = (data: { messageKey: string; username: string }) => {
+      toast.success(t(data.messageKey, { username: data.username }));
     };
     const onRequestDeclined = () => {
-      toast.error('Your friend request was declined');
+      toast.error(t('notification.requestDeclined'));
     };
-    const onFriendRemoved = (data: { message: string }) => {
-      toast.warning(data.message);
+    const onFriendRemoved = (data: { messageKey: string }) => {
+      toast.warning(t(data.messageKey));
     };
 
     const onGameInviteReceived = (data: { inviteId: string; senderUsername: string; gameRoomId: string }) => {
-        const toastId = toast.custom(
-            () => (
-            <div className="bg-zinc-800 text-white p-4 rounded-lg shadow-lg border border-zinc-700">
-                <p className="font-semibold mb-2">{data.senderUsername} wants to play!</p>
-                <div className="flex gap-2 justify-end">
-                <button
-                    className="text-xs px-2 py-1 rounded bg-zinc-600 text-white"
-                    onClick={() => {
-                    socket.emit('declineGameInvite', { inviteId: data.inviteId });
-                    toast.dismiss(toastId);
-                    }}
-                >
-                    Rechazar
-                </button>
-                <button
-                    className="text-xs px-2 py-1 rounded bg-emerald-600 text-white font-bold"
-                    onClick={() => {
-                    socket.emit('acceptGameInvite', { inviteId: data.inviteId });
-                    toast.dismiss(toastId);
-                    }}
-                >
-                    Aceptar
-                </button>
-                </div>
+      const toastId = toast.custom(
+        () => (
+          <div className="bg-zinc-800 text-white p-4 rounded-lg shadow-lg border border-zinc-700">
+            <p className="font-semibold mb-2">{t('notification.wantsToPlay', { username: data.senderUsername })}</p>
+            <div className="flex gap-2 justify-end">
+              <button
+                className="text-xs px-2 py-1 rounded bg-zinc-600 text-white"
+                onClick={() => {
+                  socket.emit('declineGameInvite', { inviteId: data.inviteId });
+                  toast.dismiss(toastId);
+                }}
+              >
+                {t('notification.decline')}
+              </button>
+              <button
+                className="text-xs px-2 py-1 rounded bg-emerald-600 text-white font-bold"
+                onClick={() => {
+                  socket.emit('acceptGameInvite', { inviteId: data.inviteId });
+                  toast.dismiss(toastId);
+                }}
+              >
+                {t('notification.accept')}
+              </button>
             </div>
-            ),
-            { duration: 15000 },
-        );
-        };
+          </div>
+        ),
+        { duration: 15000 },
+      );
+    };
 
     const onGameInviteAccepted = () => {
-        router.push('/game');
+      router.push('/game');
     };
 
     socket.on('gameInviteReceived', onGameInviteReceived);
@@ -86,7 +88,7 @@ export function NotificationListener() {
       socket.off('gameInviteReceived', onGameInviteReceived);
       socket.off('gameInviteAccepted', onGameInviteAccepted);
     };
-  }, [socket, router]);
+  }, [socket, router, t]);
 
   return null;
 }

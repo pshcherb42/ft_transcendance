@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, FormEvent, ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
 import imageCompression from 'browser-image-compression';
 import { useAuth } from '@/context/AuthContext';
 import { apiFetch } from '@/app/lib/api';
@@ -9,6 +10,7 @@ import { updateProfileSchema } from '@/validation/auth.schema';
 import { toast } from 'sonner';
 
 export default function ProfilePage() {
+  const { t } = useTranslation();
   const { user, loading, logout, refetchUser } = useAuth();
   const router = useRouter();
 
@@ -36,7 +38,6 @@ export default function ProfilePage() {
     setSaveError('');
     setFieldErrors({});
 
-    // 2. Run Zod validation schema on form inputs
     const result = updateProfileSchema.safeParse({
       username,
       currentPassword,
@@ -70,7 +71,8 @@ export default function ProfilePage() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setSaveError(data?.message ?? 'Save failed — try again');
+        const errorMessage = data?.message ?? t('profile.saveFailed');
+        setSaveError(errorMessage);
         setSaveStatus('error');
         toast.error(errorMessage);
         return;
@@ -94,8 +96,6 @@ export default function ProfilePage() {
       const fallbackError = 'Save failed — try again';
       setSaveError(fallbackError);
       setSaveStatus('error');
-      
-      // UBICACIÓN DE ERROR 2: Error de red o servidor caído
       toast.error(fallbackError);
     }
   }
@@ -103,33 +103,31 @@ export default function ProfilePage() {
   async function handleAvatarChange(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-  
+
     setAvatarStatus('uploading');
-  
+
     try {
-      // Compress first
       const compressed = await imageCompression(file, {
         maxSizeMB: 0.8,
-        maxWidthOrHeight: 256,   // avatar — small is fine
+        maxWidthOrHeight: 256,
         useWebWorker: true,
       });
-  
-      // Convert to base64 data URL
+
       const base64 = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => resolve(reader.result as string);
         reader.onerror  = reject;
         reader.readAsDataURL(compressed);
       });
-  
+
       setAvatarPreview(base64);
-  
+
       const res = await apiFetch('/users/me/avatar', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ avatar: base64 }),
       });
-  
+
       if (!res.ok) { setAvatarStatus('error'); return; }
       await refetchUser();
       setAvatarStatus('done');
@@ -147,19 +145,18 @@ export default function ProfilePage() {
   if (loading || !user) {
     return (
       <main className="flex flex-1 items-center justify-center">
-        <p className="text-zinc-400 text-sm">Loading…</p>
+        <p className="text-zinc-400 text-sm">{t('profile.loading')}</p>
       </main>
     );
   }
 
   const avatarSrc = avatarPreview ?? user.avatarPath ?? null;
-  const isOAuthUser = !user.hasPassword; // see note below
+  const isOAuthUser = !user.hasPassword;
 
   return (
     <main className="flex flex-1 items-center justify-center bg-zinc-50 dark:bg-black px-4 py-12">
       <div className="w-full max-w-sm space-y-8">
 
-        {/* Avatar */}
         <div className="flex flex-col items-center gap-3">
           <button
             type="button"
@@ -174,25 +171,23 @@ export default function ProfilePage() {
               </span>
             )}
             <span className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-medium">
-              Change
+              {t('profile.changeAvatar')}
             </span>
           </button>
           <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
           <p className="text-xs text-zinc-400">
-            {avatarStatus === 'uploading' && 'Uploading…'}
-            {avatarStatus === 'done'      && 'Avatar updated ✓'}
-            {avatarStatus === 'error'     && 'Upload failed'}
+            {avatarStatus === 'uploading' && t('profile.avatarUploading')}
+            {avatarStatus === 'done'      && t('profile.avatarUpdated')}
+            {avatarStatus === 'error'     && t('profile.avatarUploadFailed')}
           </p>
         </div>
 
-        {/* Email */}
         <p className="text-center text-sm text-zinc-500 dark:text-zinc-400">{user.email}</p>
 
-        {/* Edit form */}
         <form onSubmit={handleSave} className="space-y-4">
           {/* Username */}
           <div className="space-y-1">
-            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">Username</label>
+            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">{t('profile.username')}</label>
             <input
               type="text"
               value={username}
@@ -201,17 +196,16 @@ export default function ProfilePage() {
               className="w-full h-10 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 text-sm text-zinc-900 dark:text-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50"
             />
             {fieldErrors.username && (
-              <p className="text-xs text-red-600 dark:text-red-400">{fieldErrors.username}</p>
+              <p className="text-xs text-red-600 dark:text-red-400">{t(fieldErrors.username)}</p>
             )}
           </div>
 
-          {/* Password change — hidden for OAuth users */}
           {!isOAuthUser && (
             <div className="space-y-3 pt-2">
-              <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Change password</p>
+              <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{t('profile.changePassword')}</p>
 
               <div className="space-y-1">
-                <label className="block text-xs text-zinc-500 dark:text-zinc-400">Current password</label>
+                <label className="block text-xs text-zinc-500 dark:text-zinc-400">{t('profile.currentPassword')}</label>
                 <input
                   type="password"
                   value={currentPassword}
@@ -220,12 +214,12 @@ export default function ProfilePage() {
                   className="w-full h-10 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 text-sm text-zinc-900 dark:text-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50"
                 />
                 {fieldErrors.currentPassword && (
-                  <p className="text-xs text-red-600 dark:text-red-400">{fieldErrors.currentPassword}</p>
+                  <p className="text-xs text-red-600 dark:text-red-400">{t(fieldErrors.currentPassword)}</p>
                 )}
               </div>
 
               <div className="space-y-1">
-                <label className="block text-xs text-zinc-500 dark:text-zinc-400">New password</label>
+                <label className="block text-xs text-zinc-500 dark:text-zinc-400">{t('profile.newPassword')}</label>
                 <input
                   type="password"
                   value={newPassword}
@@ -234,12 +228,12 @@ export default function ProfilePage() {
                   className="w-full h-10 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 text-sm text-zinc-900 dark:text-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50"
                 />
                 {fieldErrors.newPassword && (
-                  <p className="text-xs text-red-600 dark:text-red-400">{fieldErrors.newPassword}</p>
+                  <p className="text-xs text-red-600 dark:text-red-400">{t(fieldErrors.newPassword)}</p>
                 )}
               </div>
 
               <div className="space-y-1">
-                <label className="block text-xs text-zinc-500 dark:text-zinc-400">Confirm new password</label>
+                <label className="block text-xs text-zinc-500 dark:text-zinc-400">{t('profile.confirmPassword')}</label>
                 <input
                   type="password"
                   value={confirmPassword}
@@ -248,7 +242,7 @@ export default function ProfilePage() {
                   className="w-full h-10 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 text-sm text-zinc-900 dark:text-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-50"
                 />
                 {fieldErrors.confirmPassword && (
-                  <p className="text-xs text-red-600 dark:text-red-400">{fieldErrors.confirmPassword}</p>
+                  <p className="text-xs text-red-600 dark:text-red-400">{t(fieldErrors.confirmPassword)}</p>
                 )}
               </div>
             </div>
@@ -259,7 +253,7 @@ export default function ProfilePage() {
             disabled={saveStatus === 'saving'}
             className="w-full h-11 rounded-full bg-zinc-900 text-white font-medium hover:bg-zinc-700 disabled:opacity-50 transition-colors dark:bg-zinc-50 dark:text-black dark:hover:bg-zinc-300"
           >
-            {saveStatus === 'saving' ? 'Saving…' : saveStatus === 'saved' ? 'Saved ✓' : 'Save changes'}
+            {saveStatus === 'saving' ? t('profile.saving') : saveStatus === 'saved' ? t('profile.saved') : t('profile.saveChanges')}
           </button>
 
           {saveStatus === 'error' && saveError && (
@@ -267,13 +261,12 @@ export default function ProfilePage() {
           )}
         </form>
 
-        {/* Logout */}
         <button
           type="button"
           onClick={handleLogout}
           className="w-full h-11 rounded-full border border-zinc-200 dark:border-zinc-700 text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
         >
-          Log out
+          {t('profile.logout')}
         </button>
 
       </div>

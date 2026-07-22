@@ -100,8 +100,9 @@ import {
 				existingSocket.disconnect(true);
 				}
 			}
-			this.presence.setOnline(userId, client.id);
-			void this.friendsService.notifyFriendsOfPresence(userId, true, this.server, this.presence);
+			this.presence.setOnline(userId, client.id, () => {
+				void this.friendsService.notifyFriendsOfPresence(userId, true, this.server, this.presence);
+			});
 			// --- end single-session enforcement ---
 
 			// Room takeover: if the user has a live room, rejoin instantly.
@@ -145,8 +146,9 @@ import {
 		const roomId: string | undefined = client.data.roomId;
 	  
 		if (userId && this.presence.getSocketId(userId) === client.id) {
-			this.presence.setOffline(userId, client.id);
-			void this.friendsService.notifyFriendsOfPresence(userId, false, this.server, this.presence);
+			this.presence.setOffline(userId, client.id, () => {
+			  void this.friendsService.notifyFriendsOfPresence(userId, false, this.server, this.presence);
+			});
 		}
 
 		if (roomId && userId) {
