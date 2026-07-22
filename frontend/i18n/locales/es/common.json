@@ -129,6 +129,16 @@
       "profileUpdated": "¡Perfil actualizado con éxito!",
       "logout": "Cerrar sesión"
     },
+    "chat": {
+      "onlineFriends": "Amigos conectados",
+      "loading": "Cargando…",
+      "noneOnline": "No hay amigos conectados",
+      "selectFriend": "Selecciona un amigo para empezar a chatear",
+      "invite": "Invitar a jugar",
+      "messagePlaceholder": "Escribe un mensaje…",
+      "send": "Enviar",
+      "newMessage": "Nuevo Mensaje!"
+    },
     "stats": {
       "title": "Estadísticas",
       "back": "← Volver",
@@ -164,6 +174,7 @@
       "play": "Jugar",
       "profile": "Perfil",
       "friends": "Amigos",
+      "chat": "Chat",
       "stats": "Stats",
       "logout": "Cerrar sesión"
     },

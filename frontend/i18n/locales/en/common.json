@@ -129,6 +129,16 @@
       "profileUpdated": "Profile updated successfully!",
       "logout": "Log out"
     },
+    "chat": {
+      "onlineFriends": "Online friends",
+      "loading": "Loading…",
+      "noneOnline": "No friends online",
+      "selectFriend": "Select a friend to start chatting",
+      "invite": "Invite to play",
+      "messagePlaceholder": "Type a message…",
+      "send": "Send",
+      "newMessage": "New Message!"
+    },
     "stats": {
       "title": "Statistics",
       "back": "← Back",
@@ -164,6 +174,7 @@
       "play": "Play",
       "profile": "Profile",
       "friends": "Friends",
+      "chat": "Chat",
       "stats": "Stats",
       "logout": "Log out"
     },

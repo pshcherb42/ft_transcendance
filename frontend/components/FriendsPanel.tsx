@@ -4,56 +4,14 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFriends } from '@/hooks/useFriends';
-import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
-import { useSocket } from '@/context/SocketContext';
-import { useAuth } from '@/context/AuthContext';
+import { useGameInvite } from '@/hooks/useGameInvite';
 
 export default function FriendsPanel() {
   const { t } = useTranslation();
   const { friends, incoming, outgoing, loading, error, sendRequest, respondToRequest, removeFriend } = useFriends();
-  const socket = useSocket();
-  const { user } = useAuth();
-  const router = useRouter();
+  const { inviteToPlay } = useGameInvite();
   const [username, setUsername] = useState('');
   const [sendError, setSendError] = useState<string | null>(null);
-
-  const handleInviteToPlay = (friendId: string, friendUsername: string) => {
-    if (!socket || !user) return;
-
-    socket.emit('sendGameInvite', { receiverId: friendId, senderUsername: user.username });
-
-    const toastId = toast.loading(t('friends.inviteSent', { username: friendUsername }), { duration: 15000 });
-
-    const onSent = (payload: { inviteId: string; gameRoomId: string }) => {
-      const onAccepted = (p: { roomId: string }) => {
-        if (p.roomId !== payload.gameRoomId) return;
-        toast.success(t('friends.inviteAccepted', { username: friendUsername }), { id: toastId, duration: 3000 });
-        cleanup();
-        router.push('/game');
-      };
-      const onExpired = (p: { inviteId: string }) => {
-        if (p.inviteId !== payload.inviteId) return;
-        toast.error(t('friends.inviteExpired', { username: friendUsername }), { id: toastId, duration: 3000 });
-        cleanup();
-      };
-      const onDeclined = (p: { inviteId: string }) => {
-        if (p.inviteId !== payload.inviteId) return;
-        toast.error(t('friends.inviteDeclined', { username: friendUsername }), { id: toastId, duration: 3000 });
-        cleanup();
-      };
-      const cleanup = () => {
-        socket.off('gameInviteAccepted', onAccepted);
-        socket.off('gameInviteExpired', onExpired);
-        socket.off('gameInviteDeclined', onDeclined);
-      };
-      socket.on('gameInviteAccepted', onAccepted);
-      socket.on('gameInviteExpired', onExpired);
-      socket.on('gameInviteDeclined', onDeclined);
-    };
-
-    socket.once('gameInviteSent', onSent);
-  };
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,27 +87,27 @@ export default function FriendsPanel() {
         <ul className="flex flex-col gap-2">
           {friends.map((f) => (
             <li key={f.friendshipId} className="flex items-center justify-between bg-zinc-800 rounded-lg px-3 py-2">
-            <div className="flex items-center gap-2">
-              <span className={`w-2 h-2 rounded-full ${f.online ? 'bg-emerald-400' : 'bg-zinc-500'}`} />
-              <span className="text-white text-sm">{f.username}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              {f.online && (
+              <div className="flex items-center gap-2">
+                <span className={`w-2 h-2 rounded-full ${f.online ? 'bg-emerald-400' : 'bg-zinc-500'}`} />
+                <span className="text-white text-sm">{f.username}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                {f.online && (
+                  <button
+                    onClick={() => inviteToPlay(f.id, f.username)}
+                    className="text-xs px-2 py-1 rounded bg-indigo-600 text-white hover:bg-indigo-500"
+                  >
+                    {t('friends.play')}
+                  </button>
+                )}
                 <button
-                  onClick={() => handleInviteToPlay(f.id, f.username)}
-                  className="text-xs px-2 py-1 rounded bg-indigo-600 text-white hover:bg-indigo-500"
+                  onClick={() => removeFriend(f.friendshipId)}
+                  className="text-xs text-zinc-400 hover:text-red-400"
                 >
-                  {t('friends.play')}
+                  {t('friends.remove')}
                 </button>
-              )}
-              <button
-                onClick={() => removeFriend(f.friendshipId)}
-                className="text-xs text-zinc-400 hover:text-red-400"
-              >
-                {t('friends.remove')}
-              </button>
-            </div>
-          </li>
+              </div>
+            </li>
           ))}
         </ul>
       </div>

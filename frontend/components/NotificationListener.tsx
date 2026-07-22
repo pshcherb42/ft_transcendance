@@ -5,12 +5,15 @@ import { useEffect } from 'react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { useSocket } from '@/context/SocketContext';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 
 export function NotificationListener() {
   const { t } = useTranslation();
   const socket = useSocket();
   const router = useRouter();
+  const pathname = usePathname();
+  const { user } = useAuth();
 
   useEffect(() => {
     if (!socket) return;
@@ -32,6 +35,11 @@ export function NotificationListener() {
     };
     const onFriendRemoved = (data: { messageKey: string }) => {
       toast.warning(t(data.messageKey));
+    };
+    const onChatMessage = (data: { senderId: string; receiverId: string; text: string }) => {
+      if (!user || data.senderId === user.id) return;
+      if (pathname === '/chat') return;
+      toast.info(t('chat.newMessage'));
     };
 
     const onGameInviteReceived = (data: { inviteId: string; senderUsername: string; gameRoomId: string }) => {
@@ -77,6 +85,7 @@ export function NotificationListener() {
     socket.on('friendRequestAccepted', onRequestAccepted);
     socket.on('friendRequestDeclined', onRequestDeclined);
     socket.on('friendRemoved', onFriendRemoved);
+    socket.on('chatMessageReceived', onChatMessage);
 
     return () => {
       socket.off('friendOnline', onFriendOnline);
@@ -87,8 +96,9 @@ export function NotificationListener() {
       socket.off('friendRemoved', onFriendRemoved);
       socket.off('gameInviteReceived', onGameInviteReceived);
       socket.off('gameInviteAccepted', onGameInviteAccepted);
+      socket.off('chatMessageReceived', onChatMessage);
     };
-  }, [socket, router, t]);
+  }, [socket, router, t, pathname, user]);
 
   return null;
 }

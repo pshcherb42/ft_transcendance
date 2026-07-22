@@ -63,6 +63,19 @@ import {
 		timeout: NodeJS.Timeout;
 	}>();
 
+	private chatHistory = new Map<string, {
+		id: string;
+		senderId: string;
+		receiverId: string;
+		text: string;
+		timestamp: number;
+	}[]>();
+	private readonly MAX_HISTORY_PER_CONVO = 200;
+	  
+	private chatKey(a: string, b: string) {
+		return [a, b].sort().join(':');
+	}
+
 	constructor(
 	  private jwtService: JwtService,
 	  private configService: ConfigService,
@@ -391,6 +404,46 @@ import {
 	if (senderSocketId) {
 		this.server.to(senderSocketId).emit('gameInviteDeclined', { inviteId: data.inviteId });
 	}
+	}
+
+	//---CHAT---
+	@SubscribeMessage('getChatHistory')
+	handleGetChatHistory(
+	@ConnectedSocket() client: Socket,
+	@MessageBody() data: { friendId: string },
+	) {
+	const userId = client.data.user?.sub;
+	if (!userId || !data?.friendId) return;
+	const key = this.chatKey(userId, data.friendId);
+	client.emit('chatHistory', { friendId: data.friendId, messages: this.chatHistory.get(key) ?? [] });
+	}
+
+	@SubscribeMessage('sendChatMessage')
+	handleSendChatMessage(
+		@ConnectedSocket() client: Socket,
+		@MessageBody() data: { receiverId: string; text: string },
+	) {
+		const senderId = client.data.user?.sub;
+		const text = data?.text?.trim();
+		if (!senderId || !data?.receiverId || !text || text.length > 1000) return;
+
+		const message = {
+			id: randomUUID(),
+			senderId,
+			receiverId: data.receiverId,
+			text,
+			timestamp: Date.now(),
+		};
+
+		const key = this.chatKey(senderId, data.receiverId);
+		const history = this.chatHistory.get(key) ?? [];
+		history.push(message);
+		if (history.length > this.MAX_HISTORY_PER_CONVO) history.shift();
+		this.chatHistory.set(key, history);
+
+		client.emit('chatMessageReceived', message);
+		const receiverSocketId = this.presence.getSocketId(data.receiverId);
+		if (receiverSocketId) this.server.to(receiverSocketId).emit('chatMessageReceived', message);
 	}
 
   }
