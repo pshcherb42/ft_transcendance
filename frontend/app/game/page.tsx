@@ -349,8 +349,6 @@ export default function GamePage() {
     const engine = new PongEngine();
     const ai = isAi ? new PongAi(difficulty) : null;
     setLocalWinner(null);
-
-    setLocalWinner(null);
     setScore({
       left: 0,
       right: 0,
@@ -568,15 +566,36 @@ export default function GamePage() {
   );
 }*/
 
+  const isGameFinished =
+    mode === 'online'
+      ? onlineStatus === 'gameover' || onlineStatus === 'opponent-left'
+      : localWinner !== null;
+
+  const resultTitle = (() => {
+    if (mode === 'online') {
+      if (onlineStatus === 'opponent-left') {
+        return 'YOU WON';
+      }
+
+      return winner === side ? 'YOU WON' : 'YOU LOST';
+    }
+
+    if (mode === 'ai') {
+      return localWinner === 'left' ? 'YOU WON' : 'AI WON';
+    }
+
+    return localWinner === 'left'
+      ? 'PLAYER ONE WON'
+      : 'PLAYER TWO WON';
+  })();
+
 return (
-  <div className="flex min-h-screen flex-col bg-[#E7E7E7]">
-    <main className="flex flex-1 px-4 py-6 md:px-8">
+  <div className="flex min-h-screen flex-col bg-[#F7F5F1]">
+    <main className="flex flex-1">
       <section
         className="
-          mx-auto
           flex
           w-full
-          max-w-[1440px]
           flex-col
           bg-[#F7F5F1]
           px-6
@@ -705,7 +724,7 @@ return (
           </div>
 
           {/* Canvas */}
-          <div className="overflow-hidden rounded-[14px] bg-[#171717]">
+          <div className="relative overflow-hidden rounded-[14px] bg-[#171717]">
             <canvas
               ref={canvasRef}
               width={WIDTH}
@@ -717,6 +736,152 @@ return (
                 bg-[#171717]
               "
             />
+
+            {isGameFinished && (
+              <div
+                className="
+                  absolute
+                  inset-0
+                  flex
+                  items-center
+                  justify-center
+                  bg-black/55
+                  px-5
+                "
+              >
+                <div
+                  className="
+                    flex
+                    w-full
+                    max-w-[430px]
+                    flex-col
+                    items-center
+                    rounded-[20px]
+                    bg-[#F7F5F1]
+                    px-8
+                    py-9
+                    text-center
+                    shadow-[0_24px_70px_rgba(0,0,0,0.35)]
+                  "
+                >
+                  <p
+                    className="
+                      text-[12px]
+                      font-medium
+                      uppercase
+                      tracking-[0.14em]
+                      text-[#615050]
+                    "
+                  >
+                    Final score
+                  </p>
+
+                  <h2
+                    className="
+                      mt-3
+                      font-display
+                      text-[clamp(2.5rem,5vw,58px)]
+                      uppercase
+                      leading-none
+                      text-brand-red
+                    "
+                  >
+                    {resultTitle}
+                  </h2>
+
+                  <div
+                    className="
+                      mt-6
+                      flex
+                      items-center
+                      gap-5
+                      text-[48px]
+                      font-semibold
+                      leading-none
+                      text-black
+                    "
+                  >
+                    <span>{score.left}</span>
+                    <span className="text-[30px] text-[#918787]">:</span>
+                    <span>{score.right}</span>
+                  </div>
+
+                  <p className="mt-4 text-[14px] text-[#615050]">
+                    {leftPlayerName} · {rightPlayerName}
+                  </p>
+
+                  {mode === 'online' ? (
+                    <button
+                      type="button"
+                      onClick={() => setOnlineRound((round) => round + 1)}
+                      className="
+                        mt-8
+                        h-[52px]
+                        w-full
+                        rounded-full
+                        bg-brand-green
+                        px-8
+                        text-[13px]
+                        font-medium
+                        uppercase
+                        tracking-[0.08em]
+                        text-white
+                        transition-colors
+                        hover:bg-[#808979]
+                      "
+                    >
+                      Find another game
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setLocalRound((round) => round + 1)}
+                      className="
+                        mt-8
+                        h-[52px]
+                        w-full
+                        rounded-full
+                        bg-brand-green
+                        px-8
+                        text-[13px]
+                        font-medium
+                        uppercase
+                        tracking-[0.08em]
+                        text-white
+                        transition-colors
+                        hover:bg-[#808979]
+                      "
+                    >
+                      Rematch
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={handleBackToMenu}
+                    className="
+                      mt-3
+                      h-[48px]
+                      w-full
+                      rounded-full
+                      border-[1.5px]
+                      border-[#D9D5D1]
+                      px-8
+                      text-[13px]
+                      font-medium
+                      uppercase
+                      tracking-[0.08em]
+                      text-[#615050]
+                      transition-colors
+                      hover:border-[#615050]
+                      hover:bg-[#D9D9D9]/30
+                    "
+                  >
+                    Back to menu
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -744,101 +909,8 @@ return (
             </p>
           )}
         </div>
-
-        {/* Кнопки после завершения */}
-        <div className="mt-4 flex justify-center gap-4">
-          {mode === 'online' &&
-            (onlineStatus === 'gameover' ||
-              onlineStatus === 'opponent-left') && (
-              <button
-                type="button"
-                onClick={() => setOnlineRound((round) => round + 1)}
-                className="
-                  h-[46px]
-                  min-w-[210px]
-                  rounded-full
-                  bg-brand-green
-                  px-8
-                  text-[13px]
-                  font-medium
-                  uppercase
-                  text-white
-                  transition-colors
-                  hover:bg-[#808979]
-                "
-              >
-                Find another game
-              </button>
-            )}
-
-          {(mode === 'local' || mode === 'ai') && localWinner && (
-            <button
-              type="button"
-              onClick={() => setLocalRound((round) => round + 1)}
-              className="
-                h-[46px]
-                min-w-[190px]
-                rounded-full
-                bg-brand-green
-                px-8
-                text-[13px]
-                font-medium
-                uppercase
-                text-white
-                transition-colors
-                hover:bg-[#808979]
-              "
-            >
-              Rematch
-            </button>
-          )}
-        </div>
       </section>
     </main>
-
-    <footer
-      className="
-        flex
-        h-[48px]
-        items-center
-        justify-end
-        gap-[34px]
-        bg-[#EDECE8]
-        px-8
-        md:px-16
-        xl:px-[108px]
-      "
-    >
-      <a
-        href="/terms"
-        className="
-          text-xs
-          uppercase
-          tracking-widest
-          text-[#615050]
-          underline-offset-4
-          hover:underline
-        "
-      >
-        Terms of Service
-      </a>
-
-      <span className="text-[#B5ACAC]">|</span>
-
-      <a
-        href="/privacy"
-        className="
-          text-xs
-          uppercase
-          tracking-widest
-          text-[#615050]
-          underline-offset-4
-          hover:underline
-        "
-      >
-        Privacy Policy
-      </a>
-    </footer>
   </div>
 );
 }

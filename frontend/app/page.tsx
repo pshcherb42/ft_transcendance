@@ -394,24 +394,6 @@ export default function HomePage() {
           </div>
         </section>
       </main>
-
-      <footer className="flex h-[48px] items-center justify-end gap-[34px] bg-[#EDECE8] px-8 md:px-16 xl:px-[108px]">
-        <a
-          href="/terms"
-          className="text-xs uppercase tracking-widest text-[#615050] hover:underline underline-offset-4"
-        >
-          Terms of Service
-        </a>
-
-        <span className="text-[#B5ACAC]">|</span>
-
-        <a
-          href="/privacy"
-          className="text-xs uppercase tracking-widest text-[#615050] hover:underline underline-offset-4"
-        >
-          Privacy Policy
-        </a>
-      </footer>
     </div>
   );
 }

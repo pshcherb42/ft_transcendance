@@ -45,8 +45,8 @@ export class PongRenderer {
     ctx.roundRect(
       LEFT_PADDLE_X,
       s.leftPaddleY,
-      12,
-      90,
+      PADDLE_WIDTH,
+      PADDLE_HEIGHT,
       6,
     );
     ctx.fill();
@@ -57,8 +57,8 @@ export class PongRenderer {
     ctx.roundRect(
       RIGHT_PADDLE_X,
       s.rightPaddleY,
-      12,
-      90,
+      PADDLE_WIDTH,
+      PADDLE_HEIGHT,
       6,
     );
     ctx.fill();
@@ -82,7 +82,7 @@ export class PongRenderer {
     }
 
     // Fin de partida
-    if (s.status === 'finished') {
+    /*if (s.status === 'finished') {
       ctx.fillStyle = 'rgba(10, 10, 10, 0.72)';
       ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
@@ -108,6 +108,6 @@ export class PongRenderer {
       ctx.fillText(`${s.scoreLeft} - ${s.scoreRight}`, WIDTH / 2, HEIGHT / 2 + 40);
 
       ctx.textBaseline = 'alphabetic';
-    }
+    }*/
   }
 }
