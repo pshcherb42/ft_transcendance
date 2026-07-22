@@ -56,7 +56,7 @@ export function useFriends() {
     };
     const onRequestAccepted = (data: { friendshipId: string; friend: Friend }) => {
       setOutgoing((prev) => prev.filter((r) => r.id !== data.friendshipId));
-      setFriends((prev) => [...prev, { friendshipId: data.friendshipId, ...data.friend }]);
+      setFriends((prev) => [...prev, { ...data.friend, friendshipId: data.friendshipId }]);
     };
     const onRequestDeclined = (data: { friendshipId: string }) => {
       setOutgoing((prev) => prev.filter((r) => r.id !== data.friendshipId));

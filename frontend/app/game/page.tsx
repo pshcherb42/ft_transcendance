@@ -114,12 +114,6 @@ export default function GamePage() {
     let snapshot: GameSnapshot | null = null;
     let mySide: Side | null = null;
 
-    socket.on('connect', () => { // native automatic event
-      setOnlineStatus('waiting');
-      socket.emit('joinQueue'); // join queue
-    });
-    socket.on('waiting', () => setOnlineStatus('waiting')); // custom event
-    socket.on('rejoinedGame', (data: { roomId: string; side: Side }) => {
     // Socket is already connected (app-wide) — just join the queue directly,
     // and re-join if we ever reconnect mid-session.
     const onConnect = () => {
@@ -140,18 +134,6 @@ export default function GamePage() {
       }
       setReconnectSecondsLeft(null);
       
-      mySide = data.side;
-      setSide(data.side);
-      setWinner(null);
-      setOnlineStatus('playing');
-    });
-    socket.on('matchFound', (data: { side: Side }) => {
-      if (disconnectTimerRef.current) {
-        clearInterval(disconnectTimerRef.current);
-        disconnectTimerRef.current = null;
-      }
-      setReconnectSecondsLeft(null);
-    
       mySide = data.side;
       setSide(data.side);
       setWinner(null);
@@ -184,9 +166,11 @@ export default function GamePage() {
         clearInterval(disconnectTimerRef.current);
         disconnectTimerRef.current = null;
       }
-    });
-    socket.on('opponentLeft', () => setOnlineStatus('opponent-left'));
-    socket.on('opponentDisconnected', (data: { userId: string; gracePeriodMs: number }) => {
+    };
+
+    const onOpponentLeft = () => setOnlineStatus('opponent-left');
+
+    const onOpponentDisconnected = (data: { userId: string; gracePeriodMs: number }) => {
       const deadline = Date.now() + data.gracePeriodMs;
       if (disconnectTimerRef.current) clearInterval(disconnectTimerRef.current);
       disconnectTimerRef.current = setInterval(() => {
@@ -197,8 +181,9 @@ export default function GamePage() {
           disconnectTimerRef.current = null;
         }
       }, 250);
-    });
-    socket.on('matchVoided', () => {
+    };
+
+    const onMatchVoided = () => {
       if (disconnectTimerRef.current) {
         clearInterval(disconnectTimerRef.current);
         disconnectTimerRef.current = null;
@@ -206,21 +191,37 @@ export default function GamePage() {
       setReconnectSecondsLeft(null);
       setOnlineStatus('opponent-left'); // or your dedicated 'match-voided' status
       setWinner(null);
-    });
-    socket.on('opponentReconnected', () => {
+    };
+
+    const onOpponentReconnected = () => {
       if (disconnectTimerRef.current) {
         clearInterval(disconnectTimerRef.current);
         disconnectTimerRef.current = null;
       }
       setReconnectSecondsLeft(null);
-    });
-    socket.on('disconnect', () => {
+    };
+    
+    /*socket.on('disconnect', () => {
       if (disconnectTimerRef.current) {
         clearInterval(disconnectTimerRef.current);
         disconnectTimerRef.current = null;
       }
       setReconnectSecondsLeft(null);
-    });
+    });*/
+
+    socket.on('connect', onConnect);
+    socket.on('waiting', onWaiting);
+    socket.on('rejoinedGame', onRejoined);
+    socket.on('noActiveGame', onNoActiveGame);
+    socket.on('matchFound', onMatchFound);
+    socket.on('gameState', onGameState);
+    socket.on('gameOver', onGameOver);
+    socket.on('opponentLeft', onOpponentLeft);
+    socket.on('opponentDisconnected', onOpponentDisconnected);
+    socket.on('matchVoided', onMatchVoided);
+    socket.on('opponentReconnected', onOpponentReconnected);
+
+    if (socket.connected) onConnect();
 
     const pressed = new Set<string>();
     let currentDir: 'up' | 'down' | 'stop' = 'stop';

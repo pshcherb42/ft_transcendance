@@ -70,7 +70,8 @@ export default function ProfilePage() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setSaveError(data?.message ?? 'Save failed — try again');
+        const errorMessage = data?.message ?? 'Save failed — try again';
+        setSaveError(errorMessage);
         setSaveStatus('error');
         toast.error(errorMessage);
         return;

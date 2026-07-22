@@ -6,8 +6,6 @@ import { encode } from '@msgpack/msgpack';
 
 const RECONNECT_GRACE_MS = 15_000;
 
-const RECONNECT_GRACE_MS = 15_000;
-
 interface Room {
   engine: PongEngine;
   leftUserId: string;
