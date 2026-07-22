@@ -21,9 +21,9 @@ type OnlineStatus =
   | 'opponent-left';
 
 const DIFF_LABEL: Record<Difficulty, string> = {
-  easy: 'Fácil',
+  easy: 'Easy',
   medium: 'Normal',
-  hard: 'Difícil',
+  hard: 'Hard',
 };
 
 export default function GamePage() {
@@ -642,6 +642,7 @@ return (
             Back to menu
           </button>
 
+          <div className="flex flex-col items-center text-center">
           <h1
             className="
               font-display
@@ -653,6 +654,39 @@ return (
           >
             {gameTitle}
           </h1>
+
+          {mode === 'online' &&
+            !isGameFinished &&
+            onlineStatus !== 'playing' && (
+              <p
+                className="
+                  mt-3
+                  text-[13px]
+                  font-medium
+                  uppercase
+                  tracking-[0.12em]
+                  text-[#615050]
+                "
+              >
+                {onlineStatusText}
+              </p>
+            )}
+
+          {mode === 'online' &&
+            !isGameFinished &&
+            reconnectSecondsLeft !== null && (
+              <p
+                className="
+                  mt-2
+                  text-[13px]
+                  font-medium
+                  text-brand-red
+                "
+              >
+                Opponent disconnected — victory in {reconnectSecondsLeft}s
+              </p>
+            )}
+        </div>
         </div>
 
         {/* Карточка игры */}
@@ -895,30 +929,16 @@ return (
           </div>
         </div>
 
-        {/* Статус игры */}
-        <div className="mx-auto mt-5 min-h-[28px] text-center">
-          <p className="text-[14px] text-[#615050]">
-            {mode === 'online'
-              ? onlineStatusText
-              : localWinner
-                ? mode === 'ai'
-                  ? localWinner === 'left'
-                    ? 'You won!'
-                    : 'AI won'
-                  : localWinner === 'left'
-                    ? 'Player one won!'
-                    : 'Player two won!'
-                : mode === 'ai'
+        {/* Информация под игровым полем */}
+          {mode !== 'online' && !isGameFinished && (
+            <div className="mx-auto mt-5 min-h-[28px] text-center">
+              <p className="text-[14px] text-[#615050]">
+                {mode === 'ai'
                   ? `Difficulty: ${DIFF_LABEL[difficulty]}`
                   : 'Player one: W / S · Player two: ↑ / ↓'}
-          </p>
-
-          {mode === 'online' && reconnectSecondsLeft !== null && (
-            <p className="mt-2 text-[13px] font-medium text-brand-red">
-              Opponent disconnected — victory in {reconnectSecondsLeft}s
-            </p>
+              </p>
+            </div>
           )}
-        </div>
       </section>
     </main>
   </div>
