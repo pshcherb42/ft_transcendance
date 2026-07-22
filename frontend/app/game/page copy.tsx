@@ -1,15 +1,17 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/AuthContext';
+import { PongEngine } from './pong-engine';
+import { PongAi, type Difficulty } from './ai';
 import { PongRenderer } from './renderer';
 import { PongMatch } from './PongMatch';
 import { TournamentView } from './TournamentView';
+import { type Difficulty } from './ai';
 import { WIDTH, HEIGHT } from './constants';
-import { type MapId } from './config';
-import type { Difficulty } from './ai';
+import { MAP_LABEL, type MapId } from './config';
 import type { GameSnapshot, Mode, Side } from './types';
 import { useSocket } from '@/context/SocketContext';
 import { decode } from '@msgpack/msgpack';
@@ -25,8 +27,6 @@ export default function GamePage() {
 
   const modeParam = searchParams.get('mode');
   const difficultyParam = searchParams.get('difficulty');
-  const mapParam = searchParams.get('map');
-  const powerupsParam = searchParams.get('powerups');
 
   const canvasRef = useRef<HTMLCanvasElement>(null); // solo modo online
   const rendererRef = useRef(new PongRenderer());
@@ -34,13 +34,17 @@ export default function GamePage() {
   const [reconnectSecondsLeft, setReconnectSecondsLeft] = useState<number | null>(null);
   const disconnectTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const mode: Mode =
-    modeParam === 'online' ||
-    modeParam === 'local' ||
-    modeParam === 'ai' ||
-    modeParam === 'tournament'
-      ? modeParam
-      : 'local';
+  const [mode, setMode] = useState<Mode>(() => {
+    if (
+      modeParam === 'online' ||
+      modeParam === 'local' ||
+      modeParam === 'ai'
+    ) {
+      return modeParam;
+    }
+  
+    return 'local';
+  });
 
   const [onlineStatus, setOnlineStatus] = useState<OnlineStatus>('connecting');
   const [side, setSide] = useState<Side | null>(null);
@@ -50,39 +54,11 @@ export default function GamePage() {
   // Modo LOCAL / IA
   const [localWinner, setLocalWinner] = useState<Side | null>(null);
   const [localRound, setLocalRound] = useState(0);
-  const [difficulty] = useState<Difficulty>(() => {
-    if (
-      difficultyParam === 'easy' ||
-      difficultyParam === 'medium' ||
-      difficultyParam === 'hard'
-    ) {
-      return difficultyParam;
-    }
-  
-    return 'medium';
-  });
-  
-  const [mapId] = useState<MapId>(() => {
-    if (
-      mapParam === 'classic' ||
-      mapParam === 'obstacles'
-    ) {
-      return mapParam;
-    }
-  
-    return 'classic';
-  });
-  
-  const [powerups] = useState(
-    () => powerupsParam === 'true',
-  );
+  const [difficulty, setDifficulty] = useState<Difficulty>('medium');
 
-  const [score, setScore] = useState({
-    left: 0,
-    right: 0,
-  });
-  
-  const [, setCountdown] = useState(0);
+  // Personalización de la partida local/IA
+  const [mapId, setMapId] = useState<MapId>('classic');
+  const [powerups, setPowerups] = useState(false);
   const socket = useSocket();
 
   const DIFF_LABEL: Record<Difficulty, string> = {
@@ -96,18 +72,6 @@ export default function GamePage() {
   }, [loading, user, router]);
 
   useEffect(() => {
-    const isValidMode =
-      modeParam === 'online' ||
-      modeParam === 'local' ||
-      modeParam === 'ai' ||
-      modeParam === 'tournament';
-  
-    if (!isValidMode) {
-      router.replace('/');
-    }
-  }, [modeParam, router]);
-
-  useEffect(() => {
     if (!socket) return;
     const onInviteAccepted = () => {
       setOnlineRound((r) => r + 1);
@@ -116,6 +80,17 @@ export default function GamePage() {
     socket.on('gameInviteAccepted', onInviteAccepted);
     return () => { socket.off('gameInviteAccepted', onInviteAccepted); };
   }, [socket]);
+
+  useEffect(() => {
+    if (!socket || mode !== 'menu') return;
+    const onAutoRejoin = () => {
+      setOnlineRound((r) => r + 1);
+      setMode('online');
+    };
+    socket.on('rejoinedGame', onAutoRejoin);
+    socket.emit('checkRoom');
+    return () => { socket.off('rejoinedGame', onAutoRejoin); };
+  }, [socket, mode]);
 
   // ----------------------------------------------------------------- ONLINE
   useEffect(() => {
@@ -324,6 +299,109 @@ export default function GamePage() {
     };
   }, [mode, onlineRound, socket, t]);
 
+  // ------------------------------------------------------------------ LOCAL
+  useEffect(() => {
+    if (mode !== 'local' && mode !== 'ai') return;
+    const isAi = mode === 'ai';
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const renderer = rendererRef.current;
+    const canvasLabels = {
+      getReady: t('game.canvas.getReady'),
+      youWin: t('game.canvas.youWin'),
+      youLose: t('game.canvas.youLose'),
+      leftWins: t('game.canvas.leftWins'),
+      rightWins: t('game.canvas.rightWins'),
+    };
+    const engine = new PongEngine();
+    const ai = isAi ? new PongAi(difficulty) : null;
+    setLocalWinner(null);
+    setScore({
+      left: 0,
+      right: 0,
+    });
+
+    const pressed = new Set<string>();
+    const refresh = () => {
+      if (isAi) {
+        const up = pressed.has('w') || pressed.has('ArrowUp');
+        const down = pressed.has('s') || pressed.has('ArrowDown');
+        engine.setInput('left', up && !down ? 'up' : down && !up ? 'down' : 'stop');
+      } else {
+        const lUp = pressed.has('w');
+        const lDown = pressed.has('s');
+        engine.setInput('left', lUp && !lDown ? 'up' : lDown && !lUp ? 'down' : 'stop');
+        const rUp = pressed.has('ArrowUp');
+        const rDown = pressed.has('ArrowDown');
+        engine.setInput('right', rUp && !rDown ? 'up' : rDown && !rUp ? 'down' : 'stop');
+      }
+    };
+    const norm = (k: string): string | null => {
+      if (k === 'w' || k === 'W') return 'w';
+      if (k === 's' || k === 'S') return 's';
+      if (k === 'ArrowUp' || k === 'ArrowDown') return k;
+      return null;
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      const k = norm(e.key);
+      if (!k) return;
+      if (k.startsWith('Arrow')) e.preventDefault();
+      pressed.add(k);
+      refresh();
+    };
+    const onKeyUp = (e: KeyboardEvent) => {
+      const k = norm(e.key);
+      if (!k) return;
+      pressed.delete(k);
+      refresh();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
+
+    const stepTimer = setInterval(() => {
+      if (ai) ai.update(engine);
+      engine.step();
+    
+      const snapshot = engine.getSnapshot();
+    
+      setScore((currentScore) => {
+        if (
+          currentScore.left === snapshot.scoreLeft &&
+          currentScore.right === snapshot.scoreRight
+        ) {
+          return currentScore;
+        }
+    
+        return {
+          left: snapshot.scoreLeft,
+          right: snapshot.scoreRight,
+        };
+      });
+    
+      if (engine.status === 'finished' && engine.winner) {
+        setLocalWinner(engine.winner);
+      }
+    }, 1000 / TICK_RATE);
+
+    let raf: number;
+    const loop = () => {
+      renderer.draw(ctx, engine.getSnapshot(), isAi ? 'left' : undefined, canvasLabels);
+      raf = requestAnimationFrame(loop);
+    };
+    loop();
+
+    return () => {
+      clearInterval(stepTimer);
+      cancelAnimationFrame(raf);
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('keyup', onKeyUp);
+    };
+  }, [mode, localRound, difficulty, t]);
+
   // --------------------------------------------------------------- UI helpers
   const onlineStatusText = (() => {
     switch (onlineStatus) {
@@ -338,6 +416,12 @@ export default function GamePage() {
     }
   })();
 
+  const startLocal = (m: Mode) => {
+    setLocalWinner(null);
+    setLocalRound((r) => r + 1);
+    setMode(m);
+  };
+
   if (loading || !user) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-900">
@@ -346,38 +430,209 @@ export default function GamePage() {
     );
   }
 
-  // --------------------------------------------------------------- TORNEO
-  if (mode === 'tournament') {
+  if (mode === 'menu') {
     return (
-      <TournamentView
-        onExit={() => router.push('/')}
-      />
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 gap-8">
+        <h1 className="text-4xl font-bold text-white">{t('game.menu.title')}</h1>
+        <div className="flex flex-col gap-4 w-64">
+          <button
+            type="button"
+            onClick={() => { setOnlineRound((r) => r + 1); setMode('online'); }}
+            className="h-12 rounded-full bg-white text-black font-semibold hover:bg-zinc-300 transition-colors"
+          >
+            {t('game.menu.playOnline')}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => { setLocalRound((r) => r + 1); setMode('local'); }}
+            className="h-12 rounded-full border border-zinc-500 text-white font-semibold hover:bg-zinc-800 transition-colors"
+          >
+            {t('game.menu.playLocal')}
+          </button>
+
+          <div className="flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={() => { setLocalRound((r) => r + 1); setMode('ai'); }}
+              className="h-12 rounded-full border border-zinc-500 text-white font-semibold hover:bg-zinc-800 transition-colors"
+            >
+              {t('game.menu.playAi')}
+            </button>
+            <div className="flex gap-2">
+              {(['easy', 'medium', 'hard'] as Difficulty[]).map((d) => (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => setDifficulty(d)}
+                  className={`flex-1 h-9 rounded-full text-sm font-medium transition-colors ${
+                    difficulty === d
+                      ? 'bg-white text-black'
+                      : 'border border-zinc-500 text-zinc-300 hover:bg-zinc-800'
+                  }`}
+                >
+                  {DIFF_LABEL[d]}
+                </button>
+              ))}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setMode('tournament')}
+            className="h-12 rounded-full border border-zinc-500 text-white font-semibold hover:bg-zinc-800 transition-colors"
+          >
+            Torneo local
+          </button>
+        </div>
+
+        {/* Personalización (solo local / IA) */}
+        <div className="flex flex-col gap-3 w-72 border-t border-zinc-800 pt-5">
+          <p className="text-xs uppercase tracking-wider text-zinc-500">
+            Personalización (local / IA)
+          </p>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-zinc-400 w-16">Mapa</span>
+            {(['classic', 'obstacles'] as MapId[]).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setMapId(m)}
+                className={`flex-1 h-9 rounded-full text-sm font-medium transition-colors ${
+                  mapId === m
+                    ? 'bg-white text-black'
+                    : 'border border-zinc-500 text-zinc-300 hover:bg-zinc-800'
+                }`}
+              >
+                {MAP_LABEL[m]}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => setPowerups((p) => !p)}
+            className={`h-9 rounded-full text-sm font-medium transition-colors ${
+              powerups
+                ? 'bg-white text-black'
+                : 'border border-zinc-500 text-zinc-300 hover:bg-zinc-800'
+            }`}
+          >
+            Power-ups: {powerups ? 'ON' : 'OFF'}
+          </button>
+        </div>
+
+        <p className="text-sm text-zinc-500 text-center max-w-xs">
+          {t('game.menu.description')}
+        </p>
+      </div>
     );
   }
 
+  // --------------------------------------------------------------- TORNEO
+  if (mode === 'tournament') {
+    return <TournamentView onExit={() => setMode('menu')} />;
+  }
+
+  const backToMenu = () => setMode('menu');
   const handleBackToMenu = () => {
     if (mode === 'online' && socket) {
       socket.emit('leaveGame');
     }
-  
     if (disconnectTimerRef.current) {
       clearInterval(disconnectTimerRef.current);
       disconnectTimerRef.current = null;
     }
-  
     setReconnectSecondsLeft(null);
-    setWinner(null);
-    setLocalWinner(null);
-    setScore({
-      left: 0,
-      right: 0,
-    });
-  
     router.push('/');
   };
 
   // ------------------------------------------------------ ONLINE / LOCAL / IA
-  const isGameFinished =
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 gap-4">
+      <h1 className="text-3xl font-bold text-white">
+        {mode === 'online' ? t('game.title.online') : mode === 'ai' ? t('game.title.ai') : t('game.title.local')}
+      </h1>
+
+      <p className="text-lg text-zinc-200 h-7">
+        {mode === 'online'
+          ? onlineStatusText
+          : localWinner
+            ? mode === 'ai'
+              ? (localWinner === 'left' ? t('game.result.youWin') : t('game.result.aiWins'))
+              : (localWinner === 'left' ? t('game.result.leftWins') : t('game.result.rightWins'))
+            : mode === 'ai'
+              ? t('game.subtitle.ai', { difficulty: DIFF_LABEL[difficulty] })
+              : t('game.subtitle.local')}
+      </p>
+
+      {mode === 'online' && reconnectSecondsLeft !== null && (
+        <p className="text-sm font-semibold text-amber-400 animate-pulse h-5">
+          {t('game.reconnect', { seconds: reconnectSecondsLeft })}
+        </p>
+      )}
+
+      {/* Online: el canvas lo pinta el effect con los snapshots del servidor.
+          Local / IA: PongMatch trae su propio motor, bucle y teclado. */}
+      {mode === 'online' ? (
+        <canvas
+          ref={canvasRef}
+          width={WIDTH}
+          height={HEIGHT}
+          className="border-4 border-white shadow-lg max-w-full"
+        />
+      ) : (
+        <PongMatch
+          key={localRound}
+          config={{ map: mapId, powerups }}
+          vsAi={mode === 'ai'}
+          difficulty={difficulty}
+          onFinish={(w) => setLocalWinner(w)}
+        />
+      )}
+
+      <p className="text-sm text-zinc-400">
+        {mode === 'online'
+          ? t('game.controls.online')
+          : mode === 'ai'
+            ? t('game.controls.ai')
+            : t('game.controls.local')}
+      </p>
+
+      <div className="flex gap-3">
+        {mode === 'online' &&
+          (onlineStatus === 'gameover' || onlineStatus === 'opponent-left') && (
+            <button
+              type="button"
+              onClick={() => setOnlineRound((r) => r + 1)}
+              className="h-11 px-6 rounded-full bg-white text-black font-medium hover:bg-zinc-300 transition-colors"
+            >
+              {t('game.button.findMatch')}
+            </button>
+          )}
+        {mode !== 'online' && localWinner && (
+          <button
+            type="button"
+            onClick={() => {
+              setLocalWinner(null);
+              setLocalRound((r) => r + 1);
+            }}
+            className="h-11 px-6 rounded-full bg-white text-black font-medium hover:bg-zinc-300 transition-colors"
+          >
+            {t('game.button.rematch')}
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={handleBackToMenu}
+          className="h-11 px-6 rounded-full border border-zinc-500 text-zinc-200 font-medium hover:bg-zinc-800 transition-colors"
+        >
+          {t('game.button.backToMenu')}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+const isGameFinished =
   mode === 'online'
     ? onlineStatus === 'gameover' || onlineStatus === 'opponent-left'
     : localWinner !== null;
@@ -399,31 +654,6 @@ const resultTitle = (() => {
     ? 'PLAYER ONE WON'
     : 'PLAYER TWO WON';
 })();
-
-const gameTitle =
-  mode === 'online'
-    ? t('game.title.online')
-    : mode === 'ai'
-      ? t('game.title.ai')
-      : t('game.title.local');
-
-const leftPlayerName =
-  mode === 'online'
-    ? side === 'left'
-      ? user.username
-      : 'Opponent'
-    : mode === 'ai'
-      ? user.username
-      : 'Player one';
-
-const rightPlayerName =
-  mode === 'online'
-    ? side === 'right'
-      ? user.username
-      : 'Opponent'
-    : mode === 'ai'
-      ? 'AI'
-      : 'Player two';
 
 return (
   <div className="flex min-h-screen flex-col bg-[#F7F5F1]">
@@ -595,23 +825,17 @@ return (
 
           {/* Canvas */}
           <div className="relative overflow-hidden rounded-[14px] bg-[#171717]">
-            {mode === 'online' ? (
-              <canvas
-                ref={canvasRef}
-                width={WIDTH}
-                height={HEIGHT}
-                className="block h-auto w-full bg-[#171717]"
-              />
-            ) : (
-              <PongMatch
-                key={localRound}
-                config={{ map: mapId, powerups }}
-                vsAi={mode === 'ai'}
-                difficulty={difficulty}
-                onScoreChange={setScore}
-                onFinish={setLocalWinner}
-              />
-            )}
+            <canvas
+              ref={canvasRef}
+              width={WIDTH}
+              height={HEIGHT}
+              className="
+                block
+                h-auto
+                w-full
+                bg-[#171717]
+              "
+            />
 
             {isGameFinished && (
               <div
@@ -711,14 +935,7 @@ return (
                   ) : (
                     <button
                       type="button"
-                      onClick={() => {
-                        setLocalWinner(null);
-                        setScore({
-                          left: 0,
-                          right: 0,
-                        });
-                        setLocalRound((round) => round + 1);
-                      }}
+                      onClick={() => setLocalRound((round) => round + 1)}
                       className="
                         mt-8
                         h-[52px]
@@ -782,4 +999,3 @@ return (
     </main>
   </div>
 );
-}

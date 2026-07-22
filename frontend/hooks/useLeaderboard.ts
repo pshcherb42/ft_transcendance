@@ -18,7 +18,7 @@ export function useLeaderboard(scope: LeaderboardScope) {
       if (!res.ok) throw new Error('Failed to load leaderboard');
       setEntries(await res.json());
     } catch {
-      setError('No se pudo cargar el leaderboard');
+      setError('stats.leaderboard.loadFailed') // no dedicated "load failed" key needed — see note below
     } finally {
       setLoading(false);
     }

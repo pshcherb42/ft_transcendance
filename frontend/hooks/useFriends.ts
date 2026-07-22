@@ -23,12 +23,12 @@ export function useFriends() {
         apiFetch('/friends/pending/incoming'),
         apiFetch('/friends/pending/outgoing'),
       ]);
-      if (!friendsRes.ok || !inRes.ok || !outRes.ok) throw new Error('Failed to load friends');
+      if (!friendsRes.ok || !inRes.ok || !outRes.ok) throw new Error('friends.errors.loadFailed');
       setFriends(await friendsRes.json());
       setIncoming(await inRes.json());
       setOutgoing(await outRes.json());
-    } catch (e) {
-      setError('Could not load friends');
+    } catch {
+      setError('friends.errors.loadFailed');
     } finally {
       setLoading(false);
     }
@@ -36,27 +36,21 @@ export function useFriends() {
 
   useEffect(() => { refetch(); }, [refetch]);
 
-  // Live presence updates — patch in place, no refetch.
   useEffect(() => {
     if (!socket) return;
 
     const onFriendOnline = (data: { userId: string }) => {
-      setFriends((prev) =>
-        prev.map((f) => (f.id === data.userId ? { ...f, online: true } : f)),
-      );
+      setFriends((prev) => prev.map((f) => (f.id === data.userId ? { ...f, online: true } : f)));
     };
     const onFriendOffline = (data: { userId: string }) => {
-      setFriends((prev) =>
-        prev.map((f) => (f.id === data.userId ? { ...f, online: false } : f)),
-      );
+      setFriends((prev) => prev.map((f) => (f.id === data.userId ? { ...f, online: false } : f)));
     };
-
     const onRequestReceived = (data: PendingIncoming) => {
       setIncoming((prev) => [...prev, data]);
     };
     const onRequestAccepted = (data: { friendshipId: string; friend: Friend }) => {
       setOutgoing((prev) => prev.filter((r) => r.id !== data.friendshipId));
-      setFriends((prev) => [...prev, { friendshipId: data.friendshipId, ...data.friend }]);
+      setFriends((prev) => [...prev, { ...data.friend, friendshipId: data.friendshipId }]);
     };
     const onRequestDeclined = (data: { friendshipId: string }) => {
       setOutgoing((prev) => prev.filter((r) => r.id !== data.friendshipId));
@@ -67,17 +61,17 @@ export function useFriends() {
 
     socket.on('friendOnline', onFriendOnline);
     socket.on('friendOffline', onFriendOffline);
-    socket.on('friendRequestReceived', onRequestReceived);   
-    socket.on('friendRequestAccepted', onRequestAccepted);   
-    socket.on('friendRequestDeclined', onRequestDeclined);  
+    socket.on('friendRequestReceived', onRequestReceived);
+    socket.on('friendRequestAccepted', onRequestAccepted);
+    socket.on('friendRequestDeclined', onRequestDeclined);
     socket.on('friendRemoved', onFriendRemoved);
 
     return () => {
       socket.off('friendOnline', onFriendOnline);
       socket.off('friendOffline', onFriendOffline);
-      socket.off('friendRequestReceived', onRequestReceived);   
-      socket.off('friendRequestAccepted', onRequestAccepted);   
-      socket.off('friendRequestDeclined', onRequestDeclined);   
+      socket.off('friendRequestReceived', onRequestReceived);
+      socket.off('friendRequestAccepted', onRequestAccepted);
+      socket.off('friendRequestDeclined', onRequestDeclined);
       socket.off('friendRemoved', onFriendRemoved);
     };
   }, [socket]);
@@ -86,7 +80,7 @@ export function useFriends() {
     const res = await apiFetch(`/friends/request/${encodeURIComponent(username)}`, { method: 'POST' });
     if (!res.ok) {
       const body = await res.json().catch(() => null);
-      throw new Error(body?.message || 'Could not send request');
+      throw new Error(body?.message || 'friends.errors.requestFailed');
     }
     await refetch();
   }, [refetch]);
@@ -97,19 +91,19 @@ export function useFriends() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action }),
     });
-    if (!res.ok) throw new Error('Could not respond to request');
+    if (!res.ok) throw new Error('friends.errors.respondFailed');
     await refetch();
   }, [refetch]);
 
   const removeFriend = useCallback(async (friendshipId: string) => {
     const res = await apiFetch(`/friends/${friendshipId}`, { method: 'DELETE' });
-    if (!res.ok) throw new Error('Could not remove friend');
+    if (!res.ok) throw new Error('friends.errors.removeFailed');
     await refetch();
   }, [refetch]);
 
   const blockUser = useCallback(async (username: string) => {
     const res = await apiFetch(`/friends/block/${encodeURIComponent(username)}`, { method: 'POST' });
-    if (!res.ok) throw new Error('Could not block user');
+    if (!res.ok) throw new Error('friends.errors.blockFailed');
     await refetch();
   }, [refetch]);
 

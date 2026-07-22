@@ -33,7 +33,7 @@ export const HEIGHT = 600;
 // --- Palas ---
 export const PADDLE_WIDTH = 12;
 export const PADDLE_HEIGHT = 90;
-export const PADDLE_SPEED = 8;
+export const PADDLE_SPEED = 11; // subido de 8 para que el juego no se sienta lento
 export const LEFT_PADDLE_X = 24;
 export const RIGHT_PADDLE_X = WIDTH - 24 - PADDLE_WIDTH; // 764
 

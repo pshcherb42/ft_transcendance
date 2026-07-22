@@ -1,0 +1,281 @@
+{
+    "auth": {
+      "login": "Log in",
+      "register": "Register",
+      "createAccount": "Create account",
+      "email": "Email",
+      "password": "Password",
+      "username": "Username",
+      "signingIn": "Signing in…",
+      "creating": "Creating…",
+      "or": "or",
+      "continueWithGoogle": "Continue with Google",
+      "noAccount": "No account?",
+      "haveAccount": "Already have an account?",
+      "loginFailed": "Login failed",
+      "registrationFailed": "Registration failed",
+      "networkError": "Network error — is the backend running?"
+    },
+    "validation": {
+      "username": {
+        "min": "Username must be at least 3 characters",
+        "max": "Username must be at most 20 characters",
+        "pattern": "Only letters, numbers, and underscores allowed"
+      },
+      "password": {
+        "min": "Password must be at least 8 characters",
+        "max": "Password must be at most 72 characters",
+        "required": "Password is required"
+      },
+      "email": { "invalid": "Enter a valid email" },
+      "confirmPassword": { "mismatch": "Passwords do not match" },
+      "currentPassword": { "required": "Current password is required to set a new one" }
+    },
+    "friends": {
+      "loading": "Loading friends…",
+      "usernamePlaceholder": "Username",
+      "add": "Add",
+      "sendFailed": "Failed to send request",
+      "incomingRequests": "Incoming requests",
+      "outgoingRequests": "Sent requests",
+      "pending": "pending",
+      "accept": "Accept",
+      "decline": "Decline",
+      "friendsCount": "Friends ({{count}})",
+      "play": "Play",
+      "remove": "Remove",
+      "inviteSent": "Invite sent to {{username}}...",
+      "inviteAccepted": "{{username}} accepted!",
+      "inviteExpired": "{{username}} didn't respond in time",
+      "inviteDeclined": "{{username}} declined the invite",
+      "errors": {
+        "loadFailed": "Could not load friends",
+        "requestFailed": "Could not send request",
+        "respondFailed": "Could not respond to request",
+        "removeFailed": "Could not remove friend",
+        "blockFailed": "Could not block user"
+      },
+      "notify": {
+        "requestReceived": "{{username}} sent you a friend request",
+        "requestAccepted": "{{username}} accepted your friend request",
+        "removed": "A friend has removed you from their list"
+      }
+    },
+    "game": {
+      "loading": "Loading…",
+      "menu": {
+        "title": "Pong",
+        "playOnline": "Play Online",
+        "playLocal": "Play Local (2 players)",
+        "playAi": "Play vs AI (1 player)",
+        "description": "Online: we match you with another player. Local: two players on the same keyboard."
+      },
+      "difficulty": { "easy": "Easy", "medium": "Normal", "hard": "Hard" },
+      "status": {
+        "connecting": "Connecting…",
+        "waiting": "Looking for opponent…",
+        "playingLeft": "You are the LEFT player",
+        "playingRight": "You are the RIGHT player",
+        "won": "You won! 🎉",
+        "lost": "You lost 😢",
+        "opponentLeft": "Opponent left — you win by forfeit"
+      },
+      "reconnect": "Opponent disconnected — you win in {{seconds}}s if they don't return",
+      "title": { "online": "Pong Online", "ai": "Pong vs AI", "local": "Pong Local" },
+      "result": {
+        "youWin": "You won! 🎉",
+        "aiWins": "AI wins! 🤖",
+        "leftWins": "LEFT player wins! 🎉",
+        "rightWins": "RIGHT player wins! 🎉"
+      },
+      "subtitle": {
+        "ai": "You (left) vs AI · {{difficulty}} — first to 5 wins",
+        "local": "First player to reach 5 wins"
+      },
+      "controls": {
+        "online": "Your controls: ↑ / ↓ (or W / S)",
+        "ai": "Your controls: W / S  (or ↑ / ↓)",
+        "local": "Left: W / S     ·     Right: ↑ / ↓"
+      },
+      "button": {
+        "findMatch": "Find another match",
+        "rematch": "Rematch",
+        "backToMenu": "Back to menu"
+      },
+      "canvas": {
+        "getReady": "GET READY",
+        "youWin": "YOU WIN!",
+        "youLose": "YOU LOSE",
+        "leftWins": "LEFT WINS",
+        "rightWins": "RIGHT WINS"
+      }
+    },
+    "profile": {
+      "loading": "Loading…",
+      "changeAvatar": "Change",
+      "avatarUploading": "Uploading…",
+      "avatarUpdated": "Avatar updated ✓",
+      "avatarUploadFailed": "Upload failed",
+      "username": "Username",
+      "changePassword": "Change password",
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm new password",
+      "saving": "Saving…",
+      "saved": "Saved ✓",
+      "saveChanges": "Save changes",
+      "saveFailed": "Save failed — try again",
+      "fixFieldErrors": "Please review the fields with errors.",
+      "profileUpdated": "Profile updated successfully!",
+      "logout": "Log out"
+    },
+    "stats": {
+      "title": "Statistics",
+      "back": "← Back",
+      "loading": "Loading…",
+      "loadError": "Statistics could not be loaded",
+      "tiles": { "matches": "Matches", "wins": "Wins", "losses": "Losses", "winRate": "Win %" },
+      "noMatches": "You haven't played any matches yet. Play your first Pong game to see your stats here!",
+      "playNow": "Play now",
+      "winLossChart": "Wins vs losses",
+      "scoreChart": "Score — last {{count}} matches",
+      "matchHistory": "Match history",
+      "chartWinsLabel": "wins",
+      "you": "You",
+      "opponent": "Opponent",
+      "table": { "opponent": "Opponent", "score": "Score", "result": "Result", "date": "Date" },
+      "result": { "win": "Win", "loss": "Loss" },
+      "leaderboard": {
+        "title": "Leaderboard",
+        "friends": "Friends",
+        "global": "Global",
+        "loading": "Loading…",
+        "noFriendsMatches": "No one on your friends list has played a match yet.",
+        "noMatches": "No matches recorded yet.",
+        "rank": "#",
+        "player": "Player",
+        "wl": "W-L",
+        "winRate": "Win %",
+        "loadFailed": "Could not load leaderboard"
+      }
+    },
+    "home": {
+      "loading": "Loading",
+      "play": "Play",
+      "profile": "Profile",
+      "friends": "Friends",
+      "stats": "Stats",
+      "logout": "Log out"
+    },
+    "notification": {
+      "friendOnline": "{{username}} is now online",
+      "friendOfflineDefault": "A friend",
+      "friendOffline": "{{username}} went offline",
+      "requestDeclined": "Your friend request was declined",
+      "wantsToPlay": "{{username}} wants to play!",
+      "accept": "Accept",
+      "decline": "Decline"
+    },
+    "legal": {
+      "back": "← Back",
+      "lastUpdated": "Last updated {{date}}",
+      "privacy": {
+        "title": "Privacy Policy",
+        "intro": "This Privacy Policy describes how ft_transcendence (\"the Service\", \"we\", \"us\") collects, uses, and protects your personal data when you use our Pong web application.",
+        "s1": { "heading": "1. Who We Are", "body": "ft_transcendence is a student project developed as part of the 42 School curriculum. It is not a commercial product. Contact:" },
+        "s2": {
+          "heading": "2. Data We Collect",
+          "table": {
+            "headers": ["Data", "Purpose", "Source"],
+            "rows": [
+              ["Username", "Public identity (leaderboards, match history, friends)", "You, at registration"],
+              ["Email address", "Account login", "You, at registration"],
+              ["Password (hashed)", "Authentication", "You, at registration"],
+              ["Avatar image", "Profile display", "Uploaded by you (optional)"],
+              ["OAuth profile info", "Login via Google", "Google, if you choose OAuth login"],
+              ["Match history & stats", "Game features, leaderboards, tournaments", "Generated by gameplay"],
+              ["IP / connection metadata", "Security, abuse prevention, WebSocket sessions", "Automatically, during use"]
+            ]
+          },
+          "outro": "We do not collect payment information, and we do not sell or share your data with third parties for advertising."
+        },
+        "s3": {
+          "heading": "3. How We Store Your Data",
+          "list": [
+            "Passwords are hashed and never stored in plain text.",
+            "Avatars are stored as encoded data in our database.",
+            "Data is stored in a PostgreSQL database running within our Docker-based infrastructure.",
+            "Access tokens (JWT) authenticate requests and are short-lived; refresh tokens are rotated on use."
+          ]
+        },
+        "s4": {
+          "heading": "4. Legal Basis & Purpose of Processing",
+          "intro": "We process your data to:",
+          "list": [
+            "Provide core account and gameplay functionality (contract necessity).",
+            "Secure your account (legitimate interest).",
+            "Enable optional features you opt into, such as OAuth login (consent)."
+          ]
+        },
+        "s5": {
+          "heading": "5. Your Rights",
+          "intro": "Under GDPR and similar frameworks, you have the right to:",
+          "list": [
+            "Access the personal data we hold about you.",
+            "Rectify inaccurate data, e.g. via your profile settings.",
+            "Erase your account and associated data (\"right to be forgotten\").",
+            "Export your data in a portable format.",
+            "Object to or restrict certain processing."
+          ],
+          "contactPre": "To exercise these rights, contact"
+        },
+        "s6": { "heading": "6. Data Retention", "body": "We retain your account data for as long as your account is active. If you delete your account, your personal data is removed from our active database within 7 business days, except where retention is required for legitimate security logging." },
+        "s7": { "heading": "7. Third-Party Services", "body": "If you log in via Google OAuth, Google's own privacy policy governs the data they process on their end. We only receive the profile fields necessary to create or link your account: name, email, avatar." },
+        "s8": { "heading": "8. Cookies & Local Storage", "body": "We use tokens stored client-side solely to keep you logged in. We do not use tracking or advertising cookies." },
+        "s9": { "heading": "9. Children's Privacy", "body": "Our Service is not intended for or directed to children under the age of 13. We do not knowingly collect or solicit personal information from anyone under 13. If we discover that a child under 13 has registered and provided us with personal data, we will delete their account and wipe their information from our databases immediately. If you believe that a child under 13 has provided data to us, please contact us immediately." },
+        "s10": { "heading": "10. Changes to This Policy", "body": "We may update this policy as the project evolves. Material changes will be noted with an updated \"Last updated\" date." },
+        "s11": { "heading": "11. Contact", "pre": "Questions about this policy or your data:" }
+      },
+      "terms": {
+        "title": "Terms of Service",
+        "intro": "Welcome to ft_transcendence (\"the Service\"). By creating an account or using the Service, you agree to these Terms of Service (\"Terms\"). This is a student project built for the 42 School curriculum and is provided for educational and demonstration purposes.",
+        "s1": { "heading": "1. Eligibility", "body": "You must be at least 13 years old to create an account. By registering, you confirm that the information you provide is accurate." },
+        "s2": {
+          "heading": "2. Your Account",
+          "list": [
+            "You are responsible for keeping your login credentials confidential.",
+            "You are responsible for all activity that occurs under your account.",
+            "You may log in via email/password or Google OAuth.",
+            "You may delete your account at any time by contacting us."
+          ]
+        },
+        "s3": {
+          "heading": "3. Acceptable Use",
+          "intro": "You agree not to:",
+          "list": [
+            "Use the Service to harass, abuse, or harm other users.",
+            "Attempt to disrupt, exploit, or gain unauthorized access to the Service, its infrastructure, or other users' accounts, including cheating or exploiting bugs.",
+            "Upload avatars or content that is illegal, offensive, or infringes on others' rights.",
+            "Use automated tools (bots) to play matches or manipulate leaderboards, unless explicitly playing against the provided AI opponent feature."
+          ],
+          "outro": "We reserve the right to suspend or delete accounts that violate these Terms."
+        },
+        "s4": {
+          "heading": "4. Content You Provide",
+          "list": [
+            "You retain ownership of content you upload, e.g. your avatar.",
+            "By uploading an avatar, you grant us a limited license to store and display it within the Service.",
+            "You are responsible for ensuring you have the right to upload any content you submit."
+          ]
+        },
+        "s5": { "heading": "5. Game Data & Fair Play", "body": "Match history, stats, and tournament results are recorded based on actual gameplay through the Service. We may reset, wipe, or modify game data during development without notice, as this is an actively developed student project." },
+        "s6": { "heading": "6. Availability", "body": "This Service is a student project and is provided \"as is\", without warranties of any kind, express or implied. We do not guarantee continuous uptime, that the Service will be free of bugs or errors, or long-term data preservation beyond the project's active development or grading period." },
+        "s7": { "heading": "7. Limitation of Liability", "body": "To the fullest extent permitted by law, the developers of ft_transcendence are not liable for any indirect, incidental, or consequential damages arising from your use of the Service. This Service is not intended for production or commercial use." },
+        "s8": { "heading": "8. Third-Party Login", "body": "If you choose to log in via Google OAuth, your use of that login method is also subject to Google's own Terms of Service." },
+        "s9": { "heading": "9. Termination", "body": "We may suspend or terminate your access to the Service at any time, with or without cause, including for violations of these Terms." },
+        "s10": { "heading": "10. Changes to These Terms", "body": "We may revise these Terms as the project evolves. Continued use of the Service after changes constitutes acceptance of the revised Terms." },
+        "s11": { "heading": "11. Governing Context", "body": "This project is developed as part of the 42 School curriculum and these Terms are intended for that educational context rather than as a commercially enforceable agreement." },
+        "s12": { "heading": "12. Contact", "pre": "Questions about these Terms:" }
+      }
+    }
+  }

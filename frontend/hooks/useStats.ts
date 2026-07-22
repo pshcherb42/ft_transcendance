@@ -18,7 +18,7 @@ export function useStats() {
       if (!res.ok) throw new Error('Failed to load stats');
       setStats(await res.json());
     } catch {
-      setError('No se pudieron cargar las estadísticas');
+      setError('stats.loadError');
     } finally {
       setLoading(false);
     }

@@ -41,7 +41,8 @@ export class FriendsService {
       id: friendship.id,
       sender: friendship.sender,
       createdAt: friendship.createdAt,
-      message: `${friendship.sender.username} sent you a friend request`,
+      messageKey: 'friends.notify.requestReceived',
+      username: friendship.sender.username,
     });
 
     return friendship;
@@ -74,7 +75,8 @@ export class FriendsService {
     this.presence.emitToUser(friendship.senderId, 'friendRequestAccepted', {
       friendshipId: updated.id,
       friend: { ...updated.receiver, online: this.presence.isOnline(updated.receiver.id) },
-      message: `${updated.receiver.username} accepted your friend request`,
+      messageKey: 'friends.notify.requestAccepted',
+      username: updated.receiver.username,
     });
 
     return updated;
@@ -88,9 +90,9 @@ export class FriendsService {
     }
     await this.prisma.friendship.delete({ where: { id: friendshipId } });
     const otherUserId = friendship.senderId === userId ? friendship.receiverId : friendship.senderId;
-    this.presence.emitToUser(otherUserId, 'friendRemoved', { 
+    this.presence.emitToUser(otherUserId, 'friendRemoved', {
       friendshipId,
-      message: 'A friend has removed you from their list'
+      messageKey: 'friends.notify.removed',
     });
 
     return { status: 'removed' };
