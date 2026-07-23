@@ -100,6 +100,7 @@
       "reconnect": "Opponent disconnected — you win in {{seconds}}s if they don't return",
       "title": { "online": "Pong Online", "ai": "Pong vs AI", "local": "Pong Local" },
       "result": {
+        "finalScore": "Final score",
         "youWin": "You won! 🎉",
         "aiWins": "AI wins! 🤖",
         "leftWins": "LEFT player wins! 🎉",
@@ -158,7 +159,6 @@
     },
     "stats": {
       "title": "Statistics",
-      "back": "← Back",
       "loading": "Loading…",
       "loadError": "Statistics could not be loaded",
       "tiles": { "matches": "Matches", "wins": "Wins", "losses": "Losses", "winRate": "Win %" },

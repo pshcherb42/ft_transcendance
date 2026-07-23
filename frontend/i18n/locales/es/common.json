@@ -100,6 +100,7 @@
       "reconnect": "Rival desconectado — ganas en {{seconds}}s si no vuelve",
       "title": { "online": "Pong Online", "ai": "Pong vs IA", "local": "Pong Local" },
       "result": {
+        "finalScore": "Puntuación final",
         "youWin": "¡Has ganado! 🎉",
         "aiWins": "¡Gana la IA! 🤖",
         "leftWins": "¡Gana el jugador IZQUIERDA! 🎉",
@@ -158,7 +159,6 @@
     },
     "stats": {
       "title": "Estadísticas",
-      "back": "← Volver",
       "loading": "Cargando…",
       "loadError": "No se pudieron cargar las estadísticas",
       "tiles": { "matches": "Partidas", "wins": "Victorias", "losses": "Derrotas", "winRate": "% Victorias" },

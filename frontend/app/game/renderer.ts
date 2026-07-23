@@ -79,8 +79,8 @@ export class PongRenderer {
         ctx.roundRect(
           obstacle.x,
           obstacle.y,
-          obstacle.width,
-          obstacle.height,
+          obstacle.w,
+          obstacle.h,
           8,
         );
         ctx.fill();

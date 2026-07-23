@@ -108,11 +108,12 @@
     },
     "reconnect": "Pretinieks atvienojās — jūs uzvarēsiet pēc {{seconds}} s, ja viņš neatgriezīsies",
     "title": {
-      "online": "Pong tiešsaistē",
+      "online": "Pong tiessaiste",
       "ai": "Pong pret MI",
       "local": "Lokālais Pong"
     },
     "result": {
+      "finalScore": "Gala rezultāts",
       "youWin": "Jūs uzvarējāt! 🎉",
       "aiWins": "MI uzvar! 🤖",
       "leftWins": "Uzvar spēlētājs KREISAJĀ PUSĒ! 🎉",
@@ -171,7 +172,6 @@
   },
   "stats": {
     "title": "Statistika",
-    "back": "← Atpakaļ",
     "loading": "Notiek ielāde…",
     "loadError": "Neizdevās ielādēt statistiku",
     "tiles": {

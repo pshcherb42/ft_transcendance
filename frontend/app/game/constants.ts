@@ -47,10 +47,10 @@ export const MAX_BALLS = 4; // tope de bolas simultáneas con multibola
 // Colores de los obstáculos y de cada tipo de power-up (los usa el renderer).
 export const COLOR_OBSTACLE = '#52525b';
 export const POWERUP_COLORS: Record<string, string> = {
-  grow: '#4ade80', // verde
-  shrink: '#f87171', // rojo
-  speed: '#fbbf24', // amarillo
-  multiball: '#60a5fa', // azul
+  grow: '#5B8DEF',      // мягкий синий
+  shrink: '#C87AB6',    // пыльная фуксия
+  speed: '#F2A65A',     // тёплый янтарный
+  multiball: '#7B6EF6', // насыщенный фиолетовый
 };
 
 // --- Estilo (solo lo usa el renderer) ---

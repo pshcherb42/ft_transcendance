@@ -465,7 +465,7 @@ return (
               hover:bg-[#D9D9D9]/20
             "
           >
-            Back to menu
+            {t('game.button.backToMenu')}
           </button>
 
           <div className="flex flex-col items-center text-center">
@@ -509,7 +509,7 @@ return (
                   text-brand-red
                 "
               >
-                Opponent disconnected — victory in {reconnectSecondsLeft}s
+                {t('game.reconnect')}
               </p>
             )}
         </div>
@@ -649,7 +649,7 @@ return (
                       text-[#615050]
                     "
                   >
-                    Final score
+                    {t('game.result.finalScore')}
                   </p>
 
                   <h2
@@ -735,7 +735,7 @@ return (
                         hover:bg-[#808979]
                       "
                     >
-                      Rematch
+                      {t('game.button.rematch')}
                     </button>
                   )}
 
@@ -760,7 +760,7 @@ return (
                       hover:bg-[#D9D9D9]/30
                     "
                   >
-                    Back to menu
+                    {t('game.button.backToMenu')}
                   </button>
                 </div>
               </div>
