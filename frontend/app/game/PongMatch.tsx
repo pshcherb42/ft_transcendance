@@ -138,7 +138,7 @@ export function PongMatch({ config, vsAi, difficulty = 'medium', onFinish, onSco
       ref={canvasRef}
       width={WIDTH}
       height={HEIGHT}
-      className="border-4 border-white shadow-lg max-w-full"
+      className="block h-auto w-full bg-[#171717]"
     />
   );
 }
