@@ -1,10 +1,16 @@
 {
     "auth": {
+      "welcome": "Bienvenido",
+      "to": "a nuestro",
+      "ourPong": "Pong",
+      "game": "juego!",
+      "subtitle": "Creado para el proyecto 42 Transcendence por el mejor equipo.",
       "login": "Iniciar sesión",
       "register": "Registrarse",
       "createAccount": "Crear cuenta",
       "email": "Correo electrónico",
       "password": "Contraseña",
+      "passwordPlaceholder": "Introduce tu contraseña",
       "username": "Nombre de usuario",
       "signingIn": "Iniciando sesión…",
       "creating": "Creando…",
@@ -27,7 +33,9 @@
         "max": "La contraseña debe tener como máximo 72 caracteres",
         "required": "La contraseña es obligatoria"
       },
-      "email": { "invalid": "Introduce un correo electrónico válido" },
+      "email": { 
+        "invalid": "Introduce un correo electrónico válido",
+        "required": "El correo electrónico es obligatorio" },
       "confirmPassword": { "mismatch": "Las contraseñas no coinciden" },
       "currentPassword": { "required": "Se requiere la contraseña actual para establecer una nueva" }
     }, 
@@ -66,8 +74,17 @@
       "menu": {
         "title": "Pong",
         "playOnline": "Jugar Online",
-        "playLocal": "Jugar Local (2 jugadores)",
-        "playAi": "Jugar vs IA (1 jugador)",
+        "playLocal": "Jugar Local",
+        "playAi": "Jugar vs IA",
+        "tournament": "Torneo",
+        "gameSettings": "Configuración del juego",
+        "gameSettingsNote": "(para IA y local)",
+				"map": "Mapa",
+				"classic": "Clásico",
+				"obstacles": "Obstáculos",
+				"powerUps": "Potenciadores",
+				"powerUpsDescription": "Activa bonificaciones durante la partida",
+				"aiDifficulty": "Dificultad de la IA",
         "description": "Online: te emparejamos con otro jugador. Local: dos jugadores en el mismo teclado."
       },
       "difficulty": { "easy": "Fácil", "medium": "Normal", "hard": "Difícil" },
@@ -172,11 +189,15 @@
     "home": {
       "loading": "Cargando",
       "play": "Jugar",
+      "chooseGame": "Elige tu juego",
+      "selectGameMode": "Selecciona un modo de juego y configura tu partida.",
+      "gameMode": "Modo de juego",
       "profile": "Perfil",
       "friends": "Amigos",
       "chat": "Chat",
       "stats": "Stats",
-      "logout": "Cerrar sesión"
+      "logout": "Cerrar sesión",
+      "loggingOut": "Cerrando sesión..."
     },
     "notification": {
       "friendOnline": "{{username}} está en línea",

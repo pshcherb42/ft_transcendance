@@ -1,0 +1,419 @@
+{
+  "auth": {
+    "welcome": "Laipni",
+    "to": "ludzam",
+    "ourPong": "musu Pong",
+    "game": "spele!",
+    "subtitle": "Izveidots 42 Transcendence projektam — no labākās komandas.",
+    "login": "Pieteikties",
+    "register": "Registracija",
+    "createAccount": "Izveidot kontu",
+    "email": "E-pasts",
+    "password": "Parole",
+    "passwordPlaceholder": "Ievadiet savu paroli",
+    "username": "Lietotājvārds",
+    "signingIn": "Notiek pieteikšanās…",
+    "creating": "Notiek izveide…",
+    "or": "vai",
+    "continueWithGoogle": "Turpināt ar Google",
+    "noAccount": "Nav konta?",
+    "haveAccount": "Jau ir konts?",
+    "loginFailed": "Pieteikšanās neizdevās",
+    "registrationFailed": "Reģistrācija neizdevās",
+    "networkError": "Tīkla kļūda — vai serveris darbojas?"
+  },
+  "validation": {
+    "username": {
+      "min": "Lietotājvārdam jābūt vismaz 3 rakstzīmes garam",
+      "max": "Lietotājvārds nedrīkst būt garāks par 20 rakstzīmēm",
+      "pattern": "Atļauti tikai burti, cipari un pasvītrojuma zīmes"
+    },
+    "password": {
+      "min": "Parolei jābūt vismaz 8 rakstzīmes garai",
+      "max": "Parole nedrīkst būt garāka par 72 rakstzīmēm",
+      "required": "Parole ir obligāta"
+    },
+    "email": {
+      "invalid": "Ievadiet derīgu e-pasta adresi",
+      "required": "E-pasts ir obligāts"
+    },
+    "confirmPassword": {
+      "mismatch": "Paroles nesakrīt"
+    },
+    "currentPassword": {
+      "required": "Lai iestatītu jaunu paroli, nepieciešama pašreizējā parole"
+    }
+  },
+  "friends": {
+    "loading": "Notiek draugu ielāde…",
+    "usernamePlaceholder": "Lietotājvārds",
+    "add": "Pievienot",
+    "sendFailed": "Neizdevās nosūtīt pieprasījumu",
+    "incomingRequests": "Saņemtie pieprasījumi",
+    "outgoingRequests": "Nosūtītie pieprasījumi",
+    "pending": "gaida",
+    "accept": "Pieņemt",
+    "decline": "Noraidīt",
+    "friendsCount": "Draugi ({{count}})",
+    "play": "Spēlēt",
+    "remove": "Noņemt",
+    "inviteSent": "Uzaicinājums nosūtīts lietotājam {{username}}...",
+    "inviteAccepted": "{{username}} pieņēma uzaicinājumu!",
+    "inviteExpired": "{{username}} neatbildēja laikus",
+    "inviteDeclined": "{{username}} noraidīja uzaicinājumu",
+    "errors": {
+      "loadFailed": "Neizdevās ielādēt draugu sarakstu",
+      "requestFailed": "Neizdevās nosūtīt pieprasījumu",
+      "respondFailed": "Neizdevās atbildēt uz pieprasījumu",
+      "removeFailed": "Neizdevās noņemt draugu",
+      "blockFailed": "Neizdevās bloķēt lietotāju"
+    },
+    "notify": {
+      "requestReceived": "{{username}} nosūtīja jums draudzības pieprasījumu",
+      "requestAccepted": "{{username}} pieņēma jūsu draudzības pieprasījumu",
+      "removed": "Draugs noņēma jūs no sava saraksta"
+    }
+  },
+  "game": {
+    "loading": "Notiek ielāde…",
+    "menu": {
+      "title": "Pong",
+      "playOnline": "Spēlēt tiešsaistē",
+      "playLocal": "Lokālā spēle",
+      "playAi": "Spēle pret MI",
+      "tournament": "Turnīrs",
+      "gameSettings": "Spēles iestatījumi",
+      "gameSettingsNote": "(AI un lokāla)",
+			"map": "Karte",
+			"classic": "Klasiska",
+			"obstacles": "Šķēršļi",
+			"powerUps": "Papildspējas",
+			"powerUpsDescription": "Iespējot bonusus spēles laikā",
+			"aiDifficulty": "MI grūtības līmenis",
+      "description": "Tiešsaistē: mēs atradīsim jums pretinieku. Lokāli: divi spēlētāji pie vienas tastatūras."
+    },
+    "difficulty": {
+      "easy": "Viegli",
+      "medium": "Vidēji",
+      "hard": "Grūti"
+    },
+    "status": {
+      "connecting": "Notiek savienošana…",
+      "waiting": "Notiek pretinieka meklēšana…",
+      "playingLeft": "Jūs spēlējat KREISAJĀ PUSĒ",
+      "playingRight": "Jūs spēlējat LABAJĀ PUSĒ",
+      "won": "Jūs uzvarējāt! 🎉",
+      "lost": "Jūs zaudējāt 😢",
+      "opponentLeft": "Pretinieks pameta spēli — jums tiek piešķirta tehniskā uzvara"
+    },
+    "reconnect": "Pretinieks atvienojās — jūs uzvarēsiet pēc {{seconds}} s, ja viņš neatgriezīsies",
+    "title": {
+      "online": "Pong tiešsaistē",
+      "ai": "Pong pret MI",
+      "local": "Lokālais Pong"
+    },
+    "result": {
+      "youWin": "Jūs uzvarējāt! 🎉",
+      "aiWins": "MI uzvar! 🤖",
+      "leftWins": "Uzvar spēlētājs KREISAJĀ PUSĒ! 🎉",
+      "rightWins": "Uzvar spēlētājs LABAJĀ PUSĒ! 🎉"
+    },
+    "subtitle": {
+      "ai": "Jūs (kreisajā pusē) pret MI · {{difficulty}} — līdz 5 punktiem",
+      "local": "Uzvar pirmais, kurš iegūst 5 punktus"
+    },
+    "controls": {
+      "online": "Vadība: ↑ / ↓ (vai W / S)",
+      "ai": "Vadība: W / S (vai ↑ / ↓)",
+      "local": "Kreisajā pusē: W / S     ·     Labajā pusē: ↑ / ↓"
+    },
+    "button": {
+      "findMatch": "Meklēt citu spēli",
+      "rematch": "Spēlēt vēlreiz",
+      "backToMenu": "Atgriezties izvēlnē"
+    },
+    "canvas": {
+      "getReady": "SAGATAVOJIETIES",
+      "youWin": "JŪS UZVARĒJĀT!",
+      "youLose": "JŪS ZAUDĒJĀT",
+      "leftWins": "UZVAR KREISAIS SPĒLĒTĀJS",
+      "rightWins": "UZVAR LABAIS SPĒLĒTĀJS"
+    }
+  },
+  "profile": {
+    "loading": "Notiek ielāde…",
+    "changeAvatar": "Mainīt",
+    "avatarUploading": "Notiek augšupielāde…",
+    "avatarUpdated": "Profila attēls atjaunināts ✓",
+    "avatarUploadFailed": "Augšupielādes kļūda",
+    "username": "Lietotājvārds",
+    "changePassword": "Mainīt paroli",
+    "currentPassword": "Pašreizējā parole",
+    "newPassword": "Jaunā parole",
+    "confirmPassword": "Apstipriniet jauno paroli",
+    "saving": "Notiek saglabāšana…",
+    "saved": "Saglabāts ✓",
+    "saveChanges": "Saglabāt izmaiņas",
+    "saveFailed": "Neizdevās saglabāt — mēģiniet vēlreiz",
+    "fixFieldErrors": "Lūdzu, pārbaudiet laukus ar kļūdām.",
+    "profileUpdated": "Profils veiksmīgi atjaunināts!",
+    "logout": "Izrakstīties"
+  },
+  "chat": {
+    "onlineFriends": "Draugi tiešsaistē",
+    "loading": "Notiek ielāde…",
+    "noneOnline": "Neviens draugs nav tiešsaistē",
+    "selectFriend": "Izvēlieties draugu, lai sāktu tērzēšanu",
+    "invite": "Uzaicināt spēlēt",
+    "messagePlaceholder": "Ievadiet ziņojumu…",
+    "send": "Sūtīt",
+    "newMessage": "Jauns ziņojums!"
+  },
+  "stats": {
+    "title": "Statistika",
+    "back": "← Atpakaļ",
+    "loading": "Notiek ielāde…",
+    "loadError": "Neizdevās ielādēt statistiku",
+    "tiles": {
+      "matches": "Spēles",
+      "wins": "Uzvaras",
+      "losses": "Zaudējumi",
+      "winRate": "Uzvaru %"
+    },
+    "noMatches": "Jūs vēl neesat aizvadījis nevienu spēli. Aizvadiet savu pirmo Pong spēli, lai redzētu statistiku!",
+    "playNow": "Spēlēt",
+    "winLossChart": "Uzvaras un zaudējumi",
+    "scoreChart": "Rezultāts — pēdējās {{count}} spēles",
+    "matchHistory": "Spēļu vēsture",
+    "chartWinsLabel": "uzvaras",
+    "you": "Jūs",
+    "opponent": "Pretinieks",
+    "table": {
+      "opponent": "Pretinieks",
+      "score": "Rezultāts",
+      "result": "Iznākums",
+      "date": "Datums"
+    },
+    "result": {
+      "win": "Uzvara",
+      "loss": "Zaudējums"
+    },
+    "leaderboard": {
+      "title": "Līderu tabula",
+      "friends": "Draugi",
+      "global": "Kopējā",
+      "loading": "Notiek ielāde…",
+      "noFriendsMatches": "Neviens no jūsu draugiem vēl nav aizvadījis nevienu spēli.",
+      "noMatches": "Vēl nav reģistrēta neviena spēle.",
+      "rank": "#",
+      "player": "Spēlētājs",
+      "wl": "U-Z",
+      "winRate": "Uzvaru %",
+      "loadFailed": "Neizdevās ielādēt līderu tabulu"
+    }
+  },
+  "home": {
+    "loading": "Notiek ielāde",
+    "play": "Spēlēt",
+    "chooseGame": "Izvelieties speli",
+    "gameMode": "Spēles režīms",
+    "selectGameMode": "Izvēlieties spēles režīmu un pielāgojiet spēli.",
+    "profile": "Profils",
+    "friends": "Draugi",
+    "chat": "Tērzēšana",
+    "stats": "Statistika",
+    "logout": "Izrakstīties",
+    "loggingOut": "Notiek izrakstīšanās..."
+  },
+  "notification": {
+    "friendOnline": "{{username}} tagad ir tiešsaistē",
+    "friendOfflineDefault": "Draugs",
+    "friendOffline": "{{username}} izgāja no tiešsaistes",
+    "requestDeclined": "Jūsu draudzības pieprasījums tika noraidīts",
+    "wantsToPlay": "{{username}} vēlas spēlēt!",
+    "accept": "Pieņemt",
+    "decline": "Noraidīt"
+  },
+  "legal": {
+    "back": "← Atpakaļ",
+    "lastUpdated": "Pēdējoreiz atjaunināts: {{date}}",
+    "privacy": {
+      "title": "Privātuma politika",
+      "intro": "Šajā Privātuma politikā ir aprakstīts, kā ft_transcendence (“Pakalpojums”, “mēs”) apkopo, izmanto un aizsargā jūsu personas datus, kad izmantojat mūsu Pong tīmekļa lietotni.",
+      "s1": {
+        "heading": "1. Kas mēs esam",
+        "body": "ft_transcendence ir mācību projekts, kas izstrādāts 42 School mācību programmas ietvaros. Tas nav komerciāls produkts. Kontaktinformācija:"
+      },
+      "s2": {
+        "heading": "2. Apkopotie dati",
+        "table": {
+          "headers": [
+            "Dati",
+            "Mērķis",
+            "Avots"
+          ],
+          "rows": [
+            [
+              "Lietotājvārds",
+              "Publiska identifikācija (līderu tabulas, spēļu vēsture, draugi)",
+              "Jūs, reģistrācijas laikā"
+            ],
+            [
+              "E-pasts",
+              "Pieteikšanās kontā",
+              "Jūs, reģistrācijas laikā"
+            ],
+            [
+              "Parole (jaucējkods)",
+              "Autentifikācija",
+              "Jūs, reģistrācijas laikā"
+            ],
+            [
+              "Profila attēls",
+              "Profila attēlošana",
+              "Jūsu augšupielādēts (pēc izvēles)"
+            ],
+            [
+              "OAuth profila dati",
+              "Pieteikšanās ar Google",
+              "Google, ja izvēlējāties pieteikšanos ar OAuth"
+            ],
+            [
+              "Spēļu vēsture un statistika",
+              "Spēles funkcijas, līderu tabulas, turnīri",
+              "Tiek izveidoti spēles laikā"
+            ],
+            [
+              "IP adrese / savienojuma metadati",
+              "Drošība, ļaunprātīgas izmantošanas novēršana, WebSocket sesijas",
+              "Automātiski lietošanas laikā"
+            ]
+          ]
+        },
+        "outro": "Mēs neapkopojam maksājumu informāciju un nepārdodam vai nenododam jūsu datus trešajām personām reklāmas nolūkos."
+      },
+      "s3": {
+        "heading": "3. Kā mēs glabājam jūsu datus",
+        "list": [
+          "Paroles tiek jauktas un nekad netiek glabātas atklātā veidā.",
+          "Profila attēli tiek glabāti kā kodēti dati mūsu datubāzē.",
+          "Dati tiek glabāti PostgreSQL datubāzē mūsu Docker infrastruktūras ietvaros.",
+          "Piekļuves pilnvaras (JWT) autentificē pieprasījumus un ir derīgas īsu laiku; atsvaidzināšanas pilnvaras tiek rotētas lietošanas laikā."
+        ]
+      },
+      "s4": {
+        "heading": "4. Apstrādes juridiskais pamats un mērķis",
+        "intro": "Mēs apstrādājam jūsu datus, lai:",
+        "list": [
+          "Nodrošinātu konta un spēles pamatfunkcionalitāti (līguma izpildes nepieciešamība).",
+          "Nodrošinātu jūsu konta drošību (leģitīmas intereses).",
+          "Iespējotu papildu funkcijas, kurām jūs piekrītat, piemēram, pieteikšanos ar OAuth (piekrišana)."
+        ]
+      },
+      "s5": {
+        "heading": "5. Jūsu tiesības",
+        "intro": "Saskaņā ar VDAR un līdzīgiem noteikumiem jums ir tiesības:",
+        "list": [
+          "Piekļūt personas datiem, kurus mēs glabājam par jums.",
+          "Labot neprecīzus datus, piemēram, profila iestatījumos.",
+          "Dzēst savu kontu un ar to saistītos datus (“tiesības tikt aizmirstam”).",
+          "Eksportēt savus datus pārnesamā formātā.",
+          "Iebilst pret noteiktu apstrādi vai ierobežot to."
+        ],
+        "contactPre": "Lai izmantotu šīs tiesības, sazinieties ar"
+      },
+      "s6": {
+        "heading": "6. Datu glabāšana",
+        "body": "Mēs glabājam jūsu konta datus, kamēr konts ir aktīvs. Dzēšot kontu, jūsu personas dati tiek izņemti no mūsu aktīvās datubāzes 7 darbdienu laikā, izņemot gadījumus, kad to glabāšana ir nepieciešama likumīgai drošības žurnālu uzturēšanai."
+      },
+      "s7": {
+        "heading": "7. Trešo pušu pakalpojumi",
+        "body": "Ja piesakāties ar Google OAuth, datu apstrādi Google pusē regulē Google privātuma politika. Mēs saņemam tikai tos profila laukus, kas nepieciešami jūsu konta izveidei vai sasaistīšanai: vārdu, e-pastu un profila attēlu."
+      },
+      "s8": {
+        "heading": "8. Sīkdatnes un lokālā krātuve",
+        "body": "Mēs izmantojam klienta pusē glabātas pilnvaras tikai jūsu pieteikšanās sesijas uzturēšanai. Mēs neizmantojam izsekošanas vai reklāmas sīkdatnes."
+      },
+      "s9": {
+        "heading": "9. Bērnu privātums",
+        "body": "Mūsu Pakalpojums nav paredzēts bērniem, kas jaunāki par 13 gadiem. Mēs apzināti neapkopojam un nepieprasām personas datus no personām, kas jaunākas par 13 gadiem. Ja atklāsim, ka bērns, kas jaunāks par 13 gadiem, ir reģistrējies un sniedzis mums personas datus, mēs nekavējoties dzēsīsim viņa kontu un informāciju no mūsu datubāzēm. Ja uzskatāt, ka bērns, kas jaunāks par 13 gadiem, ir sniedzis mums datus, nekavējoties sazinieties ar mums."
+      },
+      "s10": {
+        "heading": "10. Izmaiņas šajā Politikā",
+        "body": "Mēs varam atjaunināt šo politiku projekta attīstības gaitā. Būtiskas izmaiņas tiks atzīmētas ar atjauninātu datumu laukā “Pēdējoreiz atjaunināts”."
+      },
+      "s11": {
+        "heading": "11. Kontaktinformācija",
+        "pre": "Jautājumi par šo politiku vai jūsu datiem:"
+      }
+    },
+    "terms": {
+      "title": "Lietošanas noteikumi",
+      "intro": "Laipni lūdzam ft_transcendence (“Pakalpojums”). Izveidojot kontu vai izmantojot Pakalpojumu, jūs piekrītat šiem Lietošanas noteikumiem (“Noteikumi”). Šis ir mācību projekts, kas izstrādāts 42 School programmas ietvaros un tiek nodrošināts izglītojošiem un demonstrācijas nolūkiem.",
+      "s1": {
+        "heading": "1. Tiesības izmantot",
+        "body": "Lai izveidotu kontu, jums jābūt vismaz 13 gadus vecam. Reģistrējoties jūs apliecināt sniegtās informācijas precizitāti."
+      },
+      "s2": {
+        "heading": "2. Jūsu konts",
+        "list": [
+          "Jūs esat atbildīgs par savu pieteikšanās datu konfidencialitātes saglabāšanu.",
+          "Jūs esat atbildīgs par visām darbībām savā kontā.",
+          "Jūs varat pieteikties ar e-pastu un paroli vai ar Google OAuth.",
+          "Jūs jebkurā laikā varat dzēst savu kontu, sazinoties ar mums."
+        ]
+      },
+      "s3": {
+        "heading": "3. Pieļaujamā izmantošana",
+        "intro": "Jūs piekrītat neveikt šādas darbības:",
+        "list": [
+          "Izmantot Pakalpojumu, lai vajātu, aizskartu vai kaitētu citiem lietotājiem.",
+          "Mēģināt traucēt darbību, izmantot ievainojamības vai iegūt neatļautu piekļuvi Pakalpojumam, tā infrastruktūrai vai citu lietotāju kontiem, tostarp krāpjoties vai izmantojot kļūdas.",
+          "Augšupielādēt profila attēlus vai saturu, kas ir nelikumīgs, aizskarošs vai pārkāpj trešo personu tiesības.",
+          "Izmantot automatizētus rīkus (botus), lai spēlētu vai manipulētu ar līderu tabulām, izņemot skaidri paredzētu spēli pret iebūvēto MI pretinieku."
+        ],
+        "outro": "Mēs paturam tiesības apturēt vai dzēst kontus, kas pārkāpj šos Noteikumus."
+      },
+      "s4": {
+        "heading": "4. Jūsu iesniegtais saturs",
+        "list": [
+          "Jūs saglabājat īpašumtiesības uz savu augšupielādēto saturu, piemēram, profila attēlu.",
+          "Augšupielādējot profila attēlu, jūs piešķirat mums ierobežotu licenci to glabāt un attēlot Pakalpojuma ietvaros.",
+          "Jūs esat atbildīgs par to, lai jums būtu tiesības augšupielādēt jebkuru iesniegto saturu."
+        ]
+      },
+      "s5": {
+        "heading": "5. Spēļu dati un godīga spēle",
+        "body": "Spēļu vēsture, statistika un turnīru rezultāti tiek reģistrēti, pamatojoties uz faktisko spēli Pakalpojumā. Izstrādes laikā mēs varam atiestatīt, dzēst vai mainīt spēļu datus bez iepriekšēja brīdinājuma, jo šis ir aktīvi izstrādāts mācību projekts."
+      },
+      "s6": {
+        "heading": "6. Pieejamība",
+        "body": "Šis Pakalpojums ir mācību projekts un tiek nodrošināts “tāds, kāds tas ir”, bez jebkādām tiešām vai netiešām garantijām. Mēs negarantējam nepārtrauktu darbību, kļūdu neesamību Pakalpojumā vai datu ilgtermiņa saglabāšanu ārpus aktīvās izstrādes vai projekta vērtēšanas perioda."
+      },
+      "s7": {
+        "heading": "7. Atbildības ierobežojums",
+        "body": "Maksimālajā likumā atļautajā apmērā ft_transcendence izstrādātāji nav atbildīgi par netiešiem, nejaušiem vai izrietošiem zaudējumiem, kas radušies Pakalpojuma izmantošanas rezultātā. Šis Pakalpojums nav paredzēts rūpnieciskai vai komerciālai izmantošanai."
+      },
+      "s8": {
+        "heading": "8. Pieteikšanās ar trešo pušu pakalpojumiem",
+        "body": "Ja izvēlaties pieteikšanos ar Google OAuth, uz šīs pieteikšanās metodes izmantošanu attiecas arī Google Lietošanas noteikumi."
+      },
+      "s9": {
+        "heading": "9. Piekļuves izbeigšana",
+        "body": "Mēs varam jebkurā laikā apturēt vai pārtraukt jūsu piekļuvi Pakalpojumam, norādot iemeslu vai bez tā, tostarp šo Noteikumu pārkāpuma gadījumā."
+      },
+      "s10": {
+        "heading": "10. Izmaiņas šajos Noteikumos",
+        "body": "Mēs varam pārskatīt šos Noteikumus projekta attīstības gaitā. Turpinot izmantot Pakalpojumu pēc izmaiņām, jūs piekrītat atjauninātajiem Noteikumiem."
+      },
+      "s11": {
+        "heading": "11. Juridiskais konteksts",
+        "body": "Šis projekts ir izstrādāts 42 School mācību programmas ietvaros, un šie Noteikumi ir paredzēti šim izglītojošajam kontekstam, nevis kā komerciāli izpildāms līgums."
+      },
+      "s12": {
+        "heading": "12. Kontaktinformācija",
+        "pre": "Jautājumi par šiem Noteikumiem:"
+      }
+    }
+  }
+}

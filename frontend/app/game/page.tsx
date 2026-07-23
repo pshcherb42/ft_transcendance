@@ -426,7 +426,7 @@ const rightPlayerName =
       : 'Player two';
 
 return (
-  <div className="flex min-h-screen flex-col bg-[#F7F5F1]">
+  <div className="flex min-h-[calc(100dvh-48px)] flex-col bg-[#F7F5F1]">
     <main className="flex flex-1">
       <section
         className="

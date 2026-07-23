@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Input from '@/components/input';
 import BouncingBall from '@/components/bouncingBall';
+import { useTranslation } from 'react-i18next';
 
 export default function LoginPage() {
   const { login } = useAuth();
   const router = useRouter();
+  const { t } = useTranslation();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -31,18 +33,18 @@ export default function LoginPage() {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!trimmedEmail) {
-      setEmailError('Email is required');
+      setEmailError(t('validation.email.required'));
       hasError = true;
     } else if (!emailPattern.test(trimmedEmail)) {
-      setEmailError('Please enter a valid email');
+      setEmailError(t('validation.email.invalid'));
       hasError = true;
     }
 
     if (!password) {
-      setPasswordError('Password is required');
+      setPasswordError(t('validation.password.required'));
       hasError = true;
     } else if (password.length < 8) {
-      setPasswordError('Password must be at least 8 characters');
+      setPasswordError(t('validation.password.min'));
       hasError = true;
     }
 
@@ -57,18 +59,18 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.message ?? 'Login failed'); return; }
+      if (!res.ok) { setError(data.message ?? t('auth.loginFailed')); return; }
       await login(data.accessToken, data.refreshToken);
       router.push('/');
     } catch {
-      setError('Network error — is the backend running?');
+      setError(t('auth.networkError'));
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background flex flex-col">
+    <div className="relative min-h-[calc(100dvh-48px)] overflow-hidden bg-background flex flex-col">
       <BouncingBall />
 
       {/* основной контент */}
@@ -79,19 +81,19 @@ export default function LoginPage() {
           42 Transcendence
         </span>
         <h1 className="font-display uppercase leading-tight text-[clamp(2.5rem,7vw,92px)]">
-          <span className="text-foreground block">Welcome</span>
-          <span className="text-foreground block">to</span>
-          <span className="text-brand-red block">Our Pong</span>
-          <span className="text-foreground block">Game!</span>
+          <span className="text-foreground block">{t('auth.welcome')}</span>
+          <span className="text-foreground block">{t('auth.to')}</span>
+          <span className="text-brand-red block">{t('auth.ourPong')}</span>
+          <span className="text-foreground block">{t('auth.game')}</span>
         </h1>
         <p className="mt-6 text-[clamp(1rem,2vw,28px)] font-light text-foreground">
-            Built for the 42 Transcendence project <br /> by the best team.
+          {t('auth.subtitle')}
           </p>
         </div>
 
         {/* правая часть — форма */}
         <div className="w-full max-w-[550px] bg-white rounded-[10px] px-8 xl:px-[70px] py-[50px] shadow-[-8px_8px_32px_0_rgba(193,168,163,0.25)]">        <h2 className="font-display text-[48px] uppercase text-brand-red mb-[32]">
-          Log in
+          {t('auth.login')}
         </h2>
 
         <form
@@ -102,7 +104,7 @@ export default function LoginPage() {
           <Input
             id="email"
             name="email"
-            label="Email"
+            label={t('auth.email')}
             type="email"
             value={email}
             onChange={(e) => {
@@ -119,7 +121,7 @@ export default function LoginPage() {
           <Input
             id="password"
             name="password"
-            label="Password"
+            label={t('auth.password')}
             type="password"
             value={password}
             onChange={(e) => {
@@ -129,7 +131,7 @@ export default function LoginPage() {
                 setPasswordError('');
               }
             }}
-            placeholder="Enter your password"
+            placeholder={t('auth.passwordPlaceholder')}
             error={passwordError}
           />
 
@@ -156,14 +158,14 @@ export default function LoginPage() {
               disabled:opacity-60
             "
           >
-            {loading ? 'Logging in...' : 'Log in'}
+            {loading ? t('auth.signingIn') : t('auth.login')}
           </button>
         </form>
 
           {/* разделитель */}
           <div className="relative flex items-center my-[20px]">
             <div className="flex-1 border-t border-zinc-200" />
-            <span className="mx-3 text-xs text-zinc-400">or</span>
+            <span className="mx-3 text-xs text-zinc-400">{t('auth.or')}</span>
             <div className="flex-1 border-t border-zinc-200" />
           </div>
 
@@ -173,13 +175,13 @@ export default function LoginPage() {
           className="flex items-center justify-center gap-3 w-full h-11 rounded-full border border-zinc-200 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
         >
           <GoogleIcon />
-          Continue with Google
+          {t('auth.continueWithGoogle')}
         </a>
 
           <p className="mt-[20px] text-sm text-zinc-400">
-            Don't have an account?{' '}
+            {t('auth.noAccount')}{' '}
             <a href="/register" className="font-bold text-zinc-900 hover:underline">
-              Register
+            {t('auth.createAccount')}
             </a>
           </p>
         </div>

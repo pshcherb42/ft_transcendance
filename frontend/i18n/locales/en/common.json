@@ -1,10 +1,16 @@
 {
     "auth": {
+      "welcome": "Welcome",
+      "to": "to",
+      "ourPong": "our Pong",
+      "game": "game!",
+      "subtitle": "Built for the 42 Transcendence project by the best team.",
       "login": "Log in",
       "register": "Register",
       "createAccount": "Create account",
       "email": "Email",
       "password": "Password",
+      "passwordPlaceholder": "Enter your password",
       "username": "Username",
       "signingIn": "Signing in…",
       "creating": "Creating…",
@@ -27,7 +33,9 @@
         "max": "Password must be at most 72 characters",
         "required": "Password is required"
       },
-      "email": { "invalid": "Enter a valid email" },
+      "email": { 
+        "invalid": "Enter a valid email",
+        "required": "Email is required" },
       "confirmPassword": { "mismatch": "Passwords do not match" },
       "currentPassword": { "required": "Current password is required to set a new one" }
     },
@@ -66,8 +74,17 @@
       "menu": {
         "title": "Pong",
         "playOnline": "Play Online",
-        "playLocal": "Play Local (2 players)",
-        "playAi": "Play vs AI (1 player)",
+        "playLocal": "Play Local",
+        "playAi": "Play vs AI ",
+        "tournament": "Tournament",
+        "gameSettings": "Game settings",
+        "gameSettingsNote": "(for AI and local)",
+        "map": "Map",
+        "classic": "Classic",
+        "obstacles": "Obstacles",
+        "powerUps": "Power-ups",
+        "powerUpsDescription": "Enable bonuses during the game",
+        "aiDifficulty": "AI difficulty",
         "description": "Online: we match you with another player. Local: two players on the same keyboard."
       },
       "difficulty": { "easy": "Easy", "medium": "Normal", "hard": "Hard" },
@@ -172,11 +189,15 @@
     "home": {
       "loading": "Loading",
       "play": "Play",
+      "chooseGame": "Choose your game",
+      "gameMode": "Game mode",
+      "selectGameMode": "Select a game mode and configure your match.",
       "profile": "Profile",
       "friends": "Friends",
       "chat": "Chat",
       "stats": "Stats",
-      "logout": "Log out"
+      "logout": "Log out",
+      "loggingOut": "Logging out..."
     },
     "notification": {
       "friendOnline": "{{username}} is now online",

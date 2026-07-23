@@ -6,9 +6,9 @@ import { useTranslation } from 'react-i18next';
 const STORAGE_KEY = 'lang';
 
 const LANGS = [
-  { code: 'en', label: 'English' },
-  { code: 'es', label: 'Español' },
-  { code: 'ru', label: 'Русский' },
+  { code: 'en', label: 'EN' },
+  { code: 'es', label: 'ES' },
+  { code: 'lv', label: 'LV' },
 ];
 
 export default function LanguageSwitcher() {
@@ -19,18 +19,51 @@ export default function LanguageSwitcher() {
     window.localStorage.setItem(STORAGE_KEY, code);
   }
 
+  const currentLanguage = i18n.language.split('-')[0];
+
   return (
-    <select
-      value={i18n.language}
-      onChange={(e) => handleChange(e.target.value)}
-      className="bg-transparent border border-zinc-700 rounded px-2 py-1 text-xs text-zinc-300"
+    <div
+      className="flex items-center gap-2 pl-10"
       aria-label="Language"
     >
-      {LANGS.map((l) => (
-        <option key={l.code} value={l.code} className="bg-zinc-900">
-          {l.label}
-        </option>
-      ))}
-    </select>
+      {LANGS.map((language, index) => {
+        const isActive =
+          currentLanguage === language.code;
+
+        return (
+          <div
+            key={language.code}
+            className="flex items-center gap-2"
+          >
+            <button
+              type="button"
+              onClick={() =>
+                handleChange(language.code)
+              }
+              className={`
+                text-xs
+                font-medium
+                uppercase
+                tracking-widest
+                transition-colors
+                ${
+                  isActive
+                    ? 'text-brand-red'
+                    : 'text-[#615050] hover:text-brand-red'
+                }
+              `}
+            >
+              {language.label}
+            </button>
+
+            {index < LANGS.length - 1 && (
+              <span className="text-[#B5ACAC]">
+                /
+              </span>
+            )}
+          </div>
+        );
+      })}
+    </div>
   );
 }
