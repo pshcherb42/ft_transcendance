@@ -12,55 +12,13 @@ import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import imageCompression from 'browser-image-compression';
 import { toast } from 'sonner';
+import FriendsPanel from '@/components/FriendsPanel';
 
 import { useAuth } from '@/context/AuthContext';
 import { apiFetch } from '@/app/lib/api';
 import { updateProfileSchema } from '@/validation/auth.schema';
 
 type ProfileTab = 'friends' | 'statistics' | 'leaderboard';
-
-type Friend = {
-  id: number;
-  username: string;
-  avatarPath: string | null;
-};
-
-type FriendRequest = {
-  id: number;
-  username: string;
-  avatarPath: string | null;
-};
-
-const TEMP_FRIENDS: Friend[] = [
-  {
-    id: 1,
-    username: 'Poli',
-    avatarPath: null,
-  },
-  {
-    id: 2,
-    username: 'Ernestissimo',
-    avatarPath: null,
-  },
-  {
-    id: 3,
-    username: 'Davidello',
-    avatarPath: null,
-  },
-];
-
-const TEMP_REQUESTS: FriendRequest[] = [
-  {
-    id: 1,
-    username: 'Random guy',
-    avatarPath: null,
-  },
-  {
-    id: 2,
-    username: 'Cool girl',
-    avatarPath: null,
-  },
-];
 
 export default function ProfilePage() {
   const { t } = useTranslation();
@@ -99,12 +57,6 @@ export default function ProfilePage() {
 
   const [fieldErrors, setFieldErrors] =
     useState<Record<string, string>>({});
-
-  const [friends, setFriends] =
-    useState<Friend[]>(TEMP_FRIENDS);
-
-  const [requests, setRequests] =
-    useState<FriendRequest[]>(TEMP_REQUESTS);
 
   /*
    * Временные значения.
@@ -378,49 +330,6 @@ export default function ProfilePage() {
   async function handleLogout() {
     await logout();
     router.replace('/login');
-  }
-
-  function handleDeleteFriend(
-    friendId: number,
-  ) {
-    setFriends((currentFriends) =>
-      currentFriends.filter(
-        (friend) =>
-          friend.id !== friendId,
-      ),
-    );
-  }
-
-  function handleAcceptRequest(
-    request: FriendRequest,
-  ) {
-    setRequests((currentRequests) =>
-      currentRequests.filter(
-        (currentRequest) =>
-          currentRequest.id !== request.id,
-      ),
-    );
-
-    setFriends((currentFriends) => [
-      ...currentFriends,
-      {
-        id: request.id + 1000,
-        username: request.username,
-        avatarPath:
-          request.avatarPath,
-      },
-    ]);
-  }
-
-  function handleRejectRequest(
-    requestId: number,
-  ) {
-    setRequests((currentRequests) =>
-      currentRequests.filter(
-        (request) =>
-          request.id !== requestId,
-      ),
-    );
   }
 
   if (loading || !user) {
@@ -728,138 +637,8 @@ export default function ProfilePage() {
               md:px-12
             "
           >
-            {activeTab ===
-              'friends' && (
-              <div className="grid gap-10 lg:grid-cols-2 lg:gap-0">
-                {/* Список друзей */}
-                <div className="lg:border-r lg:border-[#EEE9E6] lg:pr-10">
-                  <h2 className="mb-8 font-display text-[36px] uppercase leading-none text-brand-red">
-                    {t(
-                      'profile.friendsList',
-                      {
-                        defaultValue:
-                          'Friends list',
-                      },
-                    )}
-                  </h2>
-
-                  {friends.length > 0 ? (
-                    <div className="space-y-5">
-                      {friends.map(
-                        (friend) => (
-                          <FriendRow
-                            key={
-                              friend.id
-                            }
-                            friend={
-                              friend
-                            }
-                            playLabel={t(
-                              'profile.play',
-                              {
-                                defaultValue:
-                                  'Play',
-                              },
-                            )}
-                            deleteLabel={t(
-                              'profile.delete',
-                              {
-                                defaultValue:
-                                  'Delete',
-                              },
-                            )}
-                            onPlay={() =>
-                              router.push(
-                                `/game?opponent=${friend.id}`,
-                              )
-                            }
-                            onDelete={() =>
-                              handleDeleteFriend(
-                                friend.id,
-                              )
-                            }
-                          />
-                        ),
-                      )}
-                    </div>
-                  ) : (
-                    <EmptyState
-                      text={t(
-                        'profile.noFriends',
-                        {
-                          defaultValue:
-                            'No friends yet',
-                        },
-                      )}
-                    />
-                  )}
-                </div>
-
-                {/* Запросы */}
-                <div className="lg:pl-10">
-                  <h2 className="mb-8 font-display text-[36px] uppercase leading-none text-brand-red">
-                    {t(
-                      'profile.requests',
-                      {
-                        defaultValue:
-                          'Requests',
-                      },
-                    )}
-                  </h2>
-
-                  {requests.length >
-                  0 ? (
-                    <div className="space-y-5">
-                      {requests.map(
-                        (request) => (
-                          <RequestRow
-                            key={
-                              request.id
-                            }
-                            request={
-                              request
-                            }
-                            acceptLabel={t(
-                              'profile.accept',
-                              {
-                                defaultValue:
-                                  'Accept',
-                              },
-                            )}
-                            rejectLabel={t(
-                              'profile.reject',
-                              {
-                                defaultValue:
-                                  'Reject',
-                              },
-                            )}
-                            onAccept={() =>
-                              handleAcceptRequest(
-                                request,
-                              )
-                            }
-                            onReject={() =>
-                              handleRejectRequest(
-                                request.id,
-                              )
-                            }
-                          />
-                        ),
-                      )}
-                    </div>
-                  ) : (
-                    <EmptyState
-                      text={t(
-                        'profile.noRequests',
-                        {
-                          defaultValue:
-                            'No pending requests',
-                        },
-                      )}
-                    />
-                  )}
-                </div>
-              </div>
+            {activeTab === 'friends' && (
+              <FriendsPanel />
             )}
 
             {activeTab ===
