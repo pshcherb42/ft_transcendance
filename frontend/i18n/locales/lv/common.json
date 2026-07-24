@@ -110,7 +110,7 @@
     "title": {
       "online": "Pong tiessaiste",
       "ai": "Pong pret MI",
-      "local": "Lokālais Pong"
+      "local": "Lokalais Pong"
     },
     "result": {
       "finalScore": "Gala rezultāts",
@@ -124,6 +124,7 @@
       "local": "Uzvar pirmais, kurš iegūst 5 punktus"
     },
     "controls": {
+      "difficulty": "Grūtības līmenis:",
       "online": "Vadība: ↑ / ↓ (vai W / S)",
       "ai": "Vadība: W / S (vai ↑ / ↓)",
       "local": "Kreisajā pusē: W / S     ·     Labajā pusē: ↑ / ↓"
@@ -135,10 +136,13 @@
     },
     "canvas": {
       "getReady": "SAGATAVOJIETIES",
-      "youWin": "JŪS UZVARĒJĀT!",
-      "youLose": "JŪS ZAUDĒJĀT",
-      "leftWins": "UZVAR KREISAIS SPĒLĒTĀJS",
-      "rightWins": "UZVAR LABAIS SPĒLĒTĀJS"
+      "youWin": "JUS UZVAREJAT!",
+      "youLose": "JUS ZAUDEJAT",
+      "leftWins": "UZVAR KREISAIS SPELETAJS",
+      "rightWins": "UZVAR LABAIS SPELETAJS",
+      "leftPlayer": "Kreisais spēlētājs",
+      "rightPlayer": "Labais spēlētājs",
+      "ai": "MI"
     }
   },
   "profile": {

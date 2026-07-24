@@ -85,7 +85,7 @@ export default function HomePage() {
 
       <main className="relative z-10 flex flex-1 flex-col">
         {/* Верхние кнопки */}
-        <header className="flex items-center justify-between px-8 pt-8 md:px-16 xl:px-[64px] xl:pt-[64px]">
+        <header className="flex items-center justify-between px-8 pt-8 md:px-16 md:pt-8">
           <button
             type="button"
             onClick={handleLogout}
@@ -142,7 +142,7 @@ export default function HomePage() {
               bg-white
               px-8
               py-14
-              -translate-y-6
+              -translate-y-8
               shadow-[-8px_8px_32px_0_rgba(193,168,163,0.25)]
               md:px-12
               xl:px-[70px]

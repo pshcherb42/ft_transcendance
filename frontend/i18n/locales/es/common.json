@@ -111,6 +111,7 @@
         "local": "Primer jugador en llegar a 5 gana"
       },
       "controls": {
+        "difficulty": "Dificultad:",
         "online": "Tus controles: ↑ / ↓ (o W / S)",
         "ai": "Tus controles: W / S  (o ↑ / ↓)",
         "local": "Izquierda: W / S     ·     Derecha: ↑ / ↓"
@@ -125,7 +126,10 @@
         "youWin": "¡GANAS!",
         "youLose": "PIERDES",
         "leftWins": "GANA IZQUIERDA",
-        "rightWins": "GANA DERECHA"
+        "rightWins": "GANA DERECHA",
+        "leftPlayer": "Jugador izquierdo",
+        "rightPlayer": "Jugador derecho",
+        "ai": "IA"
       }
     },
     "profile": {

@@ -388,16 +388,16 @@ const resultTitle = (() => {
       return 'YOU WON';
     }
 
-    return winner === side ? 'YOU WON' : 'YOU LOST';
+    return winner === side ? t('game.canvas.youWin') : t('game.canvas.youLose');
   }
 
   if (mode === 'ai') {
-    return localWinner === 'left' ? 'YOU WON' : 'AI WON';
+    return localWinner === 'left' ? t('game.canvas.youWin') : t('game.result.aiWins');
   }
 
   return localWinner === 'left'
-    ? 'PLAYER ONE WON'
-    : 'PLAYER TWO WON';
+    ? t('game.canvas.leftWins')
+    : t('game.canvas.righttWins');
 })();
 
 const gameTitle =
@@ -414,7 +414,7 @@ const leftPlayerName =
       : 'Opponent'
     : mode === 'ai'
       ? user.username
-      : 'Player one';
+      : t('game.canvas.leftPlayer');
 
 const rightPlayerName =
   mode === 'online'
@@ -422,11 +422,11 @@ const rightPlayerName =
       ? user.username
       : 'Opponent'
     : mode === 'ai'
-      ? 'AI'
-      : 'Player two';
+      ? t('game.canvas.ai')
+      : t('game.canvas.rightPlayer');
 
 return (
-  <div className="flex min-h-screen flex-col bg-[#F7F5F1]">
+  <div className="flex min-h-[calc(100dvh-48px)] flex-col bg-[#F7F5F1]">
     <main className="flex flex-1">
       <section
         className="
@@ -435,10 +435,10 @@ return (
           flex-col
           bg-[#F7F5F1]
           px-6
-          pb-10
-          pt-12
+          pb-5
+          pt-6
           md:px-16
-          md:pt-16
+          md:pt-8
         "
       >
         {/* Верхняя часть */}
@@ -531,68 +531,43 @@ return (
           "
         >
           {/* Игроки и счёт */}
-          <div
-            className="
-              grid
-              grid-cols-[1fr_auto_1fr]
-              items-end
-              gap-4
-              pb-4
-            "
-          >
-            <div>
-              <p
-                className="
-                  text-[12px]
-                  font-medium
-                  uppercase
-                  tracking-[0.12em]
-                  text-[#262121]
-                "
-              >
-                Player one
-              </p>
-
-              <p className="mt-2 text-[20px] font-semibold text-black">
-                {leftPlayerName}
-              </p>
-            </div>
-
-            <div
-              className="
-                flex
-                items-center
-                gap-4
-                text-[44px]
-                font-semibold
-                leading-none
-                text-black
-              "
-            >
-              <span>{score.left}</span>
-              <span className="text-[30px] text-[#777171]">:</span>
-              <span>{score.right}</span>
-            </div>
-
-            <div className="text-right">
-              <p
-                className="
-                  text-[12px]
-                  font-medium
-                  uppercase
-                  tracking-[0.12em]
-                  text-[#262121]
-                "
-              >
-                Player two
-              </p>
-
-              <p className="mt-2 text-[20px] font-semibold text-black">
-                {rightPlayerName}
-              </p>
-            </div>
+        <div
+          className="
+            grid
+            grid-cols-[1fr_auto_1fr]
+            items-end
+            gap-4
+            pb-4
+          "
+        >
+          <div>
+            <p className="text-[20px] font-semibold text-black">
+              {leftPlayerName}
+            </p>
           </div>
 
+          <div
+            className="
+              flex
+              items-center
+              gap-4
+              text-[44px]
+              font-semibold
+              leading-none
+              text-black
+            "
+          >
+            <span>{score.left}</span>
+            <span className="text-[30px] text-[#777171]">:</span>
+            <span>{score.right}</span>
+          </div>
+
+          <div className="text-right">
+            <p className="text-[20px] font-semibold text-black">
+              {rightPlayerName}
+            </p>
+          </div>
+        </div>
           {/* Canvas */}
           <div className="relative overflow-hidden rounded-[14px] bg-[#171717]">
             {mode === 'online' ? (
@@ -706,7 +681,7 @@ return (
                         hover:bg-[#808979]
                       "
                     >
-                      Find another game
+                      {t('game.button.findMatch')}
                     </button>
                   ) : (
                     <button
@@ -773,8 +748,8 @@ return (
             <div className="mx-auto mt-5 min-h-[28px] text-center">
               <p className="text-[14px] text-[#615050]">
                 {mode === 'ai'
-                  ? `Difficulty: ${DIFF_LABEL[difficulty]}`
-                  : 'Player one: W / S · Player two: ↑ / ↓'}
+                  ? `${t('game.controls.difficulty')} ${DIFF_LABEL[difficulty]}`
+                  : t('game.controls.local')}
               </p>
             </div>
           )}

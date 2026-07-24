@@ -98,19 +98,20 @@
         "opponentLeft": "Opponent left — you win by forfeit"
       },
       "reconnect": "Opponent disconnected — you win in {{seconds}}s if they don't return",
-      "title": { "online": "Pong Online", "ai": "Pong vs AI", "local": "Pong Local" },
+      "title": { "online": "Pong Online", "ai": "Pong vs AI", "local": "Local Pong" },
       "result": {
         "finalScore": "Final score",
-        "youWin": "You won! 🎉",
-        "aiWins": "AI wins! 🤖",
-        "leftWins": "LEFT player wins! 🎉",
-        "rightWins": "RIGHT player wins! 🎉"
+        "youWin": "You won",
+        "aiWins": "AI wins",
+        "leftWins": "LEFT player wins",
+        "rightWins": "RIGHT player wins"
       },
       "subtitle": {
         "ai": "You (left) vs AI · {{difficulty}} — first to 5 wins",
         "local": "First player to reach 5 wins"
       },
       "controls": {
+        "difficulty": "Difficulty:",
         "online": "Your controls: ↑ / ↓ (or W / S)",
         "ai": "Your controls: W / S  (or ↑ / ↓)",
         "local": "Left: W / S     ·     Right: ↑ / ↓"
@@ -124,8 +125,11 @@
         "getReady": "GET READY",
         "youWin": "YOU WIN!",
         "youLose": "YOU LOSE",
-        "leftWins": "LEFT WINS",
-        "rightWins": "RIGHT WINS"
+        "leftWins": "LEFT PLAYER WINS",
+        "rightWins": "RIGHT PLAYER WINS",
+        "leftPlayer": "Left player",
+        "rightPlayer": "Right player",
+        "ai": "AI"
       }
     },
     "profile": {
