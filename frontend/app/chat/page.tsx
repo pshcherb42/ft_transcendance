@@ -12,110 +12,524 @@ export default function ChatPage() {
   const { t } = useTranslation();
   const { user, loading } = useAuth();
   const router = useRouter();
-  const { friends, loading: friendsLoading } = useFriends();
-  const { conversations, loadHistory, sendMessage } = useChat(user?.id);
+
+  const {
+    friends,
+    loading: friendsLoading,
+  } = useFriends();
+
+  const {
+    conversations,
+    loadHistory,
+    sendMessage,
+  } = useChat(user?.id);
+
   const { inviteToPlay } = useGameInvite();
 
   const [activeFriendId, setActiveFriendId] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
 
   useEffect(() => {
-    if (!loading && !user) router.push('/login');
+    if (!loading && !user) {
+      router.push('/login');
+    }
   }, [loading, user, router]);
+
+  /*
+   * Автоматически открываем первый чат после загрузки друзей.
+   */
+  useEffect(() => {
+    if (!friendsLoading && friends.length > 0 && !activeFriendId) {
+      const firstFriendId = friends[0].id;
+
+      setActiveFriendId(firstFriendId);
+      loadHistory(firstFriendId);
+    }
+  }, [
+    friends,
+    friendsLoading,
+    activeFriendId,
+    loadHistory,
+  ]);
 
   if (loading || !user) {
     return (
-      <main className="flex flex-1 items-center justify-center bg-zinc-50 dark:bg-black">
-        <p className="text-zinc-400">{t('home.loading')}</p>
+      <main className="flex min-h-screen items-center justify-center bg-[#F4F2EE]">
+        <p className="text-sm text-[#615050]">
+          {t('home.loading')}
+        </p>
       </main>
     );
   }
 
-  const onlineFriends = friends.filter((f) => f.online);
-  const activeFriend = friends.find((f) => f.id === activeFriendId);
-  const messages = activeFriendId ? conversations[activeFriendId] ?? [] : [];
+  const activeFriend = friends.find(
+    (friend) => friend.id === activeFriendId,
+  );
+
+  const messages = activeFriendId
+    ? conversations[activeFriendId] ?? []
+    : [];
 
   const selectFriend = (friendId: string) => {
     setActiveFriendId(friendId);
-    if (!conversations[friendId]) loadHistory(friendId);
+
+    if (!conversations[friendId]) {
+      loadHistory(friendId);
+    }
   };
 
-  const handleSend = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!activeFriendId || !draft.trim()) return;
-    sendMessage(activeFriendId, draft);
+  const handleSend = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const message = draft.trim();
+
+    if (!activeFriendId || !message) {
+      return;
+    }
+
+    sendMessage(activeFriendId, message);
     setDraft('');
   };
 
+  const getInitial = (username: string) =>
+    username.charAt(0).toUpperCase();
+
   return (
-    <div className="min-h-screen bg-gray-900 flex">
-      <aside className="w-64 border-r border-zinc-800 p-4 flex flex-col gap-2">
-        <h2 className="text-white font-semibold mb-2">{t('chat.onlineFriends')}</h2>
-        {friendsLoading && <p className="text-zinc-500 text-sm">{t('chat.loading')}</p>}
-        {!friendsLoading && onlineFriends.length === 0 && (
-          <p className="text-zinc-500 text-sm">{t('chat.noneOnline')}</p>
-        )}
-        <ul className="flex flex-col gap-1">
-          {onlineFriends.map((f) => (
-            <li key={f.id}>
-              <button
-                onClick={() => selectFriend(f.id)}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm flex items-center gap-2 ${
-                  activeFriendId === f.id ? 'bg-zinc-700 text-white' : 'text-zinc-300 hover:bg-zinc-800'
-                }`}
-              >
-                <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                {f.username}
-              </button>
-            </li>
-          ))}
-        </ul>
-      </aside>
+  <div className="relative flex min-h-[calc(100dvh-48px)] flex-col overflow-hidden bg-background">
+    <main className="relative z-10 flex flex-1 flex-col">
+      {/* Верхняя навигация */}
+      <header className="flex flex-wrap items-center justify-between gap-4 px-8 pt-8 md:px-16">
+        <button
+          type="button"
+          onClick={() => router.push('/')}
+          className="
+            h-[46px]
+            min-w-[190px]
+            rounded-full
+            border
+            border-[#D9D5D1]
+            px-8
+            text-[14px]
+            font-medium
+            uppercase
+            text-[#615050]
+            transition-colors
+            hover:bg-[#D9D9D9]/20
+          "
+        >
+          {t('game.button.backToMenu')}
+        </button>
 
-      <section className="flex-1 flex flex-col">
-        {!activeFriend ? (
-          <div className="flex-1 flex items-center justify-center text-zinc-500">
-            {t('chat.selectFriend')}
-          </div>
-        ) : (
-          <>
-            <header className="border-b border-zinc-800 p-4 flex items-center justify-between">
-              <h3 className="text-white font-semibold">{activeFriend.username}</h3>
-              <button
-                onClick={() => inviteToPlay(activeFriend.id, activeFriend.username)}
-                className="text-xs px-3 py-1.5 rounded bg-indigo-600 text-white hover:bg-indigo-500"
-              >
-                {t('chat.invite')}
-              </button>
-            </header>
+        <button
+          type="button"
+          onClick={() => router.push('/profile')}
+          className="
+            ml-auto
+            h-[46px]
+            min-w-[190px]
+            rounded-full
+            bg-brand-green
+            px-8
+            text-[14px]
+            font-medium
+            uppercase
+            text-white
+            transition-colors
+            hover:bg-[#808979]
+          "
+        >
+          {t('home.profile')}
+        </button>
+      </header>
 
-            <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
-              {messages.map((m) => (
-                <div
-                  key={m.id}
-                  className={`max-w-[70%] px-3 py-2 rounded-lg text-sm ${
-                    m.senderId === user.id ? 'self-end bg-indigo-600 text-white' : 'self-start bg-zinc-800 text-zinc-100'
-                  }`}
-                >
-                  {m.text}
-                </div>
-              ))}
+      {/* Область чата */}
+      <section className="flex min-h-0 flex-1 px-8 pb-8 pt-10 md:px-16">
+        <div
+          className="
+            flex
+            min-h-0
+            flex-1
+            overflow-hidden
+            rounded-[10px]
+            bg-white
+            shadow-[-8px_8px_32px_0_rgba(193,168,163,0.25)]
+          "
+        >
+          {/* Левая колонка */}
+          <aside
+            className="
+              flex
+              w-[310px]
+              shrink-0
+              flex-col
+              border-r
+              border-[#D9D5D1]
+            "
+          >
+            <div className="px-9 pb-8 pt-7">
+              <h1
+                className="
+                  text-[42px]
+                  font-display
+                  uppercase
+                  leading-none
+                  text-brand-red
+                "
+              >
+                {t('chat.title')}
+              </h1>
             </div>
 
-            <form onSubmit={handleSend} className="border-t border-zinc-800 p-4 flex gap-2">
-              <input
-                value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-                placeholder={t('chat.messagePlaceholder')}
-                className="flex-1 h-10 rounded-lg bg-zinc-800 text-white px-3 text-sm outline-none"
-              />
-              <button type="submit" className="h-10 px-4 rounded-lg bg-white text-black text-sm font-medium">
-                {t('chat.send')}
-              </button>
-            </form>
-          </>
-        )}
-      </section>
+            <div className="flex-1 overflow-y-auto">
+              {friendsLoading && (
+                <p className="px-9 py-5 text-sm text-[#8E8780]">
+                  {t('chat.loading')}
+                </p>
+              )}
+
+              {!friendsLoading && friends.length === 0 && (
+                <p className="px-9 py-5 text-sm text-[#8E8780]">
+                  {t('chat.noFriends')}
+                </p>
+              )}
+
+              <ul>
+                {friends.map((friend) => {
+                  const isActive = activeFriendId === friend.id;
+
+                  return (
+                    <li key={friend.id}>
+                      <button
+                        type="button"
+                        onClick={() => selectFriend(friend.id)}
+                        className={`
+                          flex
+                          w-full
+                          items-center
+                          gap-4
+                          border-b
+                          border-[#F1EFEC]
+                          px-7
+                          py-4
+                          text-left
+                          transition-colors
+                          ${
+                            isActive
+                              ? 'bg-[#F7F5F1]'
+                              : 'bg-white hover:bg-[#FAF9F7]'
+                          }
+                        `}
+                      >
+                        <div
+                          className="
+                            flex
+                            h-[52px]
+                            w-[52px]
+                            shrink-0
+                            items-center
+                            justify-center
+                            rounded-full
+                            bg-[#DEDAD4]
+                            text-lg
+                            font-bold
+                            text-white
+                          "
+                        >
+                          {getInitial(friend.username)}
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                          <p
+                            className="
+                              truncate
+                              text-[18px]
+                              font-semibold
+                              text-[#615050]
+                            "
+                          >
+                            {friend.username}
+                          </p>
+
+                          <div className="mt-1 flex items-center gap-2">
+                            <span
+                              className={`
+                                h-[10px]
+                                w-[10px]
+                                rounded-full
+                                ${
+                                  friend.online
+                                    ? 'bg-[#8EBE78]'
+                                    : 'bg-[#CFCAC4]'
+                                }
+                              `}
+                            />
+
+                            <span
+                              className="
+                                text-xs
+                                font-medium
+                                uppercase
+                                text-[#615050]
+                              "
+                            >
+                              {friend.online
+                                ? t('chat.online')
+                                : t('chat.offline')}
+                            </span>
+                          </div>
+                        </div>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          </aside>
+
+          {/* Правая колонка */}
+          <section className="flex min-w-0 flex-1 flex-col">
+            {!activeFriend ? (
+              <div
+                className="
+                  flex
+                  flex-1
+                  items-center
+                  justify-center
+                  px-8
+                  text-sm
+                  text-[#8E8780]
+                "
+              >
+                {t('chat.selectFriend')}
+              </div>
+            ) : (
+              <>
+                {/* Заголовок активного чата */}
+                <header
+                  className="
+                    flex
+                    min-h-[90px]
+                    items-center
+                    justify-between
+                    border-b
+                    border-[#D9D5D1]
+                    px-8
+                  "
+                >
+                  <div className="flex items-center gap-4">
+                    <div
+                      className="
+                        flex
+                        h-[52px]
+                        w-[52px]
+                        shrink-0
+                        items-center
+                        justify-center
+                        rounded-full
+                        bg-[#DEDAD4]
+                        text-lg
+                        font-bold
+                        text-white
+                      "
+                    >
+                      {getInitial(activeFriend.username)}
+                    </div>
+
+                    <div>
+                      <h2 className="text-xl font-semibold text-[#615050]">
+                        {activeFriend.username}
+                      </h2>
+
+                      <div className="mt-1 flex items-center gap-2">
+                        <span
+                          className={`
+                            h-[10px]
+                            w-[10px]
+                            rounded-full
+                            ${
+                              activeFriend.online
+                                ? 'bg-[#8EBE78]'
+                                : 'bg-[#CFCAC4]'
+                            }
+                          `}
+                        />
+
+                        <span
+                          className="
+                            text-xs
+                            font-medium
+                            uppercase
+                            text-[#615050]
+                          "
+                        >
+                          {activeFriend.online
+                            ? t('chat.online')
+                            : t('chat.offline')}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      inviteToPlay(
+                        activeFriend.id,
+                        activeFriend.username,
+                      )
+                    }
+                    className="
+                      h-[46px]
+                      min-w-[190px]
+                      rounded-full
+                      bg-brand-red
+                      px-8
+                      text-[14px]
+                      font-medium
+                      uppercase
+                      text-white
+                      transition-colors
+                      hover:bg-[#D9361F]
+                    "
+                  >
+                    {t('chat.invite')}
+                  </button>
+                </header>
+
+                {/* Сообщения */}
+                <div
+                  className="
+                    flex
+                    min-h-0
+                    flex-1
+                    flex-col
+                    gap-3
+                    overflow-y-auto
+                    px-8
+                    py-8
+                  "
+                >
+                  {messages.length === 0 && (
+                    <div
+                      className="
+                        flex
+                        flex-1
+                        items-center
+                        justify-center
+                        text-sm
+                        text-[#AAA39C]
+                      "
+                    >
+                      {t('chat.noMessages')}
+                    </div>
+                  )}
+
+                  {messages.map((message) => {
+                    const isOwnMessage =
+                      message.senderId === user.id;
+
+                    return (
+                      <div
+                        key={message.id}
+                        className={`
+                          flex
+                          max-w-[75%]
+                          items-end
+                          gap-3
+                          ${
+                            isOwnMessage
+                              ? 'self-end'
+                              : 'self-start'
+                          }
+                        `}
+                      >
+                        <div
+                          className={`
+                            rounded-[22px]
+                            px-5
+                            py-3
+                            text-sm
+                            leading-5
+                            text-[#615050]
+                            ${
+                              isOwnMessage
+                                ? 'rounded-br-md bg-[#D8D4CE]'
+                                : 'rounded-bl-md bg-[#F0EEEA]'
+                            }
+                          `}
+                        >
+                          {message.text}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Поле отправки */}
+                <form
+                  onSubmit={handleSend}
+                  className="
+                    flex
+                    items-center
+                    gap-5
+                    border-t
+                    border-[#D9D5D1]
+                    px-8
+                    py-4
+                  "
+                >
+                  <input
+                    type="text"
+                    value={draft}
+                    onChange={(event) => setDraft(event.target.value)}
+                    placeholder={t('chat.messagePlaceholder')}
+                    className="
+                      h-[46px]
+                      min-w-0
+                      flex-1
+                      rounded-full
+                      border
+                      border-[#D9D5D1]
+                      bg-white
+                      px-5
+                      text-sm
+                      text-[#615050]
+                      outline-none
+                      transition-colors
+                      placeholder:text-zinc-400
+                      hover:border-brand-green
+                      focus:border-brand-green
+                    "
+                  />
+
+                  <button
+                    type="submit"
+                    disabled={!draft.trim()}
+                    className="
+                      h-[42px]
+                      min-w-[82px]
+                      rounded-full
+                      bg-[#EE4424]
+                      px-6
+                      text-xs
+                      font-medium
+                      uppercase
+                      text-white
+                      transition-colors
+                      hover:bg-[#D6381C]
+                      disabled:cursor-not-allowed
+                      disabled:opacity-40
+                    "
+                  >
+                    {t('chat.send')}
+                  </button>
+                </form>
+              </>
+            )}
+          </section>
+        </div>
+        </section>
+      </main>
     </div>
   );
 }

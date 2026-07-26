@@ -114,6 +114,7 @@ export default function FriendsPanel() {
             outline-none
             transition-colors
             placeholder:text-zinc-400
+            hover:border-brand-green
             focus:border-brand-green
           "
         />

@@ -163,12 +163,17 @@
       "offline": "Offline"
     },
     "chat": {
-      "onlineFriends": "Online friends",
-      "loading": "Loading…",
-      "noneOnline": "No friends online",
+      "title": "Chat",
+      "backToMenu": "Back to menu",
+      "profile": "Profile",
+      "loading": "Loading...",
+      "noFriends": "No friends yet",
       "selectFriend": "Select a friend to start chatting",
+      "online": "Online",
+      "offline": "Offline",
       "invite": "Invite to play",
-      "messagePlaceholder": "Type a message…",
+      "noMessages": "No messages yet",
+      "messagePlaceholder": "Type a message...",
       "send": "Send",
       "newMessage": "New Message!"
     },

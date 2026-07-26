@@ -135,7 +135,7 @@
       "findMatch": "Meklēt citu spēli",
       "rematch": "Spēlēt vēlreiz",
       "backToMenu": "Atgriezties izvēlnē",
-      "chat": "Tērzēšana",
+      "chat": "Chats",
       "editProfile": "Rediget profilu"
     },
     "canvas": {
@@ -176,12 +176,17 @@
     "offline": "Bezsaistē"
   },
   "chat": {
-    "onlineFriends": "Draugi tiešsaistē",
-    "loading": "Notiek ielāde…",
-    "noneOnline": "Neviens draugs nav tiešsaistē",
-    "selectFriend": "Izvēlieties draugu, lai sāktu tērzēšanu",
+    "title": "Chats",
+    "backToMenu": "Atpakaļ uz izvēlni",
+    "profile": "Profils",
+    "loading": "Ielādē...",
+    "noFriends": "Draugu vēl nav",
+    "selectFriend": "Izvēlies draugu, lai sāktu saraksti",
+    "online": "Tiešsaistē",
+    "offline": "Bezsaistē",
     "invite": "Uzaicināt spēlēt",
-    "messagePlaceholder": "Ievadiet ziņojumu…",
+    "noMessages": "Ziņojumu vēl nav",
+    "messagePlaceholder": "Raksti ziņojumu...",
     "send": "Sūtīt",
     "newMessage": "Jauns ziņojums!"
   },

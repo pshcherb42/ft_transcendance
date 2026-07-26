@@ -163,12 +163,17 @@
       "offline": "Desconectado"
     },
     "chat": {
-      "onlineFriends": "Amigos conectados",
-      "loading": "Cargando…",
-      "noneOnline": "No hay amigos conectados",
+      "title": "Chat",
+      "backToMenu": "Volver al menú",
+      "profile": "Perfil",
+      "loading": "Cargando...",
+      "noFriends": "Aún no tienes amigos",
       "selectFriend": "Selecciona un amigo para empezar a chatear",
+      "online": "En línea",
+      "offline": "Desconectado",
       "invite": "Invitar a jugar",
-      "messagePlaceholder": "Escribe un mensaje…",
+      "noMessages": "Aún no hay mensajes",
+      "messagePlaceholder": "Escribe un mensaje...",
       "send": "Enviar",
       "newMessage": "Nuevo Mensaje!"
     },
