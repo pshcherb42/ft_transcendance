@@ -41,6 +41,8 @@
     }, 
     "friends": {
       "loading": "Cargando amigos…",
+      "noIncomingRequests": "No hay solicitudes pendientes",
+      "noFriendsYet": "Aún no tienes amigos",
       "usernamePlaceholder": "Nombre de usuario",
       "add": "Añadir",
       "sendFailed": "Error al enviar la solicitud",
@@ -147,6 +149,7 @@
       "confirmPassword": "Confirmar nueva contraseña",
       "saving": "Guardando…",
       "saved": "Guardado ✓",
+      "cancel": "Cancelar",
       "saveChanges": "Guardar cambios",
       "saveFailed": "Error al guardar — inténtalo de nuevo",
       "fixFieldErrors": "Por favor, revisa los campos con errores.",
@@ -155,7 +158,9 @@
       "games": "Partidas",
       "wins": "Victorias",
       "losses": "Derrotas",
-      "winRate": "% de victorias"
+      "winRate": "% de victorias",
+      "online": "En línea",
+      "offline": "Desconectado"
     },
     "chat": {
       "onlineFriends": "Amigos conectados",

@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useLeaderboard } from '@/hooks/useLeaderboard';
 import type { LeaderboardScope } from '@/types/leaderboard';
+import UserAvatar from '@/components/UserAvatar';
 
 export default function Leaderboard({
   currentUserId,
@@ -132,25 +133,11 @@ export default function Leaderboard({
 
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 overflow-hidden rounded-full bg-[#D9D5D1]">
-                        {entry.avatarPath ? (
-                          <img
-                            src={
-                              entry.avatarPath
-                            }
-                            alt={
-                              entry.username
-                            }
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          <span className="flex h-full w-full items-center justify-center text-xs font-bold uppercase text-white">
-                            {entry.username
-                              .charAt(0)
-                              .toUpperCase()}
-                          </span>
-                        )}
-                      </div>
+                    <UserAvatar
+                      username={entry.username}
+                      avatarPath={entry.avatarPath}
+                      size="sm"
+                    />
 
                       <span className="font-medium text-[#615050]">
                         {entry.username}

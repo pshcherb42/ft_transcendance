@@ -46,6 +46,8 @@
   },
   "friends": {
     "loading": "Notiek draugu ielāde…",
+    "noIncomingRequests": "Nav ienākošu pieprasījumu",
+    "noFriendsYet": "Pagaidām nav draugu",
     "usernamePlaceholder": "Lietotājvārds",
     "add": "Pievienot",
     "sendFailed": "Neizdevās nosūtīt pieprasījumu",
@@ -134,7 +136,7 @@
       "rematch": "Spēlēt vēlreiz",
       "backToMenu": "Atgriezties izvēlnē",
       "chat": "Tērzēšana",
-      "editProfile": "Rediģēt profilu"
+      "editProfile": "Rediget profilu"
     },
     "canvas": {
       "getReady": "SAGATAVOJIETIES",
@@ -160,6 +162,7 @@
     "confirmPassword": "Apstipriniet jauno paroli",
     "saving": "Notiek saglabāšana…",
     "saved": "Saglabāts ✓",
+    "cancel": "Atcelt",
     "saveChanges": "Saglabāt izmaiņas",
     "saveFailed": "Neizdevās saglabāt — mēģiniet vēlreiz",
     "fixFieldErrors": "Lūdzu, pārbaudiet laukus ar kļūdām.",
@@ -168,7 +171,9 @@
     "games": "Spēles",
     "wins": "Uzvaras",
     "losses": "Zaudējumi",
-    "winRate": "Uzvaru %"
+    "winRate": "Uzvaru %",
+    "online": "Tiešsaistē",
+    "offline": "Bezsaistē"
   },
   "chat": {
     "onlineFriends": "Draugi tiešsaistē",

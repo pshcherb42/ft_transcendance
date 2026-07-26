@@ -41,6 +41,8 @@
     },
     "friends": {
       "loading": "Loading friends…",
+      "noIncomingRequests": "No incoming requests",
+      "noFriendsYet": "No friends yet",
       "usernamePlaceholder": "Username",
       "add": "Add",
       "sendFailed": "Failed to send request",
@@ -147,6 +149,7 @@
       "confirmPassword": "Confirm new password",
       "saving": "Saving…",
       "saved": "Saved ✓",
+      "cancel": "Cancel",
       "saveChanges": "Save changes",
       "saveFailed": "Save failed — try again",
       "fixFieldErrors": "Please review the fields with errors.",
@@ -155,7 +158,9 @@
       "games": "Games",
       "wins": "Wins",
       "losses": "Losses",
-      "winRate": "Win %"
+      "winRate": "Win %",
+      "online": "Online",
+      "offline": "Offline"
     },
     "chat": {
       "onlineFriends": "Online friends",

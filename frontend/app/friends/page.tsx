@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import FriendsPanel from '@/components/FriendsPanel';
+import FriendsPanel from '@/app/friends/FriendsPanel';
 
 export default function FriendsPage() {
   const { user, loading } = useAuth();

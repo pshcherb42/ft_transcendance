@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useFriends } from '@/hooks/useFriends';
 import { useGameInvite } from '@/hooks/useGameInvite';
+import UserAvatar from '@/components/UserAvatar';
 
 export default function FriendsPanel() {
   const { t } = useTranslation();
@@ -177,9 +178,10 @@ export default function FriendsPanel() {
                   "
                 >
                   <div className="flex min-w-0 items-center gap-3">
-                    <UserAvatar
-                      username={friend.username}
-                    />
+                  <UserAvatar
+                    username={friend.username}
+                    avatarPath={friend.avatar}
+                  />
 
                     <div className="min-w-0">
                       <p className="truncate text-[16px] font-semibold text-[#615050]">
@@ -202,14 +204,8 @@ export default function FriendsPanel() {
 
                         <span className="text-xs text-zinc-400">
                           {friend.online
-                            ? t('friends.online', {
-                                defaultValue:
-                                  'Online',
-                              })
-                            : t('friends.offline', {
-                                defaultValue:
-                                  'Offline',
-                              })}
+                            ? t('profile.online')
+                            : t('profile.offline')}
                         </span>
                       </div>
                     </div>
@@ -272,7 +268,7 @@ export default function FriendsPanel() {
             <EmptyBlock
               text={t('friends.noFriends', {
                 defaultValue:
-                  'No friends yet',
+                  t('friends.noFriendsYet'),
               })}
             />
           )}
@@ -300,11 +296,10 @@ export default function FriendsPanel() {
                   "
                 >
                   <div className="flex min-w-0 items-center gap-3">
-                    <UserAvatar
-                      username={
-                        request.sender.username
-                      }
-                    />
+                  <UserAvatar
+                    username={request.sender.username}
+                    avatarPath={request.sender.avatar}
+                  />
 
                     <p className="truncate text-[16px] font-semibold text-[#615050]">
                       {request.sender.username}
@@ -368,7 +363,7 @@ export default function FriendsPanel() {
                 'friends.noIncomingRequests',
                 {
                   defaultValue:
-                    'No incoming requests',
+                  t('friends.noIncomingRequests'),
                 },
               )}
             />
@@ -400,12 +395,10 @@ export default function FriendsPanel() {
                     "
                   >
                     <div className="flex min-w-0 items-center gap-3">
-                      <UserAvatar
-                        username={
-                          request.receiver
-                            .username
-                        }
-                      />
+                    <UserAvatar
+                      username={request.receiver.username}
+                      avatarPath={request.receiver.avatar}
+                    />
 
                       <span className="truncate text-sm font-medium text-[#615050]">
                         {
@@ -425,33 +418,6 @@ export default function FriendsPanel() {
           )}
         </section>
       </div>
-    </div>
-  );
-}
-
-function UserAvatar({
-  username,
-}: {
-  username: string;
-}) {
-  return (
-    <div
-      className="
-        flex
-        h-10
-        w-10
-        shrink-0
-        items-center
-        justify-center
-        rounded-full
-        bg-[#D9D5D1]
-        text-sm
-        font-bold
-        uppercase
-        text-white
-      "
-    >
-      {username.charAt(0).toUpperCase()}
     </div>
   );
 }
