@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useFriends } from '@/hooks/useFriends';
 import { useChat } from '@/hooks/useChat';
 import { useGameInvite } from '@/hooks/useGameInvite';
+import UserAvatar from '@/components/UserAvatar';
 
 export default function ChatPage() {
   const { t } = useTranslation();
@@ -90,9 +91,6 @@ export default function ChatPage() {
     sendMessage(activeFriendId, message);
     setDraft('');
   };
-
-  const getInitial = (username: string) =>
-    username.charAt(0).toUpperCase();
 
   return (
   <div className="relative flex min-h-[calc(100dvh-48px)] flex-col overflow-hidden bg-background">
@@ -220,22 +218,11 @@ export default function ChatPage() {
                           }
                         `}
                       >
-                        <div
-                          className="
-                            flex
-                            h-[52px]
-                            w-[52px]
-                            shrink-0
-                            items-center
-                            justify-center
-                            rounded-full
-                            bg-[#DEDAD4]
-                            text-lg
-                            font-bold
-                            text-white
-                          "
-                        >
-                          {getInitial(friend.username)}
+                        <div className="h-[52px] w-[52px] shrink-0">
+                          <UserAvatar
+                            username={friend.username}
+                            avatarPath={friend.avatar}
+                          />
                         </div>
 
                         <div className="min-w-0 flex-1">
@@ -317,23 +304,12 @@ export default function ChatPage() {
                   "
                 >
                   <div className="flex items-center gap-4">
-                    <div
-                      className="
-                        flex
-                        h-[52px]
-                        w-[52px]
-                        shrink-0
-                        items-center
-                        justify-center
-                        rounded-full
-                        bg-[#DEDAD4]
-                        text-lg
-                        font-bold
-                        text-white
-                      "
-                    >
-                      {getInitial(activeFriend.username)}
-                    </div>
+                  <div className="h-[52px] w-[52px] shrink-0">
+                    <UserAvatar
+                      username={activeFriend.username}
+                      avatarPath={activeFriend.avatar}
+                    />
+                  </div>
 
                     <div>
                       <h2 className="text-xl font-semibold text-[#615050]">
