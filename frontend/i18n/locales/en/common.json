@@ -119,7 +119,9 @@
       "button": {
         "findMatch": "Find another match",
         "rematch": "Rematch",
-        "backToMenu": "Back to menu"
+        "backToMenu": "Back to menu",
+        "chat": "Chat",
+        "editProfile": "Edit profile"
       },
       "canvas": {
         "getReady": "GET READY",
@@ -149,7 +151,11 @@
       "saveFailed": "Save failed — try again",
       "fixFieldErrors": "Please review the fields with errors.",
       "profileUpdated": "Profile updated successfully!",
-      "logout": "Log out"
+      "logout": "Log out",
+      "games": "Games",
+      "wins": "Wins",
+      "losses": "Losses",
+      "winRate": "Win %"
     },
     "chat": {
       "onlineFriends": "Online friends",

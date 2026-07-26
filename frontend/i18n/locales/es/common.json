@@ -119,7 +119,9 @@
       "button": {
         "findMatch": "Buscar otra partida",
         "rematch": "Revancha",
-        "backToMenu": "Volver al menú"
+        "backToMenu": "Volver al menú",
+        "chat": "Chat",
+        "editProfile": "Editar perfil"
       },
       "canvas": {
         "getReady": "PREPÁRATE",
@@ -149,7 +151,11 @@
       "saveFailed": "Error al guardar — inténtalo de nuevo",
       "fixFieldErrors": "Por favor, revisa los campos con errores.",
       "profileUpdated": "¡Perfil actualizado con éxito!",
-      "logout": "Cerrar sesión"
+      "logout": "Cerrar sesión",
+      "games": "Partidas",
+      "wins": "Victorias",
+      "losses": "Derrotas",
+      "winRate": "% de victorias"
     },
     "chat": {
       "onlineFriends": "Amigos conectados",
@@ -177,7 +183,7 @@
       "table": { "opponent": "Rival", "score": "Marcador", "result": "Resultado", "date": "Fecha" },
       "result": { "win": "Victoria", "loss": "Derrota" },
       "leaderboard": {
-        "title": "Leaderboard",
+        "title": "Tabla de clasificación",
         "friends": "Amigos",
         "global": "General",
         "loading": "Cargando…",

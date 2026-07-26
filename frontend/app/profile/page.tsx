@@ -13,6 +13,11 @@ import { useTranslation } from 'react-i18next';
 import imageCompression from 'browser-image-compression';
 import { toast } from 'sonner';
 import FriendsPanel from '@/components/FriendsPanel';
+import StatisticsCharts from '@/app/stats/StatisticsCharts';
+import MatchHistory from '@/app/stats/MatchHistory';
+import Leaderboard from '@/app/stats/Leaderboard';
+
+import { useStats } from '@/hooks/useStats';
 
 import { useAuth } from '@/context/AuthContext';
 import { apiFetch } from '@/app/lib/api';
@@ -23,6 +28,12 @@ type ProfileTab = 'friends' | 'statistics' | 'leaderboard';
 export default function ProfilePage() {
   const { t } = useTranslation();
   const { user, loading, logout, refetchUser } = useAuth();
+  const {
+    stats,
+    loading: statsLoading,
+    error: statsError,
+  } = useStats();
+
   const router = useRouter();
 
   const fileRef = useRef<HTMLInputElement>(null);
@@ -58,18 +69,13 @@ export default function ProfilePage() {
   const [fieldErrors, setFieldErrors] =
     useState<Record<string, string>>({});
 
-  /*
-   * Временные значения.
-   * Потом их нужно заменить данными с backend.
-   */
-  const games = 0;
-  const wins = 0;
-  const losses = 0;
-
-  const winPercentage =
-    games === 0
-      ? 0
-      : Math.round((wins / games) * 100);
+  const games = stats?.totalMatches ?? 0;
+  const wins = stats?.wins ?? 0;
+  const losses = stats?.losses ?? 0;
+  
+  const winPercentage = Math.round(
+    (stats?.winRate ?? 0) * 100,
+  );
 
   useEffect(() => {
     if (!loading && !user) {
@@ -377,7 +383,7 @@ export default function ProfilePage() {
           >
             {t('profile.backToMenu', {
               defaultValue:
-                'Back to menu',
+              t('game.button.backToMenu'),
             })}
           </button>
 
@@ -402,7 +408,7 @@ export default function ProfilePage() {
               "
             >
               {t('profile.chat', {
-                defaultValue: 'Chat',
+                defaultValue: t('game.button.chat'),
               })}
             </button>
 
@@ -427,7 +433,7 @@ export default function ProfilePage() {
                 'profile.editProfile',
                 {
                   defaultValue:
-                    'Edit profile',
+                  t('game.button.editProfile'),
                 },
               )}
             </button>
@@ -490,7 +496,7 @@ export default function ProfilePage() {
                   'profile.games',
                   {
                     defaultValue:
-                      'Games',
+                    t('profile.games'),
                   },
                 )}
               />
@@ -501,7 +507,7 @@ export default function ProfilePage() {
                   'profile.wins',
                   {
                     defaultValue:
-                      'Wins',
+                    t('profile.wins'),
                   },
                 )}
               />
@@ -512,7 +518,7 @@ export default function ProfilePage() {
                   'profile.losses',
                   {
                     defaultValue:
-                      'Loss',
+                    t('profile.losses'),
                   },
                 )}
               />
@@ -523,7 +529,7 @@ export default function ProfilePage() {
                   'profile.winPercentage',
                   {
                     defaultValue:
-                      '% Wins',
+                    t('profile.winRate'),
                   },
                 )}
               />
@@ -542,7 +548,7 @@ export default function ProfilePage() {
             >
               {t('profile.friends', {
                 defaultValue:
-                  'Friends',
+                t('stats.leaderboard.friends'),
               })}
             </TabButton>
 
@@ -561,7 +567,7 @@ export default function ProfilePage() {
                 'profile.statistics',
                 {
                   defaultValue:
-                    'Statistics',
+                  t('stats.title'),
                 },
               )}
             </TabButton>
@@ -581,7 +587,7 @@ export default function ProfilePage() {
                 'profile.leaderboard',
                 {
                   defaultValue:
-                    'Leaderboard',
+                  t('stats.leaderboard.title'),
                 },
               )}
             </TabButton>
@@ -605,83 +611,41 @@ export default function ProfilePage() {
               <FriendsPanel />
             )}
 
-            {activeTab ===
-              'statistics' && (
-              <div>
-                <h2 className="mb-8 font-display text-[36px] uppercase leading-none text-brand-red">
-                  {t(
-                    'profile.statistics',
-                    {
-                      defaultValue:
-                        'Statistics',
-                    },
-                  )}
-                </h2>
-
-                <div className="grid gap-4 md:grid-cols-3">
-                  <LargeStatCard
-                    value={games}
-                    label={t(
-                      'profile.totalGames',
-                      {
-                        defaultValue:
-                          'Total games',
-                      },
-                    )}
+            {activeTab === 'statistics' && (
+            <>
+              {statsLoading ? (
+                <div className="flex min-h-[320px] items-center justify-center">
+                  <p className="text-sm text-zinc-400">
+                    {t('stats.loading')}
+                  </p>
+                </div>
+              ) : statsError || !stats ? (
+                <div className="flex min-h-[320px] items-center justify-center">
+                  <p className="text-sm text-red-600">
+                    {statsError
+                      ? t(statsError)
+                      : t('stats.loadError')}
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-8">
+                  <StatisticsCharts
+                    stats={stats}
                   />
 
-                  <LargeStatCard
-                    value={wins}
-                    label={t(
-                      'profile.totalWins',
-                      {
-                        defaultValue:
-                          'Total wins',
-                      },
-                    )}
-                  />
-
-                  <LargeStatCard
-                    value={
-                      winPercentage
-                    }
-                    suffix="%"
-                    label={t(
-                      'profile.winRate',
-                      {
-                        defaultValue:
-                          'Win rate',
-                      },
-                    )}
+                  <MatchHistory
+                    matches={stats.matches}
                   />
                 </div>
-              </div>
-            )}
+              )}
+            </>
+          )}
 
-            {activeTab ===
-              'leaderboard' && (
-              <div>
-                <h2 className="mb-8 font-display text-[36px] uppercase leading-none text-brand-red">
-                  {t(
-                    'profile.leaderboard',
-                    {
-                      defaultValue:
-                        'Leaderboard',
-                    },
-                  )}
-                </h2>
-
-                <EmptyState
-                  text={t(
-                    'profile.leaderboardComingSoon',
-                    {
-                      defaultValue:
-                        'Leaderboard data will appear here',
-                    },
-                  )}
-                />
-              </div>
-            )}
+          {activeTab === 'leaderboard' && (
+            <Leaderboard
+              currentUserId={user.id}
+            />
+          )}
           </div>
         </section>
       </main>
@@ -1077,29 +1041,6 @@ function StatCard({
   );
 }
 
-function LargeStatCard({
-  value,
-  label,
-  suffix = '',
-}: {
-  value: number;
-  label: string;
-  suffix?: string;
-}) {
-  return (
-    <div className="rounded-[10px] border border-[#D9D5D1] bg-background px-6 py-8 text-center">
-      <p className="font-display text-[44px] uppercase leading-none text-brand-red">
-        {value}
-        {suffix}
-      </p>
-
-      <p className="mt-4 text-sm font-medium uppercase text-[#615050]">
-        {label}
-      </p>
-    </div>
-  );
-}
-
 function TabButton({
   active,
   children,
@@ -1298,20 +1239,6 @@ function SmallAvatar({
             .toUpperCase()}
         </span>
       )}
-    </div>
-  );
-}
-
-function EmptyState({
-  text,
-}: {
-  text: string;
-}) {
-  return (
-    <div className="flex min-h-[180px] items-center justify-center rounded-[10px] border border-dashed border-[#D9D5D1] px-5">
-      <p className="text-center text-sm text-zinc-400">
-        {text}
-      </p>
     </div>
   );
 }

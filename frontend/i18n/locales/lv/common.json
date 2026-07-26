@@ -49,7 +49,7 @@
     "usernamePlaceholder": "Lietotājvārds",
     "add": "Pievienot",
     "sendFailed": "Neizdevās nosūtīt pieprasījumu",
-    "incomingRequests": "Saņemtie pieprasījumi",
+    "incomingRequests": "Sanemtie pieprasijumi",
     "outgoingRequests": "Nosūtītie pieprasījumi",
     "pending": "gaida",
     "accept": "Pieņemt",
@@ -132,7 +132,9 @@
     "button": {
       "findMatch": "Meklēt citu spēli",
       "rematch": "Spēlēt vēlreiz",
-      "backToMenu": "Atgriezties izvēlnē"
+      "backToMenu": "Atgriezties izvēlnē",
+      "chat": "Tērzēšana",
+      "editProfile": "Rediģēt profilu"
     },
     "canvas": {
       "getReady": "SAGATAVOJIETIES",
@@ -162,7 +164,11 @@
     "saveFailed": "Neizdevās saglabāt — mēģiniet vēlreiz",
     "fixFieldErrors": "Lūdzu, pārbaudiet laukus ar kļūdām.",
     "profileUpdated": "Profils veiksmīgi atjaunināts!",
-    "logout": "Izrakstīties"
+    "logout": "Izrakstīties",
+    "games": "Spēles",
+    "wins": "Uzvaras",
+    "losses": "Zaudējumi",
+    "winRate": "Uzvaru %"
   },
   "chat": {
     "onlineFriends": "Draugi tiešsaistē",
@@ -186,9 +192,9 @@
     },
     "noMatches": "Jūs vēl neesat aizvadījis nevienu spēli. Aizvadiet savu pirmo Pong spēli, lai redzētu statistiku!",
     "playNow": "Spēlēt",
-    "winLossChart": "Uzvaras un zaudējumi",
-    "scoreChart": "Rezultāts — pēdējās {{count}} spēles",
-    "matchHistory": "Spēļu vēsture",
+    "winLossChart": "Uzvaras un zaudejumi",
+    "scoreChart": "Rezultats — pedejas {{count}} speles",
+    "matchHistory": "Spelu vesture",
     "chartWinsLabel": "uzvaras",
     "you": "Jūs",
     "opponent": "Pretinieks",
@@ -203,7 +209,7 @@
       "loss": "Zaudējums"
     },
     "leaderboard": {
-      "title": "Līderu tabula",
+      "title": "Lideru tabula",
       "friends": "Draugi",
       "global": "Kopējā",
       "loading": "Notiek ielāde…",
