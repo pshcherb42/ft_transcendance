@@ -434,79 +434,43 @@ export default function ProfilePage() {
           </div>
         </header>
 
-        <section className="mx-auto flex w-full max-w-[1380px] flex-1 flex-col px-8 pb-12 pt-10 md:px-16">
+        <section className="mx-auto flex w-full flex-1 flex-col px-8 pb-12 pt-10 md:px-16">
           {/* Верхняя информация профиля */}
-          <div className="grid items-center gap-10 lg:grid-cols-[460px_1fr]">
-            <div className="flex items-center gap-8">
-              <button
-                type="button"
-                onClick={openEditModal}
-                className="
-                  group
-                  relative
-                  h-[165px]
-                  w-[165px]
-                  shrink-0
-                  overflow-hidden
-                  rounded-full
-                  bg-[#D9D5D1]
-                  outline-none
-                  transition-shadow
-                  focus:ring-2
-                  focus:ring-brand-red
-                  focus:ring-offset-4
-                  focus:ring-offset-background
-                "
-              >
-                {avatarSrc ? (
-                  <img
-                    src={avatarSrc}
-                    alt={user.username}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <span className="flex h-full w-full items-center justify-center font-display text-[68px] uppercase text-white">
-                    {user.username
-                      .charAt(0)
-                      .toUpperCase()}
-                  </span>
-                )}
-
-                <span
-                  className="
-                    absolute
-                    inset-0
-                    flex
-                    items-center
-                    justify-center
-                    bg-black/40
-                    px-3
-                    text-center
-                    text-xs
-                    font-medium
-                    uppercase
-                    text-white
-                    opacity-0
-                    transition-opacity
-                    group-hover:opacity-100
-                  "
-                >
-                  {t(
-                    'profile.changeAvatar',
-                  )}
+          <div className="grid items-start gap-40 lg:grid-cols-[360px_1fr]">
+            <div className="flex items-center gap-6">
+            <div
+              className="
+                h-[140px]
+                w-[140px]
+                shrink-0
+                overflow-hidden
+                rounded-full
+                bg-[#D9D5D1]
+              "
+            >
+              {avatarSrc ? (
+                <img
+                  src={avatarSrc}
+                  alt={user.username}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span className="flex h-full w-full items-center justify-center font-display text-[56px] uppercase text-white">
+                  {user.username.charAt(0).toUpperCase()}
                 </span>
-              </button>
+              )}
+            </div>
 
               <div className="min-w-0">
-                <h1 className="break-words font-display text-[clamp(2.8rem,5vw,56px)] uppercase leading-none text-brand-red">
+                <h1 className="break-words font-display text-[clamp(2rem,3vw,40px)] uppercase leading-none text-brand-red">
                   {user.username}
                 </h1>
 
-                <p className="mt-4 break-all text-[15px] text-[#615050]">
+                <p className="mt-3 break-all text-[15px] text-[#615050]">
                   {user.email}
                 </p>
 
-                <div className="mt-8 flex items-center gap-3">
+                <div className="mt-4 flex items-center gap-3">
                   <span className="h-[13px] w-[13px] rounded-full bg-[#98C47C]" />
 
                   <span className="text-[14px] font-medium uppercase text-[#615050]">
@@ -519,7 +483,7 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+            <div className="grid grid-cols-2 gap-8 xl:grid-cols-4">
               <StatCard
                 value={games}
                 label={t(
@@ -863,7 +827,7 @@ export default function ProfilePage() {
                 }
               />
 
-              <p className="mt-3 min-h-5 text-xs text-[#615050]">
+              <p className="mt-3 min-h-2 text-xs text-[#615050]">
                 {avatarStatus ===
                   'uploading' &&
                   t(
@@ -907,7 +871,7 @@ export default function ProfilePage() {
 
               {!isOAuthUser && (
                 <>
-                  <div className="border-t border-[#EEE9E6] pt-6">
+                  <div className="border-t border-[#EEE9E6]">
                     <h3 className="text-sm font-bold uppercase tracking-wide text-[#615050]">
                       {t(
                         'profile.changePassword',

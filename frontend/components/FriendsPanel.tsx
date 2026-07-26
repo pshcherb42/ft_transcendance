@@ -155,7 +155,7 @@ export default function FriendsPanel() {
       <div className="mt-8 grid gap-10 lg:grid-cols-2 lg:gap-0">
         {/* Список друзей */}
         <section className="lg:border-r lg:border-[#EEE9E6] lg:pr-10">
-          <h2 className="mb-7 font-display text-[34px] uppercase leading-none text-brand-red">
+          <h2 className="mb-5 font-display text-[28px] uppercase leading-none text-brand-red">
             {t('friends.friendsCount', {
               count: friends.length,
             })}
@@ -280,7 +280,7 @@ export default function FriendsPanel() {
 
         {/* Запросы */}
         <section className="lg:pl-10">
-          <h2 className="mb-7 font-display text-[34px] uppercase leading-none text-brand-red">
+          <h2 className="mb-5 font-display text-[28px] uppercase leading-none text-brand-red">
             {t('friends.incomingRequests')}
           </h2>
 
@@ -468,10 +468,6 @@ function EmptyBlock({
         min-h-[150px]
         items-center
         justify-center
-        rounded-[10px]
-        border
-        border-dashed
-        border-[#D9D5D1]
         px-5
       "
     >

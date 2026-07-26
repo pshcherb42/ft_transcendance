@@ -397,7 +397,7 @@ const resultTitle = (() => {
 
   return localWinner === 'left'
     ? t('game.canvas.leftWins')
-    : t('game.canvas.righttWins');
+    : t('game.canvas.rightWins');
 })();
 
 const gameTitle =
