@@ -107,16 +107,6 @@ export default function GamePage() {
     }
   }, [modeParam, router]);
 
-  useEffect(() => {
-    if (!socket) return;
-    const onInviteAccepted = () => {
-      setOnlineRound((r) => r + 1);
-      setMode('online');
-    };
-    socket.on('gameInviteAccepted', onInviteAccepted);
-    return () => { socket.off('gameInviteAccepted', onInviteAccepted); };
-  }, [socket]);
-
   // ----------------------------------------------------------------- ONLINE
   useEffect(() => {
     if (mode !== 'online' || !socket) return;

@@ -74,7 +74,7 @@ export function NotificationListener() {
     };
 
     const onGameInviteAccepted = () => {
-      router.push('/game');
+      router.push('/game?mode=online');
     };
 
     socket.on('gameInviteReceived', onGameInviteReceived);

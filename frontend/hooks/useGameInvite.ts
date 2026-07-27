@@ -28,7 +28,7 @@ export function useGameInvite() {
         if (p.roomId !== payload.gameRoomId) return;
         toast.success(t('friends.inviteAccepted', { username: friendUsername }), { id: toastId, duration: 3000 });
         cleanup();
-        router.push('/game');
+        router.push('/game?mode=online');
       };
       const onExpired = (p: { inviteId: string }) => {
         if (p.inviteId !== payload.inviteId) return;
