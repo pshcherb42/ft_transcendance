@@ -146,7 +146,8 @@
       "rightWins": "UZVAR LABAIS SPELETAJS",
       "leftPlayer": "Kreisais spēlētājs",
       "rightPlayer": "Labais spēlētājs",
-      "ai": "MI"
+      "ai": "MI",
+      "opponent": "Pretinieks"
     }
   },
   "tournament": {

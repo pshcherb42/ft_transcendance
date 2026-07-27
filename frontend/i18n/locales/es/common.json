@@ -133,7 +133,8 @@
         "rightWins": "GANA DERECHA",
         "leftPlayer": "Jugador izquierdo",
         "rightPlayer": "Jugador derecho",
-        "ai": "IA"
+        "ai": "IA",
+        "opponent": "Oponente"
       }
     },
     "tournament": {

@@ -61,7 +61,18 @@ export class AuthService {
   }
 
   private async generateTokens(userId: string, email: string) {
-    const payload = { sub: userId, email };
+    const user = await this.usersService.findById(userId);
+  
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+  
+    const payload = {
+      sub: userId,
+      email,
+      username: user.username,
+    };
+  
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
         secret: this.config.get<string>('JWT_SECRET'),
@@ -72,6 +83,7 @@ export class AuthService {
         expiresIn: '7d',
       }),
     ]);
+  
     return { accessToken, refreshToken };
   }
 }

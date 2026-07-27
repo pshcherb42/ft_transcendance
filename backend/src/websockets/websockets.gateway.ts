@@ -213,13 +213,22 @@ import {
 		opponent.emit('matchFound', {
 			roomId,
 			side: 'left',
-			opponent: { id: client.data.user?.sub, email: client.data.user?.email },
-		});
-		client.emit('matchFound', {
+			opponent: {
+			  id: client.data.user?.sub,
+			  email: client.data.user?.email,
+			  username: client.data.user?.username,
+			},
+		  });
+		  
+		  client.emit('matchFound', {
 			roomId,
 			side: 'right',
-			opponent: { id: opponent.data.user?.sub, email: opponent.data.user?.email },
-		});
+			opponent: {
+			  id: opponent.data.user?.sub,
+			  email: opponent.data.user?.email,
+			  username: opponent.data.user?.username,
+			},
+		  });
 
 		this.gameService.createGame(roomId, opponent.data.user.sub, client.data.user.sub, this.server);
 	}
@@ -279,20 +288,46 @@ import {
 
 	@SubscribeMessage('checkRoom')
 	handleCheckRoom(@ConnectedSocket() client: Socket) {
-		const userId = client.data.user?.sub;
-		if (!userId) return;
+	const userId = client.data.user?.sub;
+	if (!userId) return;
 
-		const roomId = this.gameService.getRoomIdByUserId(userId);
-		if (roomId) {
-			const players = this.gameService.getRoomPlayers(roomId);
-			if (players) {
-				const side: Side = players.leftUserId === userId ? 'left' : 'right';
-				this.assignToRoom(client, roomId, side);
-				client.emit('rejoinedGame', { roomId, side });
-				return;
-			}
+	const roomId = this.gameService.getRoomIdByUserId(userId);
+
+	if (roomId) {
+		const players = this.gameService.getRoomPlayers(roomId);
+
+		if (players) {
+		const side: Side =
+			players.leftUserId === userId ? 'left' : 'right';
+
+		const opponentUserId =
+			side === 'left'
+			? players.rightUserId
+			: players.leftUserId;
+
+		const opponentSocketId =
+			this.presence.getSocketId(opponentUserId);
+
+		const opponentSocket = opponentSocketId
+			? this.server.sockets.sockets.get(opponentSocketId)
+			: undefined;
+
+		const opponentUsername =
+			opponentSocket?.data.user?.username ?? null;
+
+		this.assignToRoom(client, roomId, side);
+
+		client.emit('rejoinedGame', {
+			roomId,
+			side,
+			opponentUsername,
+		});
+
+		return;
 		}
-		client.emit('noActiveGame');
+	}
+
+	client.emit('noActiveGame');
 	}
 
 	afterInit(server: Server) {

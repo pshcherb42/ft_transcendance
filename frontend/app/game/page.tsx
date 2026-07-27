@@ -45,6 +45,9 @@ export default function GamePage() {
   const [onlineStatus, setOnlineStatus] = useState<OnlineStatus>('connecting');
   const [side, setSide] = useState<Side | null>(null);
   const [winner, setWinner] = useState<Side | null>(null);
+  const [opponentUsername, setOpponentUsername] = useState<string | null>(
+    null,
+  );
   const [onlineRound, setOnlineRound] = useState(0);
 
   // Modo LOCAL / IA
@@ -146,26 +149,44 @@ export default function GamePage() {
     };
 
     const onWaiting = () => setOnlineStatus('waiting');
-    const onRejoined = (data: { roomId: string; side: Side }) => {
+    const onRejoined = (data: {
+      roomId: string;
+      side: Side;
+      opponentUsername: string | null;
+    }) => {
       if (disconnectTimerRef.current) {
         clearInterval(disconnectTimerRef.current);
         disconnectTimerRef.current = null;
       }
+    
       setReconnectSecondsLeft(null);
+    
       mySide = data.side;
       setSide(data.side);
+      setOpponentUsername(data.opponentUsername);
       setWinner(null);
       setOnlineStatus('playing');
     };
 
-    const onMatchFound = (data: { side: Side }) => {
+    const onMatchFound = (data: {
+      roomId: string;
+      side: Side;
+      opponent: {
+        id: string;
+        email: string;
+        username?: string;
+      };
+    }) => {
       if (disconnectTimerRef.current) {
         clearInterval(disconnectTimerRef.current);
         disconnectTimerRef.current = null;
       }
+    
       setReconnectSecondsLeft(null);
+    
       mySide = data.side;
       setSide(data.side);
+      setOpponentUsername(data.opponent.username ?? null);
       setWinner(null);
       setOnlineStatus('playing');
     };
@@ -397,23 +418,26 @@ const gameTitle =
       ? t('game.title.ai')
       : t('game.title.local');
 
-const leftPlayerName =
-  mode === 'online'
-    ? side === 'left'
-      ? user.username
-      : 'Opponent'
-    : mode === 'ai'
-      ? user.username
-      : t('game.canvas.leftPlayer');
-
-const rightPlayerName =
-  mode === 'online'
-    ? side === 'right'
-      ? user.username
-      : 'Opponent'
-    : mode === 'ai'
-      ? t('game.canvas.ai')
-      : t('game.canvas.rightPlayer');
+      const displayedOpponentName =
+      opponentUsername ?? t('game.canvas.opponent');
+    
+    const leftPlayerName =
+      mode === 'online'
+        ? side === 'left'
+          ? user.username
+          : displayedOpponentName
+        : mode === 'ai'
+          ? user.username
+          : t('game.canvas.leftPlayer');
+    
+    const rightPlayerName =
+      mode === 'online'
+        ? side === 'right'
+          ? user.username
+          : displayedOpponentName
+        : mode === 'ai'
+          ? t('game.canvas.ai')
+          : t('game.canvas.rightPlayer');
 
 return (
   <div className="flex min-h-[calc(100dvh-48px)] flex-col bg-[#F7F5F1]">
