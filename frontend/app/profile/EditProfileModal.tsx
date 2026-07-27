@@ -63,7 +63,10 @@ export default function EditProfileModal({
 
   const [avatarPreview, setAvatarPreview] =
     useState<string | null>(null);
-
+  
+  const [pendingAvatar, setPendingAvatar] =
+    useState<string | null>(null);
+  
   const [fieldErrors, setFieldErrors] =
     useState<Record<string, string>>({});
 
@@ -74,6 +77,8 @@ export default function EditProfileModal({
 
     setUsername(user.username);
     setAvatarPreview(null);
+    setPendingAvatar(null);
+    setAvatarStatus('idle');
     setSaveError('');
     setFieldErrors({});
     setSaveStatus('idle');
@@ -119,18 +124,19 @@ export default function EditProfileModal({
   const isOAuthUser =
     !user.hasPassword;
 
-  function handleClose() {
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
-    setSaveError('');
-    setFieldErrors({});
-    setSaveStatus('idle');
-    setAvatarStatus('idle');
-    setAvatarPreview(null);
-
-    onClose();
-  }
+    function handleClose() {
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setSaveError('');
+      setFieldErrors({});
+      setSaveStatus('idle');
+      setAvatarStatus('idle');
+      setAvatarPreview(null);
+      setPendingAvatar(null);
+    
+      onClose();
+    }
 
   async function handleSave(
     event: FormEvent,
@@ -193,20 +199,52 @@ export default function EditProfileModal({
         const data = await response
           .json()
           .catch(() => ({}));
-
+      
         const errorMessage =
           data?.message ??
           t('profile.saveFailed');
-
+      
         setSaveError(errorMessage);
         setSaveStatus('error');
         toast.error(errorMessage);
-
+      
         return;
       }
-
+      
+      if (pendingAvatar) {
+        const avatarResponse = await apiFetch(
+          '/users/me/avatar',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type':
+                'application/json',
+            },
+            body: JSON.stringify({
+              avatar: pendingAvatar,
+            }),
+          },
+        );
+      
+        if (!avatarResponse.ok) {
+          const errorMessage =
+            t('profile.avatarUploadFailed');
+      
+          setAvatarStatus('error');
+          setSaveError(errorMessage);
+          setSaveStatus('error');
+          toast.error(errorMessage);
+      
+          return;
+        }
+      }
+      
       await refetchUser();
-
+      
+      setPendingAvatar(null);
+      setAvatarPreview(null);
+      setAvatarStatus('idle');
+      
       setSaveStatus('saved');
       toast.success(
         t('profile.profileUpdated'),
@@ -233,13 +271,13 @@ export default function EditProfileModal({
     event: ChangeEvent<HTMLInputElement>,
   ) {
     const file = event.target.files?.[0];
-
+  
     if (!file) {
       return;
     }
-
+  
     setAvatarStatus('uploading');
-
+  
     try {
       const compressed =
         await imageCompression(file, {
@@ -247,65 +285,32 @@ export default function EditProfileModal({
           maxWidthOrHeight: 256,
           useWebWorker: true,
         });
-
+  
       const base64 =
         await new Promise<string>(
           (resolve, reject) => {
-            const reader =
-              new FileReader();
-
+            const reader = new FileReader();
+  
             reader.onloadend = () => {
               resolve(
                 reader.result as string,
               );
             };
-
+  
             reader.onerror = reject;
-
+  
             reader.readAsDataURL(
               compressed,
             );
           },
         );
-
+  
       setAvatarPreview(base64);
-
-      const response = await apiFetch(
-        '/users/me/avatar',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type':
-              'application/json',
-          },
-          body: JSON.stringify({
-            avatar: base64,
-          }),
-        },
-      );
-
-      if (!response.ok) {
-        setAvatarStatus('error');
-        toast.error(
-          t('profile.avatarUploadFailed'),
-        );
-
-        return;
-      }
-
-      await refetchUser();
-
+      setPendingAvatar(base64);
       setAvatarStatus('done');
-      toast.success(
-        t('profile.avatarUpdated'),
-      );
-
-      window.setTimeout(() => {
-        setAvatarStatus('idle');
-      }, 2000);
     } catch {
       setAvatarStatus('error');
-
+  
       toast.error(
         t('profile.avatarUploadFailed'),
       );
@@ -386,60 +391,105 @@ export default function EditProfileModal({
         </h2>
 
         <div className="mt-8 flex flex-col items-center">
-          <button
-            type="button"
-            onClick={() =>
-              fileRef.current?.click()
-            }
-            className="
-              group
-              relative
-              h-28
-              w-28
-              overflow-hidden
-              rounded-full
-              bg-[#D9D5D1]
-              outline-none
-              focus:ring-2
-              focus:ring-brand-red
-            "
-          >
-            {avatarSrc ? (
-              <img
-                src={avatarSrc}
-                alt={user.username}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <span className="flex h-full w-full items-center justify-center font-display text-[44px] uppercase text-white">
-                {user.username
-                  .charAt(0)
-                  .toUpperCase()}
-              </span>
-            )}
+        <div className="relative">
+  <button
+    type="button"
+    onClick={() =>
+      fileRef.current?.click()
+    }
+    aria-label={t(
+      'profile.changeAvatar',
+    )}
+    className="
+      group
+      relative
+      h-28
+      w-28
+      overflow-hidden
+      rounded-full
+      bg-[#D9D5D1]
+      outline-none
+      transition
+      hover:brightness-95
+      focus:ring-2
+      focus:ring-brand-red
+      focus:ring-offset-2
+    "
+  >
+    {avatarSrc ? (
+      <img
+        src={avatarSrc}
+        alt={user.username}
+        className="
+          h-full
+          w-full
+          object-cover
+          transition-transform
+          group-hover:scale-105
+        "
+      />
+    ) : (
+      <span className="flex h-full w-full items-center justify-center font-display text-[44px] uppercase text-white">
+        {user.username
+          .charAt(0)
+          .toUpperCase()}
+      </span>
+    )}
 
-            <span
-              className="
-                absolute
-                inset-0
-                flex
-                items-center
-                justify-center
-                bg-black/40
-                px-3
-                text-center
-                text-xs
-                font-medium
-                uppercase
-                text-white
-                opacity-0
-                transition-opacity
-                group-hover:opacity-100
-              "
-            >
-              {t('profile.changeAvatar')}
-            </span>
-          </button>
+    <span
+      className="
+        absolute
+        inset-0
+        bg-black/0
+        transition-colors
+        group-hover:bg-black/10
+      "
+    />
+      </button>
+
+      <div
+      aria-hidden="true"
+      className="
+        pointer-events-none
+        absolute
+        bottom-0
+        right-0
+        flex
+        h-9
+        w-9
+        items-center
+        justify-center
+        rounded-full
+        border-2
+        border-background
+        bg-brand-red
+        text-white
+        shadow-sm
+      "
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        aria-hidden="true"
+        className="h-4 w-4"
+      >
+        <path
+          d="M4 20h4l10.5-10.5a2.828 2.828 0 0 0-4-4L4 16v4Z"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+
+        <path
+          d="m13.5 6.5 4 4"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        />
+      </svg>
+    </div>
+  </div>
 
           <input
             ref={fileRef}
@@ -454,7 +504,7 @@ export default function EditProfileModal({
               t('profile.avatarUploading')}
 
             {avatarStatus === 'done' &&
-              t('profile.avatarUpdated')}
+              t('profile.avatarSelected')}
 
             {avatarStatus === 'error' &&
               t('profile.avatarUploadFailed')}

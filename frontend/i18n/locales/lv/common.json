@@ -207,7 +207,8 @@
     "losses": "Zaudējumi",
     "winRate": "Uzvaru %",
     "online": "Tiešsaistē",
-    "offline": "Bezsaistē"
+    "offline": "Bezsaistē",
+    "avatarSelected": "Izvēlēts jauns profila attēls"
   },
   "chat": {
     "title": "Chats",

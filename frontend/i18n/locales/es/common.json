@@ -194,7 +194,8 @@
       "losses": "Derrotas",
       "winRate": "% de victorias",
       "online": "En línea",
-      "offline": "Desconectado"
+      "offline": "Desconectado",
+      "avatarSelected": "Nuevo avatar seleccionado"
     },
     "chat": {
       "title": "Chat",

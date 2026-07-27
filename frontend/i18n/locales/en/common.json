@@ -194,7 +194,8 @@
       "losses": "Losses",
       "winRate": "Win %",
       "online": "Online",
-      "offline": "Offline"
+      "offline": "Offline",
+      "avatarSelected": "New avatar selected"
     },
     "chat": {
       "title": "Chat",
