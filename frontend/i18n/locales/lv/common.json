@@ -149,6 +149,39 @@
       "ai": "MI"
     }
   },
+  "tournament": {
+  "title": "Turnirs",
+  "round": "Kārta",
+  "players": "Spēlētāji",
+  "player": "Spēlētājs",
+  "addPlayers": "Pievieno no 2 līdz 8 spēlētājiem",
+  "uniqueNames": "Katram spēlētājam jāievada unikāls vārds.",
+  "addPlayer": "+ Pievienot spēlētāju",
+  "start": "Sākt turnīru",
+  "leave": "Pamest turnīru",
+  "back": "Atpakaļ uz izvēlni",
+
+  "nextMatch": "Nākamā spēle",
+  "play": "Spēlēt",
+
+  "leftPlayer": "Kreisais spēlētājs",
+  "rightPlayer": "Labais spēlētājs",
+
+  "winner": "Spēles uzvarētājs",
+  "winnerText": "{{winner}} uzvarēja {{loser}}",
+  "next": "Nākamā spēle",
+
+  "bracket": "Turnīra tabula",
+  "bracketDescription": "Pašreizējās un pabeigtās spēles",
+  "final": "Fināls",
+
+  "champion": "Turnīra čempions",
+  "championDescription": "Apsveicam! Turnīrs ir noslēdzies.",
+  "newTournament": "Jauns turnīrs",
+
+  "winnerLabel": "Uzvarētājs",
+  "playerNamesUnique": "Spēlētāju vārdiem jābūt unikāliem."
+  },
   "profile": {
     "loading": "Notiek ielāde…",
     "changeAvatar": "Mainīt",

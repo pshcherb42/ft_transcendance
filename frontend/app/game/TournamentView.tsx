@@ -5,6 +5,7 @@ import { Tournament, type TournamentMatch } from './tournament';
 import { DEFAULT_CONFIG } from './config';
 import { PongMatch } from './PongMatch';
 import type { Side } from './types';
+import { useTranslation } from 'react-i18next';
 
 type Phase = 'register' | 'play' | 'done';
 
@@ -17,6 +18,7 @@ export function TournamentView({
   const [names, setNames] = useState<string[]>(['', '']);
   const [ready, setReady] = useState(false);
   const [, forceRender] = useState(0);
+  const { t } = useTranslation();
 
   const tournamentRef = useRef<Tournament | null>(null);
 
@@ -131,7 +133,7 @@ export function TournamentView({
                   hover:bg-[#D9D9D9]/20
                 "
               >
-                Back to menu
+                {t('tournament.back')}
               </button>
 
               <div className="text-center">
@@ -144,11 +146,11 @@ export function TournamentView({
                     text-brand-red
                   "
                 >
-                  Tournament
+                  {t('tournament.title')}
                 </h1>
 
                 <p className="mt-3 text-[14px] text-[#615050]">
-                  Add between 2 and 8 players
+                {t('tournament.addPlayers')}
                 </p>
               </div>
             </div>
@@ -179,11 +181,11 @@ export function TournamentView({
                     text-[#615050]
                   "
                 >
-                  Players
+                  {t('tournament.players')}
                 </p>
 
                 <p className="mt-2 text-[13px] text-[#918787]">
-                  Enter a unique name for each player.
+                {t('tournament.uniqueNames')}
                 </p>
               </div>
 
@@ -206,7 +208,7 @@ export function TournamentView({
                           text-[#615050]
                         "
                       >
-                        Player {index + 1}
+                        {t('tournament.player')} {index + 1}
                       </label>
 
                       <input
@@ -215,7 +217,7 @@ export function TournamentView({
                         onChange={(event) =>
                           updateName(index, event.target.value)
                         }
-                        placeholder={`Player ${index + 1}`}
+                        placeholder={`${t('tournament.player')} ${index + 1}`}
                         maxLength={16}
                         autoComplete="off"
                         className="
@@ -292,13 +294,13 @@ export function TournamentView({
                     hover:bg-[#D9D9D9]/20
                   "
                 >
-                  + Add player
+                  {t('tournament.addPlayer')}
                 </button>
               )}
 
               {!uniqueNames && cleanNames.length >= 2 && (
                 <p className="mt-4 text-center text-[13px] text-brand-red">
-                  Player names must be unique.
+                  {t('tournament.playerNamesUnique')}
                 </p>
               )}
 
@@ -334,30 +336,7 @@ export function TournamentView({
                     disabled:hover:bg-brand-green
                   "
                 >
-                  Start tournament
-                </button>
-
-                <button
-                  type="button"
-                  onClick={onExit}
-                  className="
-                    h-[48px]
-                    min-w-[220px]
-                    rounded-full
-                    border-[1.5px]
-                    border-[#D9D5D1]
-                    px-8
-                    text-[13px]
-                    font-medium
-                    uppercase
-                    tracking-[0.08em]
-                    text-[#615050]
-                    transition-colors
-                    hover:border-[#615050]
-                    hover:bg-[#D9D9D9]/20
-                  "
-                >
-                  Back to menu
+                  {t('tournament.start')}
                 </button>
               </div>
             </div>
@@ -413,7 +392,7 @@ export function TournamentView({
                   hover:bg-[#D9D9D9]/20
                 "
               >
-                Back to menu
+                {t('tournament.back')}
               </button>
 
               <h1
@@ -425,7 +404,7 @@ export function TournamentView({
                   text-brand-red
                 "
               >
-                Tournament
+                {t('tournament.title')}
               </h1>
             </div>
 
@@ -454,7 +433,7 @@ export function TournamentView({
                     text-[#615050]
                   "
                 >
-                  Tournament winner
+                  {t('tournament.champion')}
                 </p>
 
                 <h2
@@ -472,7 +451,7 @@ export function TournamentView({
                 </h2>
 
                 <p className="mt-4 text-[14px] text-[#615050]">
-                  Congratulations. The tournament is complete.
+                {t('tournament.championDescription')}
                 </p>
               </div>
 
@@ -522,7 +501,7 @@ export function TournamentView({
                     hover:bg-[#808979]
                   "
                 >
-                  New tournament
+                  {t('tournament.newTournament')}
                 </button>
 
                 <button
@@ -545,7 +524,7 @@ export function TournamentView({
                     hover:bg-[#D9D9D9]/20
                   "
                 >
-                  Back to menu
+                  {t('tournament.back')}
                 </button>
               </div>
             </div>
@@ -634,7 +613,7 @@ const handleWinner = (side: Side) => {
                 hover:bg-[#D9D9D9]/20
               "
             >
-              Leave tournament
+              {t('tournament.leave')}
             </button>
 
             <div className="text-center">
@@ -647,7 +626,7 @@ const handleWinner = (side: Side) => {
                   text-brand-red
                 "
               >
-                Tournament
+                {t('tournament.title')}
               </h1>
 
               <p
@@ -660,7 +639,7 @@ const handleWinner = (side: Side) => {
                   text-[#615050]
                 "
               >
-                Round {currentMatch.round + 1}
+                {t('tournament.round')} {currentMatch.round + 1}
               </p>
             </div>
           </div>
@@ -775,7 +754,7 @@ const handleWinner = (side: Side) => {
             text-[#BEB7B2]
           "
         >
-          Match winner
+          {t('tournament.winner')}
         </p>
 
         <h2
@@ -814,7 +793,10 @@ const handleWinner = (side: Side) => {
         </div>
 
         <p className="mt-4 text-[14px] text-[#BEB7B2]">
-          {lastResult.winner} defeated {lastResult.loser}
+        {t('tournament.winnerText', {
+          winner: lastResult.winner,
+          loser: lastResult.loser,
+        })}
         </p>
 
         <button
@@ -842,7 +824,7 @@ const handleWinner = (side: Side) => {
             hover:bg-[#808979]
           "
         >
-          Next match
+          {t('tournament.next')}
         </button>
       </div>
     ) : (
@@ -869,7 +851,7 @@ const handleWinner = (side: Side) => {
             text-[#BEB7B2]
           "
         >
-          Next match
+          {t('tournament.next')}
         </p>
 
         <h2
@@ -927,7 +909,7 @@ const handleWinner = (side: Side) => {
             hover:bg-[#D9361F]
           "
         >
-          Play
+          {t('tournament.play')}
         </button>
       </div>
     )}
@@ -971,11 +953,11 @@ const handleWinner = (side: Side) => {
                       text-[#615050]
                     "
                   >
-                    Tournament bracket
+                    {t('tournament.bracket')}
                   </p>
 
                   <p className="mt-1 text-[13px] text-[#918787]">
-                    Current and completed matches
+                  {t('tournament.bracketDescription')}
                   </p>
                 </div>
 
@@ -1018,6 +1000,7 @@ function Bracket({
   rounds: TournamentMatch[][];
   currentMatch: TournamentMatch | null;
 }) {
+  const { t } = useTranslation();
   return (
     <div
       className="
@@ -1050,8 +1033,8 @@ function Bracket({
             "
           >
             {roundIndex === rounds.length - 1
-              ? 'Final'
-              : `Round ${roundIndex + 1}`}
+              ? t('tournament.final')
+              : `${t('tournament.round')} ${roundIndex + 1}`}
           </p>
 
           <div className="flex flex-1 flex-col justify-around gap-3">
@@ -1114,6 +1097,7 @@ function MatchRow({
   isWinner: boolean;
   isCurrent: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <div
       className={`
@@ -1150,7 +1134,7 @@ function MatchRow({
             tracking-[0.06em]
           "
         >
-          Winner
+          {t('tournament.winner')}
         </span>
       )}
     </div>

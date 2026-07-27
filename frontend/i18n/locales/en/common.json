@@ -136,6 +136,39 @@
         "ai": "AI"
       }
     },
+    "tournament": {
+  "title": "Tournament",
+  "round": "Round",
+  "players": "Players",
+  "player": "Player",
+  "addPlayers": "Add between 2 and 8 players",
+  "uniqueNames": "Enter a unique name for each player.",
+  "addPlayer": "+ Add player",
+  "start": "Start tournament",
+  "leave": "Leave tournament",
+  "back": "Back to menu",
+
+  "nextMatch": "Next match",
+  "play": "Play",
+
+  "leftPlayer": "Left player",
+  "rightPlayer": "Right player",
+
+  "winner": "Match winner",
+  "winnerText": "{{winner}} defeated {{loser}}",
+  "next": "Next match",
+
+  "bracket": "Tournament bracket",
+  "bracketDescription": "Current and completed matches",
+  "final": "Final",
+
+  "champion": "Tournament winner",
+  "championDescription": "Congratulations! The tournament is complete.",
+  "newTournament": "New tournament",
+
+  "winnerLabel": "Winner",
+  "playerNamesUnique": "Player names must be unique."
+  },
     "profile": {
       "loading": "Loading…",
       "changeAvatar": "Change",

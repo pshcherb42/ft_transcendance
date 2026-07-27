@@ -136,6 +136,39 @@
         "ai": "IA"
       }
     },
+    "tournament": {
+  "title": "Torneo",
+  "round": "Ronda",
+  "players": "Jugadores",
+  "player": "Jugador",
+  "addPlayers": "Añade entre 2 y 8 jugadores",
+  "uniqueNames": "Introduce un nombre único para cada jugador.",
+  "addPlayer": "+ Añadir jugador",
+  "start": "Empezar torneo",
+  "leave": "Salir del torneo",
+  "back": "Volver al menú",
+
+  "nextMatch": "Próximo partido",
+  "play": "Jugar",
+
+  "leftPlayer": "Jugador izquierdo",
+  "rightPlayer": "Jugador derecho",
+
+  "winner": "Ganador del partido",
+  "winnerText": "{{winner}} derrotó a {{loser}}",
+  "next": "Siguiente partido",
+
+  "bracket": "Cuadro del torneo",
+  "bracketDescription": "Partidos actuales y completados",
+  "final": "Final",
+
+  "champion": "Campeón del torneo",
+  "championDescription": "¡Enhorabuena! El torneo ha terminado.",
+  "newTournament": "Nuevo torneo",
+
+  "winnerLabel": "Ganador",
+  "playerNamesUnique": "Los nombres de los jugadores deben ser únicos."
+  },
     "profile": {
       "loading": "Cargando…",
       "changeAvatar": "Cambiar",
