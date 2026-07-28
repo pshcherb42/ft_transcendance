@@ -33,7 +33,9 @@ import {
 		  /^https?:\/\/127\.0\.0\.1(:\d+)?$/.test(origin) ||
 		  /^https?:\/\/[a-zA-Z0-9_-]+(:\d+)?$/.test(origin) || // Matches raw hostname mappings
 		  /^https?:\/\/192\.168\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(origin) ||
-		  /^https?:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(origin);
+		  /^https?:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(origin) ||
+		  // 172.16.0.0/12: red por defecto de Docker y hotspot de móvil (172.20.10.x)
+		  /^https?:\/\/172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(origin);
   
 		if (allowed) {
 		  callback(null, true);
