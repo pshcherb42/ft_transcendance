@@ -242,6 +242,27 @@
       }
     },
     "home": {
+      "viewRules": "Ver las reglas del juego",
+    "rules": {
+    "title": "Cómo jugar",
+    "objectiveTitle": "Objetivo",
+    "objective": "Consigue puntos enviando la pelota más allá de la pala de tu oponente. El primer jugador que llegue a 5 puntos gana la partida.",
+    "controlsTitle": "Controles",
+    "leftControls": "Jugador izquierdo: usa W y S para mover la pala.",
+    "rightControls": "Jugador derecho: usa las flechas arriba y abajo para mover la pala.",
+    "onlineControls": "En las partidas online, cada jugador controla su propia pala.",
+    "mapsTitle": "Mapas",
+    "classicMap": "Clásico: una pista estándar de Pong.",
+    "obstaclesMap": "Obstáculos: las paredes adicionales cambian la trayectoria de la pelota.",
+    "powerupsTitle": "Potenciadores",
+    "powerups": "Cuando están activados, pueden aparecer potenciadores aleatorios durante la partida y afectar temporalmente al juego.",
+    "tournamentTitle": "Torneo",
+    "tournament": "El torneo utiliza un formato de eliminación directa. Gana cada partida para avanzar hasta que solo quede un campeón."
+  },
+  "common": {
+    "close": "Cerrar",
+    "gotIt": "Entendido"
+  },
       "loading": "Cargando",
       "play": "Jugar",
       "chooseGame": "Elige tu juego",

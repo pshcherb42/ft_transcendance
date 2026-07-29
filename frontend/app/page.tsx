@@ -36,6 +36,8 @@ export default function HomePage() {
   const [logoutLoading, setLogoutLoading] =
     useState(false);
 
+  const [rulesOpen, setRulesOpen] = useState(false);
+
   useEffect(() => {
     if (!loading && !user) {
       router.replace('/login');
@@ -155,9 +157,30 @@ export default function HomePage() {
                 {t('home.chooseGame')}
               </h1>
 
-              <p className="mt-4 text-sm text-[#615050]">
-                {t('home.selectGameMode')}
-              </p>
+              <div className="mt-4 flex items-center justify-center gap-2 text-sm">
+                <span className="text-[#615050]">
+                  {t('home.selectGameMode')}
+                </span>
+
+                <button
+                  type="button"
+                  onClick={() => setRulesOpen(true)}
+                  className="
+                    inline-flex
+                    items-center
+                    gap-1
+                    cursor-pointer
+                    font-medium
+                    text-brand-red
+                    transition-colors
+                    hover:text-brand-red
+                    hover:underline
+                    hover:underline-offset-4
+                  "
+                >
+                  {t('home.viewRules')}
+                </button>
+              </div>
             </div>
 
             <div className="grid gap-10 md:grid-cols-2 md:gap-14">
@@ -407,7 +430,131 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-      </main>
+        </main>
+
+{rulesOpen && (
+  <div
+    className="
+      fixed
+      inset-0
+      z-50
+      flex
+      items-center
+      justify-center
+      bg-black/40
+      p-4
+    "
+    onMouseDown={() => setRulesOpen(false)}
+  >
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="rules-modal-title"
+      onMouseDown={(event) => event.stopPropagation()}
+      className="
+        relative
+        max-h-[calc(100dvh-32px)]
+        w-full
+        max-w-[640px]
+        overflow-y-auto
+        rounded-[10px]
+        bg-white
+        px-8
+        py-10
+        shadow-[-8px_8px_32px_rgba(193,168,163,0.25)]
+        md:px-10
+      "
+    >
+      <button
+        type="button"
+        onClick={() => setRulesOpen(false)}
+        aria-label={t('common.close')}
+        className="
+          absolute
+          right-6
+          top-5
+          text-[28px]
+          leading-none
+          text-[#615050]
+          transition-colors
+          hover:text-[#1A1A1A]
+        "
+      >
+        ×
+      </button>
+
+      <h2
+        id="rules-modal-title"
+        className="
+          mb-8
+          pr-10
+          font-display
+          text-[36px]
+          uppercase
+          leading-none
+          text-brand-red
+        "
+      >
+        {t('home.rules.title')}
+      </h2>
+
+      <div className="space-y-6">
+        <section>
+          <h3 className="mb-2 text-sm font-bold uppercase text-[#1A1A1A]">
+            {t('home.rules.objectiveTitle')}
+          </h3>
+
+          <p className="text-sm leading-6 text-[#615050]">
+            {t('home.rules.objective')}
+          </p>
+        </section>
+
+        <section>
+          <h3 className="mb-2 text-sm font-bold uppercase text-[#1A1A1A]">
+            {t('home.rules.controlsTitle')}
+          </h3>
+
+          <ul className="list-disc space-y-1 pl-5 text-sm leading-6 text-[#615050]">
+            <li>{t('home.rules.leftControls')}</li>
+            <li>{t('home.rules.rightControls')}</li>
+            <li>{t('home.rules.onlineControls')}</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3 className="mb-2 text-sm font-bold uppercase text-[#1A1A1A]">
+            {t('home.rules.mapsTitle')}
+          </h3>
+
+          <ul className="list-disc space-y-1 pl-5 text-sm leading-6 text-[#615050]">
+            <li>{t('home.rules.classicMap')}</li>
+            <li>{t('home.rules.obstaclesMap')}</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3 className="mb-2 text-sm font-bold uppercase text-[#1A1A1A]">
+            {t('home.rules.powerupsTitle')}
+          </h3>
+
+          <p className="text-sm leading-6 text-[#615050]">
+            {t('home.rules.powerups')}
+          </p>
+        </section>
+
+        <section>
+          <h3 className="mb-2 text-sm font-bold uppercase text-[#1A1A1A]">
+            {t('home.rules.tournamentTitle')}
+          </h3>
+
+          <p className="text-sm leading-6 text-[#615050]">
+            {t('home.rules.tournament')}
+          </p>
+        </section>
+      </div>
     </div>
-  );
+  </div>
+)}
+</div>
+);
 }

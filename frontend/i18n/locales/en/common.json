@@ -242,6 +242,27 @@
       }
     },
     "home": {
+          "viewRules": "View game rules",
+           "rules": {
+          "title": "How to play",
+          "objectiveTitle": "Objective",
+          "objective": "Score points by sending the ball past your opponent. The first player to reach 5 points wins the match.",
+          "controlsTitle": "Controls",
+          "leftControls": "Left player: use W and S to move the paddle.",
+          "rightControls": "Right player: use the up and down arrow keys to move the paddle.",
+          "onlineControls": "In online matches, each player controls their own paddle.",
+          "mapsTitle": "Maps",
+          "classicMap": "Classic: a standard Pong arena.",
+          "obstaclesMap": "Obstacles: additional walls change the ball's trajectory.",
+          "powerupsTitle": "Power-ups",
+          "powerups": "When enabled, random power-ups may appear during the match and temporarily affect the gameplay.",
+          "tournamentTitle": "Tournament",
+          "tournament": "The tournament uses a single-elimination format. Win each match to advance until only one champion remains."
+        },
+        "common": {
+          "close": "Close",
+          "gotIt": "Got it"
+        },
       "loading": "Loading",
       "play": "Play",
       "chooseGame": "Choose your game",

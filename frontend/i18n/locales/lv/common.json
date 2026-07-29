@@ -268,6 +268,27 @@
     }
   },
   "home": {
+    "viewRules": "Skatīt spēles noteikumus",
+    "rules": {
+    "title": "Ka spelet",
+    "objectiveTitle": "Mērķis",
+    "objective": "Gūsti punktus, raidot bumbiņu garām pretinieka raketei. Spēli uzvar pirmais spēlētājs, kurš iegūst 5 punktus.",
+    "controlsTitle": "Vadība",
+    "leftControls": "Kreisais spēlētājs: izmanto W un S, lai pārvietotu raketi.",
+    "rightControls": "Labais spēlētājs: izmanto augšup un lejup vērstos bulttaustiņus, lai pārvietotu raketi.",
+    "onlineControls": "Tiešsaistes spēlēs katrs spēlētājs kontrolē savu raketi.",
+    "mapsTitle": "Kartes",
+    "classicMap": "Klasiskā: standarta Pong spēles laukums.",
+    "obstaclesMap": "Šķēršļi: papildu sienas maina bumbiņas kustības virzienu.",
+    "powerupsTitle": "Pastiprinājumi",
+    "powerups": "Kad tie ir ieslēgti, spēles laikā var parādīties nejauši pastiprinājumi, kas īslaicīgi ietekmē spēles gaitu.",
+    "tournamentTitle": "Turnīrs",
+    "tournament": "Turnīrs notiek pēc izslēgšanas principa. Uzvari katrā spēlē, lai turpinātu, līdz paliek tikai viens čempions."
+  },
+  "common": {
+    "close": "Aizvērt",
+    "gotIt": "Sapratu"
+  },
     "loading": "Notiek ielāde",
     "play": "Spēlēt",
     "chooseGame": "Izvelieties speli",

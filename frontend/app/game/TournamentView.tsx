@@ -535,14 +535,24 @@ const handleWinner = (side: Side) => {
 
   if (!winnerName || !loserName) return;
 
-  setLastResult({
-    winner: winnerName,
-    loser: loserName,
-    score: {
-      left: score.left,
-      right: score.right,
-    },
-  });
+  const finalScore =
+  side === 'left'
+    ? {
+        left: 5,
+        right: score.right,
+      }
+    : {
+        left: score.left,
+        right: 5,
+      };
+
+setLastResult({
+  winner: winnerName,
+  loser: loserName,
+  score: finalScore,
+});
+
+setScore(finalScore);
 
   tournament.reportWinner(winnerName);
 
