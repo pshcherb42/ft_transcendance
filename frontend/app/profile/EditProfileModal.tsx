@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import imageCompression from 'browser-image-compression';
 import { toast } from 'sonner';
+import Input from '@/components/input';
 
 import { useAuth } from '@/context/AuthContext';
 import { apiFetch } from '@/app/lib/api';
@@ -515,7 +516,9 @@ export default function EditProfileModal({
           onSubmit={handleSave}
           className="mt-5 space-y-5"
         >
-          <ProfileInput
+          <Input
+            id="profile-username"
+            name="username"
             label={t('profile.username')}
             type="text"
             value={username}
@@ -525,8 +528,8 @@ export default function EditProfileModal({
                 ? t(fieldErrors.username)
                 : undefined
             }
-            onChange={setUsername}
-          />
+            onValueChange={setUsername}
+            />
 
           {!isOAuthUser && (
             <>
@@ -536,54 +539,50 @@ export default function EditProfileModal({
                 </h3>
               </div>
 
-              <ProfileInput
-                label={t(
-                  'profile.currentPassword',
-                )}
+              <Input
+                id="current-password"
+                name="currentPassword"
+                label={t('profile.currentPassword')}
                 type="password"
                 value={currentPassword}
                 autoComplete="current-password"
                 error={
                   fieldErrors.currentPassword
-                    ? t(
-                        fieldErrors.currentPassword,
-                      )
+                    ? t(fieldErrors.currentPassword)
                     : undefined
                 }
-                onChange={setCurrentPassword}
+                onValueChange={setCurrentPassword}
               />
 
-              <ProfileInput
-                label={t(
-                  'profile.newPassword',
-                )}
-                type="password"
-                value={newPassword}
-                autoComplete="new-password"
-                error={
-                  fieldErrors.newPassword
-                    ? t(fieldErrors.newPassword)
-                    : undefined
-                }
-                onChange={setNewPassword}
-              />
+              <Input
+                    id="new-password"
+                    name="newPassword"
+                    label={t('profile.newPassword')}
+                    type="password"
+                    value={newPassword}
+                    autoComplete="new-password"
+                    error={
+                      fieldErrors.newPassword
+                        ? t(fieldErrors.newPassword)
+                        : undefined
+                    }
+                    onValueChange={setNewPassword}
+                />
 
-              <ProfileInput
-                label={t(
-                  'profile.confirmPassword',
-                )}
-                type="password"
-                value={confirmPassword}
-                autoComplete="new-password"
-                error={
-                  fieldErrors.confirmPassword
-                    ? t(
-                        fieldErrors.confirmPassword,
-                      )
-                    : undefined
-                }
-                onChange={setConfirmPassword}
-              />
+            <Input
+                  id="confirm-password"
+                  name="confirmPassword"
+                  label={t('profile.confirmPassword')}
+                  type="password"
+                  value={confirmPassword}
+                  autoComplete="new-password"
+                  error={
+                    fieldErrors.confirmPassword
+                      ? t(fieldErrors.confirmPassword)
+                      : undefined
+                  }
+                  onValueChange={setConfirmPassword}
+                />
             </>
           )}
 
@@ -668,66 +667,6 @@ export default function EditProfileModal({
           </button>
         </form>
       </div>
-    </div>
-  );
-}
-
-function ProfileInput({
-  label,
-  type,
-  value,
-  error,
-  required,
-  autoComplete,
-  onChange,
-}: {
-  label: string;
-  type: 'text' | 'password';
-  value: string;
-  error?: string;
-  required?: boolean;
-  autoComplete?: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <div>
-      <label className="mb-2 block text-sm font-medium text-[#615050]">
-        {label}
-      </label>
-
-      <input
-        type={type}
-        value={value}
-        required={required}
-        autoComplete={autoComplete}
-        onChange={(event) =>
-          onChange(event.target.value)
-        }
-        className={`
-          h-[46px]
-          w-full
-          rounded-[10px]
-          border
-          bg-white
-          px-4
-          text-sm
-          text-[#615050]
-          outline-none
-          transition-colors
-          focus:border-brand-red
-          ${
-            error
-              ? 'border-red-500'
-              : 'border-[#D9D5D1]'
-          }
-        `}
-      />
-
-      {error && (
-        <p className="mt-1 text-xs text-red-600">
-          {error}
-        </p>
-      )}
     </div>
   );
 }

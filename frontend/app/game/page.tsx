@@ -461,23 +461,22 @@ return (
             type="button"
             onClick={handleBackToMenu}
             className="
-              absolute
-              left-0
-              top-0
-              h-[46px]
-              min-w-[185px]
-              rounded-full
-              border-[1.5px]
-              border-[#D9D5D1]
-              px-7
-              text-[13px]
-              font-medium
-              uppercase
-              text-[#615050]
-              transition-colors
-              hover:border-[#615050]
-              hover:bg-[#D9D9D9]/20
-            "
+                  absolute
+                  left-0
+                  top-0
+                  h-[46px]
+                  min-w-[190px]
+                  rounded-full
+                  border
+                  border-[#D9D5D1]
+                  px-8
+                  text-[14px]
+                  font-medium
+                  uppercase
+                  text-[#615050]
+                  transition-colors
+                  hover:bg-[#D9D9D9]/20
+                "
           >
             {t('game.button.backToMenu')}
           </button>

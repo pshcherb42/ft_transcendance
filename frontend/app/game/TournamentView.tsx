@@ -6,6 +6,7 @@ import { DEFAULT_CONFIG } from './config';
 import { PongMatch } from './PongMatch';
 import type { Side } from './types';
 import { useTranslation } from 'react-i18next';
+import Input from '@/components/input';
 
 type Phase = 'register' | 'play' | 'done';
 
@@ -119,17 +120,16 @@ export function TournamentView({
                   left-0
                   top-0
                   h-[46px]
-                  min-w-[185px]
+                  min-w-[190px]
                   rounded-full
-                  border-[1.5px]
+                  border
                   border-[#D9D5D1]
-                  px-7
-                  text-[13px]
+                  px-8
+                  text-[14px]
                   font-medium
                   uppercase
                   text-[#615050]
                   transition-colors
-                  hover:border-[#615050]
                   hover:bg-[#D9D9D9]/20
                 "
               >
@@ -211,33 +211,14 @@ export function TournamentView({
                         {t('tournament.player')} {index + 1}
                       </label>
 
-                      <input
+                      <Input
                         id={`tournament-player-${index}`}
+                        name={`tournament-player-${index}`}
                         value={name}
-                        onChange={(event) =>
-                          updateName(index, event.target.value)
-                        }
+                        onValueChange={(value) => updateName(index, value)}
                         placeholder={`${t('tournament.player')} ${index + 1}`}
                         maxLength={16}
                         autoComplete="off"
-                        className="
-                          h-[46px]
-                          w-full
-                          rounded-[7px]
-                          border
-                          border-[#D9D5D1]
-                          bg-white
-                          px-4
-                          text-[14px]
-                          text-[#1A1A1A]
-                          outline-none
-                          transition-colors
-                          placeholder:text-[#B4AAAA]
-                          hover:border-[#726B61]
-                          focus:border-brand-red
-                          focus:ring-1
-                          focus:ring-brand-red
-                        "
                       />
                     </div>
 
