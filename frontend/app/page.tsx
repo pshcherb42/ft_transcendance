@@ -82,23 +82,44 @@ export default function HomePage() {
   }
 
   return (
-    <div className="relative flex min-h-[calc(100dvh-48px)] flex-col overflow-hidden bg-background">
+    <div className="relative flex min-h-[calc(100dvh-48px)] flex-col bg-background">
       <BouncingBall />
 
       <main className="relative z-10 flex flex-1 flex-col">
         {/* Верхние кнопки */}
-        <header className="flex items-center justify-between px-8 pt-8 md:px-16 md:pt-8">
+        <header
+          className="
+            flex
+            items-center
+            justify-between
+            gap-3
+            px-4
+            pt-4
+            sm:px-6
+            sm:pt-6
+            md:px-10
+            md:pt-8
+            lg:px-16
+          "
+        >
           <button
             type="button"
             onClick={handleLogout}
             disabled={logoutLoading}
             className="
-              h-[46px]
-              min-w-[190px]
+              h-[42px]
+              min-w-0
+              flex-1
+              px-4
+              sm:h-[46px]
+              sm:min-w-[160px]
+              sm:flex-none
+              sm:px-6
+              lg:min-w-[190px]
+              lg:px-8
               rounded-full
               border
               border-[#D9D5D1]
-              px-8
               text-[14px]
               font-medium
               uppercase
@@ -118,11 +139,18 @@ export default function HomePage() {
             type="button"
             onClick={() => router.push('/profile')}
             className="
-              h-[46px]
-              min-w-[190px]
+              h-[42px]
+              min-w-0
+              flex-1
+              px-4
+              sm:h-[46px]
+              sm:min-w-[160px]
+              sm:flex-none
+              sm:px-6
+              lg:min-w-[190px]
+              lg:px-8
               rounded-full
               bg-brand-green
-              px-8
               text-[14px]
               font-medium
               uppercase
@@ -136,28 +164,51 @@ export default function HomePage() {
         </header>
 
         {/* Основной контент - белая карточка*/}
-        <section className="mx-auto flex w-full max-w-[1100px] flex-1 items-center  justify-center px-8 py-12 md:px-16">
+        <section
+          className="
+            mx-auto
+            flex
+            w-full
+            max-w-[1100px]
+            flex-1
+            items-start
+            justify-center
+            px-4
+            pb-8
+            pt-8
+            sm:px-6
+            sm:pb-10
+            sm:pt-10
+            md:items-center
+            md:px-10
+            md:py-12
+            lg:px-12
+          "
+        >
           <div
             className="
               w-full
               rounded-[10px]
               bg-white
-              px-8
-              py-14
-              -translate-y-8
+              px-5
+              py-8
               shadow-[-8px_8px_32px_0_rgba(193,168,163,0.25)]
-              md:px-12
+              sm:px-7
+              sm:py-10
+              md:px-10
+              md:py-12
+              lg:px-12
               xl:px-[70px]
-              xl:py-[80]
+              xl:py-[64px]
             "
           >
-            <div className="mb-12 text-center">
+            <div className="mb-8 text-center md:mb-12">
 
-              <h1 className="font-display text-[clamp(2.5rem,5vw,56px)] uppercase leading-none text-brand-red">
+              <h1 className="font-display text-[clamp(2rem,8vw,56px)] uppercase leading-none text-brand-red">
                 {t('home.chooseGame')}
               </h1>
 
-              <div className="mt-4 flex items-center justify-center gap-2 text-sm">
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-sm">
                 <span className="text-[#615050]">
                   {t('home.selectGameMode')}
                 </span>
@@ -183,14 +234,14 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="grid gap-10 md:grid-cols-2 md:gap-14">
+            <div className="grid gap-10 lg:grid-cols-2 lg:gap-14">
               {/* Левая часть — режимы игры */}
               <div>
                 <p className="mb-4 text-sm font-bold uppercase tracking-wide text-[#615050]">
                   {t('home.gameMode')}
                 </p>
 
-                <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-3 sm:gap-4 lg:gap-6">
                   <button
                     type="button"
                     onClick={() => startGame('online')}
@@ -278,7 +329,7 @@ export default function HomePage() {
               </div>
 
               {/* Правая часть — настройки */}
-              <div className="md:border-l md:border-[#EEE9E6] md:pl-14">
+              <div className="lg:border-l lg:border-[#EEE9E6] lg:pl-14">
                 <p className="mb-5 text-sm font-bold uppercase tracking-wide text-[#615050]">
                 {t('game.menu.gameSettings')}{' '} <span className="lowercase font-medium">{t('game.menu.gameSettingsNote')}</span>
                 </p>
@@ -295,6 +346,8 @@ export default function HomePage() {
                       onClick={() => setMapId('classic')}
                       className={`
                         h-[46px]
+                        min-w-0
+                        px-2
                         rounded-full
                         border
                         text-sm
@@ -315,6 +368,8 @@ export default function HomePage() {
                       onClick={() => setMapId('obstacles')}
                       className={`
                         h-[46px]
+                        min-w-0
+                        px-2
                         rounded-full
                         border
                         text-sm
@@ -459,10 +514,13 @@ export default function HomePage() {
         overflow-y-auto
         rounded-[10px]
         bg-white
-        px-8
-        py-10
+        px-5
+        py-7
         shadow-[-8px_8px_32px_rgba(193,168,163,0.25)]
+        sm:px-8
+        sm:py-9
         md:px-10
+        md:py-10
       "
     >
       <button
@@ -489,7 +547,9 @@ export default function HomePage() {
           mb-8
           pr-10
           font-display
-          text-[36px]
+          text-[28px]
+          sm:text-[32px]
+          md:text-[36px]
           uppercase
           leading-none
           text-brand-red
