@@ -29,6 +29,7 @@ export default function ChatPage() {
 
   const [activeFriendId, setActiveFriendId] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
+  const [mobileChatOpen, setMobileChatOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -71,13 +72,14 @@ export default function ChatPage() {
     ? conversations[activeFriendId] ?? []
     : [];
 
-  const selectFriend = (friendId: string) => {
-    setActiveFriendId(friendId);
-
-    if (!conversations[friendId]) {
-      loadHistory(friendId);
-    }
-  };
+    const selectFriend = (friendId: string) => {
+      setActiveFriendId(friendId);
+      setMobileChatOpen(true);
+    
+      if (!conversations[friendId]) {
+        loadHistory(friendId);
+      }
+    };
 
   const handleSend = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -93,20 +95,41 @@ export default function ChatPage() {
   };
 
   return (
-  <div className="relative flex min-h-[calc(100dvh-48px)] flex-col overflow-hidden bg-background">
+    <div className="relative flex min-h-[calc(100dvh-48px)] flex-col bg-background">
     <main className="relative z-10 flex flex-1 flex-col">
       {/* Верхняя навигация */}
-      <header className="flex flex-wrap items-center justify-between gap-4 px-8 pt-8 md:px-16">
+      <header
+        className="
+          flex
+          items-center
+          justify-between
+          gap-3
+          px-4
+          pt-4
+          sm:px-6
+          sm:pt-6
+          md:px-10
+          md:pt-8
+          lg:px-16
+        "
+      >
         <button
           type="button"
           onClick={() => router.push('/')}
           className="
-            h-[46px]
-            min-w-[190px]
+            h-[42px]
+            min-w-0
+            flex-1
+            px-4
+            text-[13px]
+            sm:h-[46px]
+            sm:min-w-[190px]
+            sm:flex-none
+            sm:px-8
+            sm:text-[14px]
             rounded-full
             border
             border-[#D9D5D1]
-            px-8
             text-[14px]
             font-medium
             uppercase
@@ -122,18 +145,23 @@ export default function ChatPage() {
           type="button"
           onClick={() => router.push('/profile')}
           className="
-            ml-auto
-            h-[46px]
-            min-w-[190px]
+            h-[42px]
+            min-w-0
+            flex-1
             rounded-full
             bg-brand-green
-            px-8
-            text-[14px]
+            px-4
+            text-[13px]
             font-medium
             uppercase
             text-white
             transition-colors
             hover:bg-[#808979]
+            sm:h-[46px]
+            sm:min-w-[190px]
+            sm:flex-none
+            sm:px-8
+            sm:text-[14px]
           "
         >
           {t('home.profile')}
@@ -141,28 +169,48 @@ export default function ChatPage() {
       </header>
 
       {/* Область чата */}
-      <section className="flex min-h-0 flex-1 px-8 pb-8 pt-10 md:px-16">
+      <section
+        className="
+          flex
+          min-h-0
+          flex-1
+          px-4
+          pb-6
+          pt-6
+          sm:px-6
+          sm:pt-8
+          md:px-10
+          md:pb-8
+          md:pt-10
+          lg:px-16
+        "
+      >
         <div
           className="
             flex
-            min-h-0
-            flex-1
+            h-[calc(100dvh-170px)]
+            min-h-[500px]
+            w-full
             overflow-hidden
             rounded-[10px]
             bg-white
             shadow-[-8px_8px_32px_0_rgba(193,168,163,0.25)]
+            sm:h-[calc(100dvh-190px)]
+            md:h-[calc(100dvh-210px)]
           "
         >
           {/* Левая колонка */}
           <aside
-            className="
-              flex
-              w-[310px]
-              shrink-0
+            className={`
+              w-full
               flex-col
-              border-r
-              border-[#D9D5D1]
-            "
+              md:flex
+              md:w-[310px]
+              md:shrink-0
+              md:border-r
+              md:border-[#D9D5D1]
+              ${mobileChatOpen ? 'hidden' : 'flex'}
+            `}
           >
             <div className="px-9 pb-8 pt-7">
               <h1
@@ -274,7 +322,17 @@ export default function ChatPage() {
           </aside>
 
           {/* Правая колонка */}
-          <section className="flex min-w-0 flex-1 flex-col">
+          <section
+            className={`
+              min-w-0
+              flex-1
+              flex-col
+              md:flex
+              min-h-0
+              overflow-hidden
+              ${mobileChatOpen ? 'flex' : 'hidden'}
+            `}
+          >
             {!activeFriend ? (
               <div
                 className="
@@ -295,16 +353,59 @@ export default function ChatPage() {
                 <header
                   className="
                     flex
-                    min-h-[90px]
-                    items-center
-                    justify-between
+                    flex-col
+                    gap-3
                     border-b
                     border-[#D9D5D1]
-                    px-8
-                  "
+                    px-4
+                    py-4
+                    sm:px-6
+                    min-[510px]:min-h-[90px]
+                    min-[510px]:flex-row
+                    min-[6510px]:items-center
+                    min-[510px]:justify-between
+                    min-[510px]:gap-4
+                    min-[510px]:px-8
+                    min-[510px]:py-4
+                    "
                 >
-                  <div className="flex items-center gap-4">
-                  <div className="h-[52px] w-[52px] shrink-0">
+                  <div className="flex w-full min-w-0 items-center gap-3 md:w-auto">
+                  <button
+                    type="button"
+                    onClick={() => setMobileChatOpen(false)}
+                    aria-label={t('chat.backToFriends')}
+                    className="
+                      flex
+                      h-10
+                      w-10
+                      shrink-0
+                      items-center
+                      justify-center
+                      rounded-full
+                      border
+                      border-[#D9D5D1]
+                      text-[#615050]
+                      transition-colors
+                      hover:bg-[#D9D9D9]/20
+                      md:hidden
+                    "
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      aria-hidden="true"
+                      className="h-5 w-5"
+                    >
+                      <path
+                        d="M15 18l-6-6 6-6"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                  <div className="h-[44px] w-[44px] shrink-0 sm:h-[52px] sm:w-[52px]">
                     <UserAvatar
                       username={activeFriend.username}
                       avatarPath={activeFriend.avatar}
@@ -381,8 +482,12 @@ export default function ChatPage() {
                     flex-col
                     gap-3
                     overflow-y-auto
-                    px-8
-                    py-8
+                    px-4
+                    py-5
+                    sm:px-6
+                    sm:py-6
+                    md:px-8
+                    md:py-8
                   "
                 >
                   {messages.length === 0 && (
@@ -447,11 +552,16 @@ export default function ChatPage() {
                   className="
                     flex
                     items-center
-                    gap-5
+                    gap-2
                     border-t
                     border-[#D9D5D1]
-                    px-8
-                    py-4
+                    px-3
+                    py-3
+                    sm:gap-3
+                    sm:px-4
+                    sm:py-4
+                    md:gap-5
+                    md:px-8
                   "
                 >
                   <input
