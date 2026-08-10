@@ -111,36 +111,42 @@ export function TournamentView({
             "
           >
             {/* Header */}
-            <div className="relative flex min-h-[70px] items-start justify-center">
+            <div className="flex flex-col items-center gap-5 sm:gap-6 lg:relative lg:min-h-[70px] lg:items-start lg:justify-center justify-center">
               <button
                 type="button"
                 onClick={onExit}
                 className="
-                  absolute
-                  left-0
-                  top-0
-                  h-[46px]
-                  min-w-[190px]
+                  h-[42px]
+                  w-full
+                  max-w-[240px]
                   rounded-full
                   border
                   border-[#D9D5D1]
-                  px-8
-                  text-[14px]
+                  px-4
+                  text-[13px]
                   font-medium
                   uppercase
                   text-[#615050]
                   transition-colors
                   hover:bg-[#D9D9D9]/20
+                  sm:h-[46px]
+                  sm:w-auto
+                  sm:min-w-[190px]
+                  sm:px-8
+                  sm:text-[14px]
+                  lg:absolute
+                  lg:left-0
+                  lg:top-0
                 "
               >
                 {t('tournament.back')}
               </button>
 
-              <div className="text-center">
+              <div className="flex w-full flex-col items-center text-center">
                 <h1
                   className="
                     font-display
-                    text-[clamp(2.8rem,5vw,64px)]
+                    text-[clamp(2rem,8vw,64px)]
                     uppercase
                     leading-none
                     text-brand-red
@@ -164,9 +170,11 @@ export function TournamentView({
                 max-w-[820px]
                 rounded-[14px]
                 bg-white
-                px-6
-                py-8
+                px-4
+                py-6
                 shadow-[-8px_8px_32px_0_rgba(193,168,163,0.20)]
+                sm:px-6
+                sm:py-8
                 md:px-10
                 md:py-10
               "
@@ -301,7 +309,9 @@ export function TournamentView({
                   onClick={startTournament}
                   className="
                     h-[48px]
-                    min-w-[220px]
+                    w-full
+                    sm:w-auto
+                    sm:min-w-[220px]
                     rounded-full
                     bg-brand-green
                     px-8
@@ -350,43 +360,50 @@ export function TournamentView({
               md:pt-8
             "
           >
-            <div className="relative flex min-h-[70px] items-start justify-center">
+            <div className="flex flex-col items-center gap-5 justify-center sm:gap-6 lg:relative lg:min-h-[70px] lg:items-start lg:justify-center">
               <button
                 type="button"
                 onClick={onExit}
                 className="
-                  absolute
-                  left-0
-                  top-0
-                  h-[46px]
-                  min-w-[185px]
+                  h-[42px]
+                  w-full
+                  max-w-[240px]
                   rounded-full
-                  border-[1.5px]
+                  border
                   border-[#D9D5D1]
-                  px-7
+                  px-4
                   text-[13px]
                   font-medium
                   uppercase
                   text-[#615050]
                   transition-colors
-                  hover:border-[#615050]
                   hover:bg-[#D9D9D9]/20
+                  sm:h-[46px]
+                  sm:w-auto
+                  sm:min-w-[190px]
+                  sm:px-8
+                  sm:text-[14px]
+                  lg:absolute
+                  lg:left-0
+                  lg:top-0
                 "
               >
                 {t('tournament.back')}
               </button>
 
-              <h1
-                className="
-                  font-display
-                  text-[clamp(2.8rem,5vw,64px)]
-                  uppercase
-                  leading-none
-                  text-brand-red
-                "
-              >
-                {t('tournament.title')}
-              </h1>
+              <div className="flex w-full flex-col items-center text-center">
+                <h1
+                  className="
+                    font-display
+                    text-[clamp(2rem,8vw,64px)]
+                    uppercase
+                    leading-none
+                    text-brand-red
+                  "
+                >
+                  {t('tournament.title')}
+                </h1>
+              </div>
             </div>
 
             <div
@@ -420,9 +437,10 @@ export function TournamentView({
                 <h2
                   className="
                     mt-3
-                    break-all
                     font-display
-                    text-[clamp(3rem,7vw,76px)]
+                    max-w-full
+                    break-words
+                    text-[clamp(2.2rem,10vw,76px)]
                     uppercase
                     leading-none
                     text-brand-red
@@ -469,7 +487,9 @@ export function TournamentView({
                   onClick={resetTournament}
                   className="
                     h-[48px]
-                    min-w-[220px]
+                    w-full
+                    sm:w-auto
+                    sm:min-w-[220px]
                     rounded-full
                     bg-brand-green
                     px-8
@@ -490,7 +510,9 @@ export function TournamentView({
                   onClick={onExit}
                   className="
                     h-[48px]
-                    min-w-[220px]
+                    w-full
+                    sm:w-auto
+                    sm:min-w-[220px]
                     rounded-full
                     border-[1.5px]
                     border-[#D9D5D1]
@@ -581,37 +603,42 @@ setScore(finalScore);
           "
         >
           {/* Header */}
-          <div className="relative flex min-h-[70px] items-start justify-center">
+          <div className="flex flex-col items-center gap-5 sm:gap-6 lg:relative lg:min-h-[70px] lg:items-start lg:justify-center justify-center">
             <button
               type="button"
               onClick={onExit}
               className="
-                absolute
-                left-0
-                top-0
-                h-[46px]
-                min-w-[185px]
-                rounded-full
-                border-[1.5px]
-                border-[#D9D5D1]
-                px-7
-                text-[13px]
-                font-medium
-                uppercase
-                text-[#615050]
-                transition-colors
-                hover:border-[#615050]
-                hover:bg-[#D9D9D9]/20
+                  h-[42px]
+                  w-full
+                  max-w-[240px]
+                  rounded-full
+                  border
+                  border-[#D9D5D1]
+                  px-4
+                  text-[13px]
+                  font-medium
+                  uppercase
+                  text-[#615050]
+                  transition-colors
+                  hover:bg-[#D9D9D9]/20
+                  sm:h-[46px]
+                  sm:w-auto
+                  sm:min-w-[190px]
+                  sm:px-8
+                  sm:text-[14px]
+                  lg:absolute
+                  lg:left-0
+                  lg:top-0
               "
             >
               {t('tournament.leave')}
             </button>
 
-            <div className="text-center">
+            <div className="flex w-full flex-col items-center text-center">
               <h1
                 className="
                   font-display
-                  text-[clamp(2.8rem,5vw,64px)]
+                  text-[clamp(2rem,8vw,64px)]
                   uppercase
                   leading-none
                   text-brand-red
@@ -638,63 +665,91 @@ setScore(finalScore);
           {/* Match card */}
           
           <div
-  className="
-    mx-auto
-    mt-4
-    w-full
-    max-w-[1085px]
-    rounded-[14px]
-    bg-white
-    px-5
-    pb-5
-    pt-4
-    md:px-6
-  "
->
+            className="
+              mx-auto
+              mt-4
+              w-full
+              max-w-[1085px]
+              rounded-[14px]
+              bg-white
+              px-5
+              pb-5
+              pt-4
+              md:px-6
+            "
+          >
   {/* Ники и счёт — только во время самой игры */}
   {ready && (
-    <div
-      className="
-        grid
-        grid-cols-[1fr_auto_1fr]
-        items-end
-        gap-4
-        pb-4
-      "
-    >
-      <div>
-        <p className="truncate text-[20px] font-semibold text-black">
-          {currentMatch.p1}
-        </p>
-      </div>
-
-      <div
+  <div
+    className="
+      grid
+      grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]
+      items-end
+      gap-2
+      pb-3
+      sm:gap-4
+      sm:pb-4
+    "
+  >
+    {/* Левый игрок */}
+    <div className="min-w-0">
+      <p
         className="
-          flex
-          items-center
-          gap-4
-          text-[44px]
+          truncate
+          text-[13px]
           font-semibold
-          leading-none
           text-black
+          sm:text-[16px]
+          md:text-[20px]
         "
       >
-        <span>{score.left}</span>
-
-        <span className="text-[30px] text-[#777171]">
-          :
-        </span>
-
-        <span>{score.right}</span>
-      </div>
-
-      <div className="text-right">
-        <p className="truncate text-[20px] font-semibold text-black">
-          {currentMatch.p2}
-        </p>
-      </div>
+        {currentMatch.p1}
+      </p>
     </div>
-  )}
+
+    {/* Счёт */}
+    <div
+      className="
+        flex
+        shrink-0
+        items-center
+        gap-2
+        text-[28px]
+        font-semibold
+        leading-none
+        text-black
+        sm:gap-3
+        sm:text-[36px]
+        md:gap-4
+        md:text-[44px]
+      "
+    >
+      <span>{score.left}</span>
+
+      <span className="text-[20px] text-[#777171] sm:text-[24px] md:text-[30px]">
+        :
+      </span>
+
+      <span>{score.right}</span>
+    </div>
+
+    {/* Правый игрок */}
+    <div className="min-w-0 text-right">
+      <p
+        className="
+          truncate
+          text-[13px]
+          font-semibold
+          text-black
+          sm:text-[16px]
+          md:text-[20px]
+        "
+      >
+        {currentMatch.p2}
+      </p>
+    </div>
+  </div>
+)}
 
   {/* Чёрное поле ограничено шириной белой карточки */}
   <div
@@ -707,7 +762,7 @@ setScore(finalScore);
       overflow-hidden
       rounded-[14px]
       bg-[#171717]
-      ${ready ? '' : 'min-h-[330px]'}
+      ${ready ? '' : 'min-h-[260px] sm:min-h-[300px] md:min-h-[330px]'}
     `}
   >
     {ready ? (
@@ -726,7 +781,9 @@ setScore(finalScore);
       <div
         className="
           flex
-          min-h-[330px]
+          min-h-[260px]
+          sm:min-h-[300px]
+          md:min-h-[330px]
           w-full
           max-w-[400px]
           flex-col
@@ -823,7 +880,9 @@ setScore(finalScore);
       <div
         className="
           flex
-          min-h-[330px]
+          min-h-[260px]
+          sm:min-h-[300px]
+          md:min-h-[330px]
           w-full
           max-w-[360px]
           flex-col
@@ -850,6 +909,8 @@ setScore(finalScore);
             mt-4
             font-display
             text-[clamp(2rem,4vw,44px)]
+            max-w-full
+            break-words
             uppercase
             leading-none
             text-white
@@ -866,6 +927,8 @@ setScore(finalScore);
           className="
             font-display
             text-[clamp(2rem,4vw,44px)]
+            max-w-full
+            break-words
             uppercase
             leading-none
             text-white
@@ -995,11 +1058,14 @@ function Bracket({
   return (
     <div
       className="
+        -mx-2
         flex
         max-w-full
-        gap-5
+        gap-3
         overflow-x-auto
+        px-2
         pb-2
+        sm:gap-5
       "
     >
       {rounds.map((round, roundIndex) => (

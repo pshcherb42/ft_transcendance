@@ -448,44 +448,53 @@ return (
           w-full
           flex-col
           bg-[#F7F5F1]
-          px-6
-          pb-5
-          pt-6
-          md:px-16
+          px-4
+          pb-6
+          pt-4
+          sm:px-6
+          sm:pt-6
+          md:px-10
           md:pt-8
+          lg:px-16
         "
       >
         {/* Верхняя часть */}
-        <div className="relative flex min-h-[70px] items-start justify-center">
+        <div className="flex flex-col items-center gap-5 sm:gap-6 lg:relative lg:min-h-[70px] lg:items-start lg:justify-center justify-center">
           <button
             type="button"
             onClick={handleBackToMenu}
             className="
-                  absolute
-                  left-0
-                  top-0
-                  h-[46px]
-                  min-w-[190px]
+                  h-[42px]
+                  w-full
+                  max-w-[240px]
                   rounded-full
                   border
                   border-[#D9D5D1]
-                  px-8
-                  text-[14px]
+                  px-4
+                  text-[13px]
                   font-medium
                   uppercase
                   text-[#615050]
                   transition-colors
                   hover:bg-[#D9D9D9]/20
+                  sm:h-[46px]
+                  sm:w-auto
+                  sm:min-w-[190px]
+                  sm:px-8
+                  sm:text-[14px]
+                  lg:absolute
+                  lg:left-0
+                  lg:top-0
                 "
           >
             {t('game.button.backToMenu')}
           </button>
 
-          <div className="flex flex-col items-center text-center">
+          <div className="flex w-full flex-col items-center text-center">
           <h1
             className="
               font-display
-              text-[clamp(2.8rem,5vw,64px)]
+              text-[clamp(2rem,8vw,64px)]
               uppercase
               leading-none
               text-brand-red
@@ -532,29 +541,44 @@ return (
         <div
           className="
             mx-auto
-            mt-4
+            mt-5
             w-full
             max-w-[1085px]
             rounded-[14px]
             bg-white
-            px-5
-            pb-5
-            pt-4
+            px-3
+            pb-3
+            pt-3
+            sm:px-4
+            sm:pb-4
+            sm:pt-4
             md:px-6
+            md:pb-5
           "
         >
           {/* Игроки и счёт */}
         <div
           className="
             grid
-            grid-cols-[1fr_auto_1fr]
+            grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]
             items-end
-            gap-4
-            pb-4
+            gap-2
+            pb-3
+            sm:gap-4
+            sm:pb-4
           "
         >
-          <div>
-            <p className="text-[20px] font-semibold text-black">
+          <div className="min-w-0">
+            <p
+              className="
+                truncate
+                text-[13px]
+                font-semibold
+                text-black
+                sm:text-[16px]
+                md:text-[20px]
+              "
+            >
               {leftPlayerName}
             </p>
           </div>
@@ -562,27 +586,45 @@ return (
           <div
             className="
               flex
+              shrink-0
               items-center
-              gap-4
-              text-[44px]
+              gap-2
+              text-[28px]
               font-semibold
               leading-none
               text-black
+              sm:gap-3
+              sm:text-[36px]
+              md:gap-4
+              md:text-[44px]
             "
           >
             <span>{score.left}</span>
-            <span className="text-[30px] text-[#777171]">:</span>
+
+            <span className="text-[20px] text-[#777171] sm:text-[24px] md:text-[30px]">
+              :
+            </span>
+
             <span>{score.right}</span>
           </div>
 
-          <div className="text-right">
-            <p className="text-[20px] font-semibold text-black">
+          <div className="min-w-0 text-right">
+            <p
+              className="
+                truncate
+                text-[13px]
+                font-semibold
+                text-black
+                sm:text-[16px]
+                md:text-[20px]
+              "
+            >
               {rightPlayerName}
             </p>
           </div>
         </div>
           {/* Canvas */}
-          <div className="relative overflow-hidden rounded-[14px] bg-[#171717]">
+          <div className="relative overflow-hidden rounded-[10px] bg-[#171717] sm:rounded-[14px]">
             {mode === 'online' ? (
               <canvas
                 ref={canvasRef}
@@ -620,12 +662,17 @@ return (
                     max-w-[430px]
                     flex-col
                     items-center
-                    rounded-[20px]
+                    rounded-[14px]
                     bg-[#F7F5F1]
-                    px-8
-                    py-9
+                    px-4
+                    py-4
                     text-center
                     shadow-[0_24px_70px_rgba(0,0,0,0.35)]
+                    sm:rounded-[20px]
+                    sm:px-6
+                    sm:py-6
+                    md:px-8
+                    md:py-9
                   "
                 >
                   <p
@@ -644,7 +691,7 @@ return (
                     className="
                       mt-3
                       font-display
-                      text-[clamp(2.5rem,5vw,58px)]
+                      text-[clamp(1.7rem,8vw,58px)]
                       uppercase
                       leading-none
                       text-brand-red
@@ -655,14 +702,18 @@ return (
 
                   <div
                     className="
-                      mt-6
+                      mt-3
                       flex
                       items-center
-                      gap-5
-                      text-[48px]
+                      gap-3
+                      text-[30px]
                       font-semibold
                       leading-none
                       text-black
+                      sm:mt-5
+                      sm:text-[40px]
+                      md:mt-6
+                      md:text-[48px]
                     "
                   >
                     <span>{score.left}</span>
@@ -670,7 +721,7 @@ return (
                     <span>{score.right}</span>
                   </div>
 
-                  <p className="mt-4 text-[14px] text-[#615050]">
+                  <p className="mt-2 max-w-full truncate text-[12px] text-[#615050] sm:mt-4 sm:text-[14px]">
                     {leftPlayerName} · {rightPlayerName}
                   </p>
 
@@ -679,8 +730,8 @@ return (
                       type="button"
                       onClick={() => setOnlineRound((round) => round + 1)}
                       className="
-                        mt-8
-                        h-[52px]
+                        mt-4
+                        h-[42px]
                         w-full
                         rounded-full
                         bg-brand-green
@@ -692,6 +743,10 @@ return (
                         text-white
                         transition-colors
                         hover:bg-[#808979]
+                        sm:mt-6
+                        sm:h-[48px]
+                        md:mt-8
+                        md:h-[52px]
                       "
                     >
                       {t('game.button.findMatch')}
@@ -708,8 +763,8 @@ return (
                         setLocalRound((round) => round + 1);
                       }}
                       className="
-                        mt-8
-                        h-[52px]
+                        mt-4
+                        h-[42px]
                         w-full
                         rounded-full
                         bg-brand-green
@@ -721,6 +776,10 @@ return (
                         text-white
                         transition-colors
                         hover:bg-[#808979]
+                        sm:mt-6
+                        sm:h-[48px]
+                        md:mt-8
+                        md:h-[52px]
                       "
                     >
                       {t('game.button.rematch')}
@@ -731,8 +790,8 @@ return (
                     type="button"
                     onClick={handleBackToMenu}
                     className="
-                      mt-3
-                      h-[48px]
+                      mt-4
+                      h-[42px]
                       w-full
                       rounded-full
                       border-[1.5px]
@@ -746,6 +805,10 @@ return (
                       transition-colors
                       hover:border-[#615050]
                       hover:bg-[#D9D9D9]/30
+                      sm:mt-6
+                      sm:h-[48px]
+                      md:mt-8
+                      md:h-[52px]
                     "
                   >
                     {t('game.button.backToMenu')}
@@ -759,7 +822,7 @@ return (
         {/* Информация под игровым полем */}
           {mode !== 'online' && !isGameFinished && (
             <div className="mx-auto mt-5 min-h-[28px] text-center">
-              <p className="text-[14px] text-[#615050]">
+              <p className="text-[12px] leading-5 text-[#615050] sm:text-[14px]">
                 {mode === 'ai'
                   ? `${t('game.controls.difficulty')} ${DIFF_LABEL[difficulty]}`
                   : t('game.controls.local')}
