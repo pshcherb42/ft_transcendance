@@ -75,46 +75,80 @@ export default function ProfilePage() {
   return (
     <div className="relative flex min-h-[calc(100dvh-48px)] flex-col overflow-hidden bg-background">
       <main className="relative z-10 flex flex-1 flex-col">
-        <header className="flex flex-wrap items-center justify-between gap-4 px-8 pt-8 md:px-16">
+        <header
+          className="
+            flex
+            flex-col
+            gap-3
+            px-4
+            pt-4
+            sm:px-6
+            sm:pt-6
+            md:px-10
+            md:pt-8
+            min-[650px]:flex-row
+            min-[650px]:items-center
+            min-[650px]:justify-between
+            lg:px-16
+          "
+        >
           <button
             type="button"
             onClick={() => router.push('/')}
             className="
-              h-[46px]
-              min-w-[190px]
+              h-[42px]
+              w-full
               rounded-full
               border
               border-[#D9D5D1]
-              px-8
-              text-[14px]
+              px-4
+              text-[13px]
               font-medium
               uppercase
               text-[#615050]
               transition-colors
               hover:bg-[#D9D9D9]/20
+              sm:h-[46px]
+              sm:w-auto
+              sm:min-w-[190px]
+              sm:px-8
+              sm:text-[14px]
             "
           >
             {t('game.button.backToMenu')}
           </button>
 
-          <div className="ml-auto flex flex-wrap gap-4">
+          <div
+            className="
+              grid
+              w-full
+              grid-cols-2
+              gap-3
+              min-[700px]:flex
+              min-[700px]:w-auto
+              min-[700px]:gap-4
+            "
+          >
             <button
               type="button"
-              onClick={() =>
-                router.push('/chat')
-              }
+              onClick={() => router.push('/chat')}
               className="
-                h-[46px]
-                min-w-[190px]
+                h-[42px]
+                w-full
                 rounded-full
                 bg-brand-red
-                px-8
-                text-[14px]
+                px-4
+                text-[13px]
                 font-medium
                 uppercase
                 text-white
                 transition-colors
                 hover:bg-[#D9361F]
+                sm:h-[46px]
+                sm:px-8
+                sm:text-[14px]
+                min-[650px]:min-w-[170px]
+                lg:min-w-[190px]
               "
             >
               {t('game.button.chat')}
@@ -122,21 +156,24 @@ export default function ProfilePage() {
 
             <button
               type="button"
-              onClick={() =>
-                setEditModalOpen(true)
-              }
+              onClick={() => setEditModalOpen(true)}
               className="
-                h-[46px]
-                min-w-[190px]
+                h-[42px]
+                w-full
                 rounded-full
                 bg-brand-green
-                px-8
-                text-[14px]
+                px-4
+                text-[13px]
                 font-medium
                 uppercase
                 text-white
                 transition-colors
                 hover:bg-[#808979]
+                sm:h-[46px]
+                sm:px-8
+                sm:text-[14px]
+                min-[650px]:min-w-[170px]
+                lg:min-w-[190px]
               "
             >
               {t('game.button.editProfile')}
@@ -144,7 +181,25 @@ export default function ProfilePage() {
           </div>
         </header>
 
-        <section className="mx-auto flex w-full flex-1 flex-col px-8 pb-12 pt-10 md:px-16">
+        <section
+          className="
+            mx-auto
+            flex
+            w-full
+            flex-1
+            flex-col
+            px-4
+            pb-8
+            pt-6
+            sm:px-6
+            sm:pb-10
+            sm:pt-8
+            md:px-10
+            lg:px-16
+            lg:pb-12
+            lg:pt-10
+          "
+        >
           <ProfileHeader
             username={user.username}
             email={user.email}
@@ -171,10 +226,14 @@ export default function ProfilePage() {
               w-full
               rounded-[10px]
               bg-white
-              px-8
-              py-10
+              px-4
+              py-6
               shadow-[-8px_8px_32px_0_rgba(193,168,163,0.25)]
-              md:px-12
+              sm:px-6
+              sm:py-8
+              md:px-8
+              md:py-10
+              lg:px-12
             "
           >
             {activeTab === 'friends' && (

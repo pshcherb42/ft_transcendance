@@ -332,13 +332,16 @@ export default function EditProfileModal({
         inset-0
         z-50
         flex
-        items-center
+        items-start
         justify-center
         overflow-y-auto
         bg-[#615050]/35
         px-4
-        py-8
+        py-4
         backdrop-blur-[2px]
+        sm:py-6
+        md:items-center
+        md:py-8
       "
       onMouseDown={(event) => {
         if (
@@ -351,15 +354,18 @@ export default function EditProfileModal({
     >
       <div
         className="
-          relative
-          w-full
-          max-w-[560px]
-          rounded-[10px]
-          bg-background
-          px-8
-          py-10
-          shadow-[-8px_8px_32px_0_rgba(97,80,80,0.25)]
-          md:px-12
+        relative
+        w-full
+        max-w-[560px]
+        rounded-[10px]
+        bg-background
+        px-5
+        py-6
+        shadow-[-8px_8px_32px_0_rgba(97,80,80,0.25)]
+        sm:px-8
+        sm:py-8
+        md:px-12
+        md:py-10
         "
       >
         <button
@@ -387,7 +393,7 @@ export default function EditProfileModal({
           ×
         </button>
 
-        <h2 className="pr-12 font-display text-[40px] uppercase leading-none text-brand-red">
+        <h2 className="pr-12 font-display text-[30px] uppercase leading-none text-brand-red sm:text-[36px] md:text-[40px]">
           {t('game.button.editProfile')}
         </h2>
 
@@ -601,7 +607,9 @@ export default function EditProfileModal({
               }
               className="
                 h-[46px]
+                min-h-[46px]
                 flex-1
+                shrink-0
                 rounded-full
                 bg-brand-red
                 px-8
@@ -627,7 +635,9 @@ export default function EditProfileModal({
               onClick={handleClose}
               className="
                 h-[46px]
+                min-h-[46px]
                 flex-1
+                shrink-0
                 rounded-full
                 border
                 border-[#D9D5D1]
@@ -649,7 +659,9 @@ export default function EditProfileModal({
             onClick={handleLogout}
             className="
               h-[46px]
+              min-h[46px]
               w-full
+              shrink-0
               rounded-full
               border
               border-brand-red

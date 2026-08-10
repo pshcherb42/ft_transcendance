@@ -102,8 +102,10 @@ export default function FriendsPanel() {
           )}
           className="
             h-[46px]
-            min-w-0
-            flex-1
+            w-full
+            shrink-0
+            sm:min-w-0
+            sm:flex-1
             rounded-full
             border
             border-[#D9D5D1]
@@ -125,12 +127,12 @@ export default function FriendsPanel() {
             sending || !username.trim()
           }
           className="
-            h-[46px]
-            min-w-[160px]
+            h-[42px]
+            w-full
             rounded-full
             bg-brand-green
-            px-7
-            text-[14px]
+            px-5
+            text-[13px]
             font-medium
             uppercase
             text-white
@@ -138,6 +140,11 @@ export default function FriendsPanel() {
             hover:bg-[#808979]
             disabled:cursor-not-allowed
             disabled:opacity-50
+            sm:h-[46px]
+            sm:w-auto
+            sm:min-w-[160px]
+            sm:px-7
+            sm:text-[14px]
           "
         >
           {sending
@@ -175,7 +182,7 @@ export default function FriendsPanel() {
                     border-b
                     border-[#EEE9E6]
                     pb-5
-                    sm:grid-cols-[minmax(0,1fr)_110px_110px]
+                    min-[550px]:grid-cols-[minmax(0,1fr)_110px_110px]
                   "
                 >
                   <div className="flex min-w-0 items-center gap-3">
@@ -212,56 +219,65 @@ export default function FriendsPanel() {
                     </div>
                   </div>
 
-                  <button
-                    type="button"
-                    disabled={!friend.online}
-                    onClick={() =>
-                      inviteToPlay(
-                        friend.id,
-                        friend.username,
-                      )
-                    }
+                  <div
                     className="
-                      h-[34px]
-                      rounded-full
-                      bg-brand-green
-                      px-4
-                      text-[12px]
-                      font-medium
-                      uppercase
-                      text-white
-                      transition-colors
-                      hover:bg-[#808979]
-                      disabled:cursor-not-allowed
-                      disabled:opacity-40
+                      grid
+                      grid-cols-2
+                      gap-2
+                      min-[550px]:contents
                     "
                   >
-                    {t('friends.play')}
-                  </button>
+                    <button
+                      type="button"
+                      disabled={!friend.online}
+                      onClick={() =>
+                        inviteToPlay(
+                          friend.id,
+                          friend.username,
+                        )
+                      }
+                      className="
+                        h-[38px]
+                        rounded-full
+                        bg-brand-green
+                        px-4
+                        text-[12px]
+                        font-medium
+                        uppercase
+                        text-white
+                        transition-colors
+                        hover:bg-[#808979]
+                        disabled:cursor-not-allowed
+                        disabled:opacity-40
+                        min-[550px]:h-[34px]
+                      "
+                    >
+                      {t('friends.play')}
+                    </button>
 
-                  <button
-                    type="button"
-                    onClick={() =>
-                      removeFriend(
-                        friend.friendshipId,
-                      )
-                    }
-                    className="
-                      h-[34px]
-                      rounded-full
-                      border
-                      border-[#D9D5D1]
-                      px-4
-                      text-[12px]
-                      font-medium
-                      uppercase
-                      text-[#615050]
-                      transition-colors
-                      hover:bg-[#D9D9D9]/20
-                    "
-                  >
-                    {t('friends.remove')}
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        removeFriend(friend.friendshipId)
+                      }
+                      className="
+                        h-[38px]
+                        rounded-full
+                        border
+                        border-[#D9D5D1]
+                        px-4
+                        text-[12px]
+                        font-medium
+                        uppercase
+                        text-[#615050]
+                        transition-colors
+                        hover:bg-[#D9D9D9]/20
+                        min-[550px]:h-[34px]
+                      "
+                    >
+                      {t('friends.remove')}
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -293,7 +309,7 @@ export default function FriendsPanel() {
                     border-b
                     border-[#EEE9E6]
                     pb-5
-                    sm:grid-cols-[minmax(0,1fr)_110px_110px]
+                    min-[550px]:grid-cols-[minmax(0,1fr)_110px_110px]
                   "
                 >
                   <div className="flex min-w-0 items-center gap-3">
@@ -307,6 +323,14 @@ export default function FriendsPanel() {
                     </p>
                   </div>
 
+                  <div
+                  className="
+                    grid
+                    grid-cols-2
+                    gap-2
+                    min-[550px]:contents
+                  "
+                >
                   <button
                     type="button"
                     onClick={() =>
@@ -316,7 +340,7 @@ export default function FriendsPanel() {
                       )
                     }
                     className="
-                      h-[34px]
+                      h-[38px]
                       rounded-full
                       bg-brand-green
                       px-4
@@ -326,6 +350,7 @@ export default function FriendsPanel() {
                       text-white
                       transition-colors
                       hover:bg-[#808979]
+                      min-[550px]:h-[34px]
                     "
                   >
                     {t('friends.accept')}
@@ -340,7 +365,7 @@ export default function FriendsPanel() {
                       )
                     }
                     className="
-                      h-[34px]
+                      h-[38px]
                       rounded-full
                       border
                       border-[#D9D5D1]
@@ -351,10 +376,12 @@ export default function FriendsPanel() {
                       text-[#615050]
                       transition-colors
                       hover:bg-[#D9D9D9]/20
+                      min-[550px]:h-[34px]
                     "
                   >
                     {t('friends.decline')}
                   </button>
+                </div>
                 </li>
               ))}
             </ul>

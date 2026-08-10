@@ -172,12 +172,23 @@ export default function StatisticsCharts({
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
-      <div className="rounded-[10px] border border-[#D9D5D1] bg-white p-6">
-        <h2 className="mb-4 font-display text-[24px] uppercase leading-none text-brand-red">
+      <div
+        className="
+          min-w-0
+          rounded-[10px]
+          border
+          border-[#D9D5D1]
+          bg-white
+          p-4
+          sm:p-5
+          md:p-6
+        "
+      >
+        <h2 className="mb-4 font-display text-[20px] uppercase leading-none text-brand-red sm:text-[22px] md:text-[24px]">
           {t('stats.winLossChart')}
         </h2>
 
-        <div className="h-[280px]">
+        <div className="h-[220px] sm:h-[250px] md:h-[280px]">
           <Doughnut
             data={doughnutData}
             options={{
@@ -193,8 +204,8 @@ export default function StatisticsCharts({
                     color:
                       COLORS.textSecondary,
 
-                    boxWidth: 12,
-                    padding: 16,
+                    boxWidth: 10,
+                    padding: 10,
                   },
                 },
 
@@ -224,14 +235,25 @@ export default function StatisticsCharts({
         </div>
       </div>
 
-      <div className="rounded-[10px] border border-[#D9D5D1] bg-white p-6">
-        <h2 className="mb-4 font-display text-[24px] uppercase leading-none text-brand-red">
+      <div
+        className="
+          min-w-0
+          rounded-[10px]
+          border
+          border-[#D9D5D1]
+          bg-white
+          p-4
+          sm:p-5
+          md:p-6
+        "
+      >
+        <h2 className="mb-4 font-display text-[20px] uppercase leading-none text-brand-red sm:text-[22px] md:text-[24px]">
           {t('stats.scoreChart', {
             count: recentMatches.length,
           })}
         </h2>
 
-        <div className="h-[280px]">
+        <div className="h-[240px] sm:h-[260px] md:h-[280px]">
           <Bar
             data={barData}
             options={{
@@ -270,8 +292,8 @@ export default function StatisticsCharts({
                     color:
                       COLORS.textSecondary,
 
-                    boxWidth: 12,
-                    padding: 16,
+                    boxWidth: 10,
+                    padding: 10,
                   },
                 },
 

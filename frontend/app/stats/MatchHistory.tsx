@@ -20,7 +20,7 @@ export default function MatchHistory({
 
   return (
     <div className="overflow-hidden rounded-[10px] border border-[#D9D5D1] bg-white">
-      <h2 className="px-6 pt-6 font-display text-[24px] uppercase leading-none text-brand-red">
+      <h2 className="px-6 pt-6 font-display text-[20px] uppercase leading-none text-brand-red sm:text-[22px] md:text-[24px]">
         {t('stats.matchHistory')}
       </h2>
 

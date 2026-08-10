@@ -17,7 +17,7 @@ export default function ProfileTabs({
   const { t } = useTranslation();
 
   return (
-    <div className="mt-10 flex flex-wrap gap-3">
+    <div className="mt-10 flex w-full flex-wrap gap-2 sm:gap-3">
       <TabButton
         active={activeTab === 'friends'}
         onClick={() => onTabChange('friends')}
@@ -60,14 +60,20 @@ function TabButton({
       type="button"
       onClick={onClick}
       className={`
-        h-[46px]
-        min-w-[140px]
+        h-[42px]
+        min-w-0
+        flex-1
         rounded-full
         border
-        px-7
-        text-[14px]
+        px-3
+        text-[12px]
         font-medium
         transition-colors
+        sm:h-[46px]
+        sm:min-w-[140px]
+        sm:flex-none
+        sm:px-7
+        sm:text-[14px]
         ${
           active
             ? 'border-brand-green bg-brand-green text-white hover:bg-[#808979]'
