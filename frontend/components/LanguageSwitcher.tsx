@@ -22,18 +22,15 @@ export default function LanguageSwitcher() {
   const currentLanguage = i18n.language.split('-')[0];
 
   return (
-    <div
-      className="flex items-center gap-2 pl-10"
-      aria-label="Language"
-    >
+    <div className="flex items-center justify-center gap-2">
       {LANGS.map((language, index) => {
         const isActive =
           currentLanguage === language.code;
-
+  
         return (
           <div
             key={language.code}
-            className="flex items-center gap-2"
+            className="contents"
           >
             <button
               type="button"
@@ -55,7 +52,7 @@ export default function LanguageSwitcher() {
             >
               {language.label}
             </button>
-
+  
             {index < LANGS.length - 1 && (
               <span className="text-[#B5ACAC]">
                 /
