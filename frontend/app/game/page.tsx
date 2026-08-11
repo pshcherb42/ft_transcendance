@@ -531,7 +531,9 @@ return (
                   text-brand-red
                 "
               >
-                {t('game.reconnect')}
+                {t('game.reconnect', {
+                  seconds: reconnectSecondsLeft,
+                })}
               </p>
             )}
         </div>
@@ -624,200 +626,345 @@ return (
           </div>
         </div>
           {/* Canvas */}
-          <div className="relative overflow-hidden rounded-[10px] bg-[#171717] sm:rounded-[14px]">
-            {mode === 'online' ? (
-              <canvas
-                ref={canvasRef}
-                width={WIDTH}
-                height={HEIGHT}
-                className="block h-auto w-full bg-[#171717]"
-              />
-            ) : (
-              <PongMatch
-                key={localRound}
-                config={{ map: mapId, powerups }}
-                vsAi={mode === 'ai'}
-                difficulty={difficulty}
-                onScoreChange={setScore}
-                onFinish={setLocalWinner}
-              />
-            )}
+        <div
+          className={`
+            relative
+            overflow-hidden
+            rounded-[10px]
+            bg-[#171717]
+            sm:rounded-[14px]
+            ${
+              isGameFinished
+                ? 'hidden min-[950px]:block'
+                : 'block'
+            }
+          `}
+        >
+          {mode === 'online' ? (
+            <canvas
+              ref={canvasRef}
+              width={WIDTH}
+              height={HEIGHT}
+              className="block h-auto w-full bg-[#171717]"
+            />
+          ) : (
+            <PongMatch
+              key={localRound}
+              config={{ map: mapId, powerups }}
+              vsAi={mode === 'ai'}
+              difficulty={difficulty}
+              onScoreChange={setScore}
+              onFinish={setLocalWinner}
+            />
+          )}
 
-            {isGameFinished && (
+          {/* Desktop result overlay */}
+          {isGameFinished && (
+            <div
+              className="
+                absolute
+                inset-0
+                hidden
+                items-center
+                justify-center
+                bg-black/55
+                px-5
+                min-[950px]:flex
+              "
+            >
               <div
                 className="
-                  absolute
-                  inset-0
                   flex
+                  w-full
+                  max-w-[430px]
+                  flex-col
                   items-center
-                  justify-center
-                  bg-black/55
-                  px-5
+                  rounded-[20px]
+                  bg-[#F7F5F1]
+                  px-8
+                  py-9
+                  text-center
+                  shadow-[0_24px_70px_rgba(0,0,0,0.35)]
                 "
               >
-                <div
+                <p
                   className="
-                    flex
-                    w-full
-                    max-w-[430px]
-                    flex-col
-                    items-center
-                    rounded-[14px]
-                    bg-[#F7F5F1]
-                    px-4
-                    py-4
-                    text-center
-                    shadow-[0_24px_70px_rgba(0,0,0,0.35)]
-                    sm:rounded-[20px]
-                    sm:px-6
-                    sm:py-6
-                    md:px-8
-                    md:py-9
+                    text-[12px]
+                    font-medium
+                    uppercase
+                    tracking-[0.14em]
+                    text-[#615050]
                   "
                 >
-                  <p
-                    className="
-                      text-[12px]
-                      font-medium
-                      uppercase
-                      tracking-[0.14em]
-                      text-[#615050]
-                    "
-                  >
-                    {t('game.result.finalScore')}
-                  </p>
+                  {t('game.result.finalScore')}
+                </p>
 
-                  <h2
-                    className="
-                      mt-3
-                      font-display
-                      text-[clamp(1.7rem,8vw,58px)]
-                      uppercase
-                      leading-none
-                      text-brand-red
-                    "
-                  >
-                    {resultTitle}
-                  </h2>
+                <h2
+                  className="
+                    mt-3
+                    font-display
+                    text-[clamp(1.7rem,8vw,58px)]
+                    uppercase
+                    leading-none
+                    text-brand-red
+                  "
+                >
+                  {resultTitle}
+                </h2>
 
-                  <div
-                    className="
-                      mt-3
-                      flex
-                      items-center
-                      gap-3
-                      text-[30px]
-                      font-semibold
-                      leading-none
-                      text-black
-                      sm:mt-5
-                      sm:text-[40px]
-                      md:mt-6
-                      md:text-[48px]
-                    "
-                  >
-                    <span>{score.left}</span>
-                    <span className="text-[30px] text-[#918787]">:</span>
-                    <span>{score.right}</span>
-                  </div>
+                <div
+                  className="
+                    mt-6
+                    flex
+                    items-center
+                    gap-3
+                    text-[48px]
+                    font-semibold
+                    leading-none
+                    text-black
+                  "
+                >
+                  <span>{score.left}</span>
+                  <span className="text-[30px] text-[#918787]">:</span>
+                  <span>{score.right}</span>
+                </div>
 
-                  <p className="mt-2 max-w-full truncate text-[12px] text-[#615050] sm:mt-4 sm:text-[14px]">
-                    {leftPlayerName} · {rightPlayerName}
-                  </p>
+                <p className="mt-4 max-w-full truncate text-[14px] text-[#615050]">
+                  {leftPlayerName} · {rightPlayerName}
+                </p>
 
-                  {mode === 'online' ? (
-                    <button
-                      type="button"
-                      onClick={() => setOnlineRound((round) => round + 1)}
-                      className="
-                        mt-4
-                        h-[42px]
-                        w-full
-                        rounded-full
-                        bg-brand-green
-                        px-8
-                        text-[13px]
-                        font-medium
-                        uppercase
-                        tracking-[0.08em]
-                        text-white
-                        transition-colors
-                        hover:bg-[#808979]
-                        sm:mt-6
-                        sm:h-[48px]
-                        md:mt-8
-                        md:h-[52px]
-                      "
-                    >
-                      {t('game.button.findMatch')}
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setLocalWinner(null);
-                        setScore({
-                          left: 0,
-                          right: 0,
-                        });
-                        setLocalRound((round) => round + 1);
-                      }}
-                      className="
-                        mt-4
-                        h-[42px]
-                        w-full
-                        rounded-full
-                        bg-brand-green
-                        px-8
-                        text-[13px]
-                        font-medium
-                        uppercase
-                        tracking-[0.08em]
-                        text-white
-                        transition-colors
-                        hover:bg-[#808979]
-                        sm:mt-6
-                        sm:h-[48px]
-                        md:mt-8
-                        md:h-[52px]
-                      "
-                    >
-                      {t('game.button.rematch')}
-                    </button>
-                  )}
-
+                {mode === 'online' ? (
                   <button
                     type="button"
-                    onClick={handleBackToMenu}
+                    onClick={() =>
+                      setOnlineRound((round) => round + 1)
+                    }
                     className="
                       mt-4
-                      h-[42px]
+                      h-[52px]
                       w-full
                       rounded-full
-                      border-[1.5px]
-                      border-[#D9D5D1]
+                      bg-brand-green
                       px-8
                       text-[13px]
                       font-medium
                       uppercase
                       tracking-[0.08em]
-                      text-[#615050]
+                      text-white
                       transition-colors
-                      hover:border-[#615050]
-                      hover:bg-[#D9D9D9]/30
-                      sm:mt-6
-                      sm:h-[48px]
-                      md:mt-8
-                      md:h-[52px]
+                      hover:bg-[#808979]
                     "
                   >
-                    {t('game.button.backToMenu')}
+                    {t('game.button.findMatch')}
                   </button>
-                </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLocalWinner(null);
+                      setScore({
+                        left: 0,
+                        right: 0,
+                      });
+                      setLocalRound((round) => round + 1);
+                    }}
+                    className="
+                      mt-4
+                      h-[52px]
+                      w-full
+                      rounded-full
+                      bg-brand-green
+                      px-8
+                      text-[13px]
+                      font-medium
+                      uppercase
+                      tracking-[0.08em]
+                      text-white
+                      transition-colors
+                      hover:bg-[#808979]
+                    "
+                  >
+                    {t('game.button.rematch')}
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={handleBackToMenu}
+                  className="
+                    mt-4
+                    h-[52px]
+                    w-full
+                    rounded-full
+                    border-[1.5px]
+                    border-[#D9D5D1]
+                    px-8
+                    text-[13px]
+                    font-medium
+                    uppercase
+                    tracking-[0.08em]
+                    text-[#615050]
+                    transition-colors
+                    hover:border-[#615050]
+                    hover:bg-[#D9D9D9]/30
+                  "
+                >
+                  {t('game.button.backToMenu')}
+                </button>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
+
+        {/* Mobile result — вместо игрового поля */}
+        {isGameFinished && (
+          <div
+            className="
+              flex
+              w-full
+              flex-col
+              items-center
+              rounded-[14px]
+              bg-[#F7F5F1]
+              px-5
+              py-6
+              text-center
+              
+              min-[950px]:hidden
+            "
+          >
+            <p
+              className="
+                text-[12px]
+                font-medium
+                uppercase
+                tracking-[0.14em]
+                text-[#615050]
+              "
+            >
+              {t('game.result.finalScore')}
+            </p>
+
+            <h2
+              className="
+                mt-3
+                font-display
+                text-[clamp(2rem,9vw,48px)]
+                uppercase
+                leading-none
+                text-brand-red
+              "
+            >
+              {resultTitle}
+            </h2>
+
+            <div
+              className="
+                mt-4
+                flex
+                items-center
+                gap-3
+                text-[34px]
+                font-semibold
+                leading-none
+                text-black
+                sm:text-[40px]
+              "
+            >
+              <span>{score.left}</span>
+
+              <span className="text-[24px] text-[#918787]">
+                :
+              </span>
+
+              <span>{score.right}</span>
+            </div>
+
+            <p className="mt-3 max-w-full truncate text-[13px] text-[#615050]">
+              {leftPlayerName} · {rightPlayerName}
+            </p>
+
+            {mode === 'online' ? (
+              <button
+                type="button"
+                onClick={() =>
+                  setOnlineRound((round) => round + 1)
+                }
+                className="
+                  mt-4
+                  h-[46px]
+                  w-full
+                  rounded-full
+                  bg-brand-green
+                  px-8
+                  text-[13px]
+                  font-medium
+                  uppercase
+                  tracking-[0.08em]
+                  text-white
+                  transition-colors
+                  hover:bg-[#808979]
+                "
+              >
+                {t('game.button.findMatch')}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setLocalWinner(null);
+                  setScore({
+                    left: 0,
+                    right: 0,
+                  });
+                  setLocalRound((round) => round + 1);
+                }}
+                className="
+                  mt-4
+                  h-[46px]
+                  w-full
+                  rounded-full
+                  bg-brand-green
+                  px-8
+                  text-[13px]
+                  font-medium
+                  uppercase
+                  tracking-[0.08em]
+                  text-white
+                  transition-colors
+                  hover:bg-[#808979]
+                "
+              >
+                {t('game.button.rematch')}
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={handleBackToMenu}
+              className="
+                mt-3
+                h-[46px]
+                w-full
+                rounded-full
+                border-[1.5px]
+                border-[#D9D5D1]
+                px-8
+                text-[13px]
+                font-medium
+                uppercase
+                tracking-[0.08em]
+                text-[#615050]
+                transition-colors
+                hover:border-[#615050]
+                hover:bg-[#D9D9D9]/30
+              "
+            >
+              {t('game.button.backToMenu')}
+            </button>
+          </div>
+        )}
+
 
         {/* Информация под игровым полем */}
           {mode !== 'online' && !isGameFinished && (
@@ -829,6 +976,7 @@ return (
               </p>
             </div>
           )}
+          </div>
       </section>
     </main>
   </div>

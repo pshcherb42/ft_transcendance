@@ -40,6 +40,8 @@ export function TournamentView({
       if (!canStart) return;
     
       tournamentRef.current = new Tournament(cleanNames);
+      setLastResult(null);
+      
       setScore({
         left: 0,
         right: 0,
@@ -48,12 +50,21 @@ export function TournamentView({
       setPhase('play');
     };
 
-  const resetTournament = () => {
-    tournamentRef.current = null;
-    setNames(['', '']);
-    setReady(false);
-    setPhase('register');
-  };
+    const resetTournament = () => {
+      tournamentRef.current = null;
+    
+      setNames(['', '']);
+      setReady(false);
+    
+      setLastResult(null);
+    
+      setScore({
+        left: 0,
+        right: 0,
+      });
+    
+      setPhase('register');
+    };
 
   const updateName = (index: number, value: string) => {
     setNames((currentNames) =>
