@@ -40,19 +40,7 @@ export default function ChatPage() {
   /*
    * Автоматически открываем первый чат после загрузки друзей.
    */
-  useEffect(() => {
-    if (!friendsLoading && friends.length > 0 && !activeFriendId) {
-      const firstFriendId = friends[0].id;
 
-      setActiveFriendId(firstFriendId);
-      loadHistory(firstFriendId);
-    }
-  }, [
-    friends,
-    friendsLoading,
-    activeFriendId,
-    loadHistory,
-  ]);
 
   if (loading || !user) {
     return (
@@ -212,7 +200,7 @@ export default function ChatPage() {
               ${mobileChatOpen ? 'hidden' : 'flex'}
             `}
           >
-            <div className="px-9 pb-8 pt-7">
+            <div className="flex min-h-[90px] items-center border-b border-[#D9D5D1] px-7">
               <h1
                 className="
                   text-[42px]
