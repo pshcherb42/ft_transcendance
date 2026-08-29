@@ -1,4 +1,5 @@
 'use client';
+import { useTranslation } from 'react-i18next';
 
 import type {
   ChangeEvent,
@@ -28,6 +29,7 @@ export default function Input({
   ...props
 }: InputProps) {
   const inputId = id ?? name;
+  const { t } = useTranslation();
 
   const handleChange = (
     event: ChangeEvent<HTMLInputElement>,
@@ -106,7 +108,7 @@ export default function Input({
             text-[#EE4424]
           "
         >
-          {error}
+          {t(error)}
         </p>
       )}
     </div>

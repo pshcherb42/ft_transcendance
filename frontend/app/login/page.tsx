@@ -38,18 +38,18 @@ export default function LoginPage() {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!trimmedEmail) {
-      setEmailError(t('validation.email.required'));
+      setEmailError('validation.email.required');
       hasError = true;
     } else if (!emailPattern.test(trimmedEmail)) {
-      setEmailError(t('validation.email.invalid'));
+      setEmailError('validation.email.invalid');
       hasError = true;
     }
 
     if (!password) {
-      setPasswordError(t('validation.password.required'));
+      setPasswordError('validation.password.required');
       hasError = true;
     } else if (password.length < 8) {
-      setPasswordError(t('validation.password.min'));
+      setPasswordError('validation.password.min');
       hasError = true;
     }
 

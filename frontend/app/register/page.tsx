@@ -39,23 +39,23 @@ export default function RegisterPage() {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!username.trim()) {
-      setUsernameError(t('validation.username.required'));
+      setUsernameError('validation.username.required');
       hasError = true;
     }
 
     if (!email.trim()) {
-      setEmailError(t('validation.email.required'));
+      setEmailError('validation.email.required');
       hasError = true;
     } else if (!emailPattern.test(email.trim())) {
-      setEmailError(t('validation.email.invalid'));
+      setEmailError('validation.email.invalid');
       hasError = true;
     }
 
     if (!password) {
-      setPasswordError(t('validation.password.required'));
+      setPasswordError('validation.password.required');
       hasError = true;
     } else if (password.length < 8) {
-      setPasswordError(t('validation.password.min'));
+      setPasswordError('validation.password.min');
       hasError = true;
     }
 
