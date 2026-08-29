@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Input from '@/components/input';
 import BouncingBall from '@/components/bouncingBall';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 
 export default function RegisterPage() {
@@ -129,21 +129,26 @@ export default function RegisterPage() {
                 max-[350px]:text-[42px]
               "
             >
-              <span className="block text-foreground">
-                {t('auth.welcome')}
-              </span>
+                {/* Old title (4 spans) — temporarily commented out
+                <span className="block text-foreground">
+                  {t('auth.welcome')}
+                </span>
 
-              <span className="block text-foreground">
-                {t('auth.to')}
-              </span>
+                <span className="block text-foreground">
+                  {t('auth.to')}
+                </span>
 
-              <span className="block text-brand-red">
-                {t('auth.ourPong')}
-              </span>
+                <span className="block text-brand-red">
+                  {t('auth.ourPong')}
+                </span>
 
-              <span className="block text-foreground">
-                {t('auth.game')}
-              </span>
+                <span className="block text-foreground">
+                  {t('auth.game')}
+                </span>
+                */}
+                <Trans i18nKey="auth.title">
+                  <span className="text-brand-red">nuestro Pong</span>
+                </Trans>
             </h1>
 
             <p
@@ -408,6 +413,7 @@ export default function RegisterPage() {
               xl:text-[92px]
             "
           >
+            {/* Old title (4 spans) — temporarily commented out
             <span className="block text-foreground">
               {t('auth.welcome')}
             </span>
@@ -423,6 +429,10 @@ export default function RegisterPage() {
             <span className="block text-foreground">
               {t('auth.game')}
             </span>
+            */}
+            <Trans i18nKey="auth.title">
+              <span className="text-brand-red">nuestro Pong</span>
+            </Trans>
           </h1>
 
           <p

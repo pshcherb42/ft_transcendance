@@ -4,6 +4,7 @@
       "to": "to",
       "ourPong": "our Pong",
       "game": "game!",
+      "title": "Welcome to <0>our Pong</0> game!",
       "subtitle": "Built for the 42 Transcendence project by the best team.",
       "login": "Log in",
       "register": "Register",

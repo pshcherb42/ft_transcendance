@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Input from '@/components/input';
 import BouncingBall from '@/components/bouncingBall';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -124,6 +124,7 @@ export default function LoginPage() {
                   max-[350px]:text-[42px]
                 "
               >
+                {/* Old title (4 spans) — temporarily commented out
                 <span className="block text-foreground">
                   {t('auth.welcome')}
                 </span>
@@ -139,6 +140,10 @@ export default function LoginPage() {
                 <span className="block text-foreground">
                   {t('auth.game')}
                 </span>
+                */}
+                <Trans i18nKey="auth.title">
+                  <span className="text-brand-red">nuestro Pong</span>
+                </Trans>
               </h1>
 
               <p
@@ -414,10 +419,15 @@ export default function LoginPage() {
               lg:text-[72px]
               xl:text-[92px]
             ">
+          {/* Old title (4 spans) — temporarily commented out
           <span className="text-foreground block">{t('auth.welcome')}</span>
           <span className="text-foreground block">{t('auth.to')}</span>
           <span className="text-brand-red block">{t('auth.ourPong')}</span>
           <span className="text-foreground block">{t('auth.game')}</span>
+          */}
+          <Trans i18nKey="auth.title">
+            <span className="text-brand-red">nuestro Pong</span>
+          </Trans>
         </h1>
         <p
           className="
