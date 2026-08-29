@@ -27,7 +27,8 @@
     "username": {
       "min": "Lietotājvārdam jābūt vismaz 3 rakstzīmes garam",
       "max": "Lietotājvārds nedrīkst būt garāks par 20 rakstzīmēm",
-      "pattern": "Atļauti tikai burti, cipari un pasvītrojuma zīmes"
+      "pattern": "Atļauti tikai burti, cipari un pasvītrojuma zīmes",
+      "required": "Lietotājvārds ir obligāts"
     },
     "password": {
       "min": "Parolei jābūt vismaz 8 rakstzīmes garai",

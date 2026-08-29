@@ -39,7 +39,7 @@ export default function RegisterPage() {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!username.trim()) {
-      setUsernameError('Username is required');
+      setUsernameError(t('validation.username.required'));
       hasError = true;
     }
 

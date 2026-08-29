@@ -27,7 +27,8 @@
       "username": {
         "min": "Username must be at least 3 characters",
         "max": "Username must be at most 20 characters",
-        "pattern": "Only letters, numbers, and underscores allowed"
+        "pattern": "Only letters, numbers, and underscores allowed",
+        "required": "Username is required"
       },
       "password": {
         "min": "Password must be at least 8 characters",

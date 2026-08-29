@@ -27,7 +27,8 @@
       "username": {
         "min": "El nombre de usuario debe tener al menos 3 caracteres",
         "max": "El nombre de usuario debe tener como máximo 20 caracteres",
-        "pattern": "Solo se permiten letras, números y guiones bajos"
+        "pattern": "Solo se permiten letras, números y guiones bajos",
+        "required": "Se necesita un nombre de usuario"
       },
       "password": {
         "min": "La contraseña debe tener al menos 8 caracteres",
