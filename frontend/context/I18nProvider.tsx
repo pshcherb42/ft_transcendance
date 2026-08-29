@@ -5,7 +5,7 @@ import { I18nextProvider, useTranslation } from 'react-i18next';
 import i18n from '@/i18n/config';
 
 const STORAGE_KEY = 'lang';
-const SUPPORTED = ['en', 'es', 'ru'];
+const SUPPORTED = ['en', 'es', 'lv'];
 
 function LanguageSync() {
   const { i18n } = useTranslation();
