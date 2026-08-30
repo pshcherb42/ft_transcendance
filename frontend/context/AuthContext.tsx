@@ -8,38 +8,42 @@ import {
   useCallback,
   ReactNode,
 } from 'react';
-import { storeTokens, clearTokens, isLoggedIn, getAccessToken } from '@/app/lib/auth';
+import { storeTokens, clearTokens, isLoggedIn } from '@/app/lib/auth';
 import { apiFetch, tryRefresh } from '@/app/lib/api';
 
 interface User {
-  id:         string;
-  username:   string;
-  email:      string;
+  id: string;
+  username: string;
+  email: string;
   avatarPath: string | null;
   hasPassword: boolean;
 }
 
 interface AuthContextValue {
-  user:    User | null;
+  user: User | null;
   loading: boolean;
-  login:   (access: string, refresh: string) => Promise<void>;
-  logout:  () => void;
+  login: (access: string, refresh: string) => Promise<void>;
+  logout: () => void;
   refetchUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user,    setUser]    = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchUser = useCallback(async () => {
+    await Promise.resolve();
     setLoading(true);
-    if (!isLoggedIn()) { setLoading(false); return; }
+    if (!isLoggedIn()) {
+      setLoading(false);
+      return;
+    }
     try {
       const res = await apiFetch('/users/me');
       if (res.ok) setUser(await res.json());
-      else        setUser(null);
+      else setUser(null);
     } catch {
       setUser(null);
     } finally {
@@ -47,34 +51,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  useEffect(() => { fetchUser(); }, [fetchUser]);
+  // useEffect(() => {
+  //   fetchUser();
+  // }, [fetchUser]);
 
-  // 🔄 🟢 NUEVO: Efecto para el refresco automático en segundo plano
   useEffect(() => {
-    if (!user) return; // Solo ejecutamos si el usuario tiene sesión activa
+    let cancelled = false;
 
-    // Opción A: Intervalo fijo conservador (ej. cada 4 minutos si tu Access Token dura 5-10 minutos)
-    const REFRESH_INTERVAL_MS = 12 * 60 * 1000; 
+    Promise.resolve()
+      .then(async () => {
+        if (cancelled) return;
+
+        setLoading(true);
+        await fetchUser();
+        if (!cancelled) setLoading(false);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchUser]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const REFRESH_INTERVAL_MS = 12 * 60 * 1000;
 
     const interval = setInterval(async () => {
-      console.log('🔄 Verificando y refrescando sesión en segundo plano...');
-      
-      // Llamamos a tu función existente. Si falla, limpiará los tokens
-      const success = await tryRefresh(); 
-      
-      if (!success) {
-        setUser(null);
-        window.location.href = '/login';
-      }
+      try {
+        const success = await tryRefresh();
+
+        if (!success) {
+          setUser(null);
+          window.location.href = '/login';
+        }
+      } catch {}
     }, REFRESH_INTERVAL_MS);
 
-    return () => clearInterval(interval); // Limpieza crucial al desmontar o desloguear
+    return () => clearInterval(interval);
   }, [user]);
 
-  const login = useCallback(async (access: string, refresh: string) => {
-    storeTokens(access, refresh);
-    await fetchUser();
-  }, [fetchUser]);
+  const login = useCallback(
+    async (access: string, refresh: string) => {
+      storeTokens(access, refresh);
+      await fetchUser();
+    },
+    [fetchUser],
+  );
 
   const logout = useCallback(() => {
     clearTokens();
@@ -82,7 +105,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, refetchUser: fetchUser }}>
+    <AuthContext.Provider
+      value={{ user, loading, login, logout, refetchUser: fetchUser }}
+    >
       {children}
     </AuthContext.Provider>
   );
