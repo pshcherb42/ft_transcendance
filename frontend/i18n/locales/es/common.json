@@ -1,391 +1,486 @@
 {
-    "auth": {
-      "welcome": "Bienvenido",
-      "to": "a nuestro",
-      "ourPong": "Pong",
-      "game": "juego!",
-      "title": "¡Bienvenido a <0>nuestro</0> juego de <0>Pong</0>!",
-      "subtitle": "Creado para el proyecto 42 Transcendence por el mejor equipo.",
-      "login": "Iniciar sesión",
-      "register": "Registrarse",
-      "createAccount": "Crear cuenta",
-      "email": "Correo electrónico",
-      "password": "Contraseña",
-      "passwordPlaceholder": "Introduce tu contraseña",
-      "username": "Nombre de usuario",
-      "signingIn": "Iniciando sesión…",
-      "creating": "Creando…",
-      "or": "o",
-      "continueWithGoogle": "Continuar con Google",
-      "noAccount": "¿No tienes cuenta?",
-      "haveAccount": "¿Ya tienes cuenta?",
-      "loginFailed": "Error al iniciar sesión",
-      "registrationFailed": "Error al registrarse",
-      "networkError": "Error de red — ¿está el backend en marcha?"
-    },
-    "validation": {
-      "username": {
-        "min": "El nombre de usuario debe tener al menos 3 caracteres",
-        "max": "El nombre de usuario debe tener como máximo 20 caracteres",
-        "pattern": "Solo se permiten letras, números y guiones bajos",
-        "required": "Se necesita un nombre de usuario"
-      },
-      "password": {
-        "min": "La contraseña debe tener al menos 8 caracteres",
-        "max": "La contraseña debe tener como máximo 72 caracteres",
-        "required": "La contraseña es obligatoria"
-      },
-      "email": { 
-        "invalid": "Introduce un correo electrónico válido",
-        "required": "El correo electrónico es obligatorio" },
-      "confirmPassword": { "mismatch": "Las contraseñas no coinciden" },
-      "currentPassword": { "required": "Se requiere la contraseña actual para establecer una nueva" }
-    }, 
-    "friends": {
-      "loading": "Cargando amigos…",
-      "noIncomingRequests": "No hay solicitudes pendientes",
-      "noFriendsYet": "Aún no tienes amigos",
-      "usernamePlaceholder": "Nombre de usuario",
-      "add": "Añadir",
-      "sendFailed": "Error al enviar la solicitud",
-      "incomingRequests": "Solicitudes recibidas",
-      "outgoingRequests": "Solicitudes enviadas",
-      "pending": "pendiente",
-      "accept": "Aceptar",
-      "decline": "Rechazar",
-      "friendsCount": "Amigos ({{count}})",
-      "play": "Jugar",
-      "remove": "Eliminar",
-      "inviteSent": "Invitación enviada a {{username}}...",
-      "inviteAccepted": "¡{{username}} aceptó!",
-      "inviteExpired": "{{username}} no respondió a tiempo",
-      "inviteDeclined": "{{username}} rechazó la invitación",
-      "errors": {
-        "loadFailed": "No se pudieron cargar los amigos",
-        "requestFailed": "No se pudo enviar la solicitud",
-        "respondFailed": "No se pudo responder a la solicitud",
-        "removeFailed": "No se pudo eliminar al amigo",
-        "blockFailed": "No se pudo bloquear al usuario"
-      },
-      "notify": {
-        "requestReceived": "{{username}} te envió una solicitud de amistad",
-        "requestAccepted": "{{username}} aceptó tu solicitud de amistad",
-        "removed": "Un amigo te ha eliminado de su lista"
-      }
-    },
-    "game": {
-      "loading": "Cargando…",
-      "menu": {
-        "title": "Pong",
-        "playOnline": "Jugar Online",
-        "playLocal": "Jugar Local",
-        "playAi": "Jugar vs IA",
-        "tournament": "Torneo",
-        "gameSettings": "Configuración del juego",
-        "gameSettingsNote": "(para IA y local)",
-				"map": "Mapa",
-				"classic": "Clásico",
-				"obstacles": "Obstáculos",
-				"powerUps": "Potenciadores",
-				"powerUpsDescription": "Activa bonificaciones durante la partida",
-				"aiDifficulty": "Dificultad de la IA",
-        "description": "Online: te emparejamos con otro jugador. Local: dos jugadores en el mismo teclado."
-      },
-      "difficulty": { "easy": "Fácil", "medium": "Normal", "hard": "Difícil" },
-      "status": {
-        "connecting": "Conectando…",
-        "waiting": "Buscando rival…",
-        "playingLeft": "Eres el jugador IZQUIERDA",
-        "playingRight": "Eres el jugador DERECHA",
-        "won": "¡Has ganado! 🎉",
-        "lost": "Has perdido 😢",
-        "opponentLeft": "El rival abandonó — ganas por abandono"
-      },
-      "reconnect": "Rival desconectado — ganas en {{seconds}}s si no vuelve",
-      "title": { "online": "Pong Online", "ai": "Pong vs IA", "local": "Pong Local" },
-      "result": {
-        "finalScore": "Puntuación final",
-        "youWin": "¡Has ganado! 🎉",
-        "aiWins": "¡Gana la IA! 🤖",
-        "leftWins": "¡Gana el jugador IZQUIERDA! 🎉",
-        "rightWins": "¡Gana el jugador DERECHA! 🎉"
-      },
-      "subtitle": {
-        "ai": "Tú (izquierda) vs IA · {{difficulty}} — primero a 5 gana",
-        "local": "Primer jugador en llegar a 5 gana"
-      },
-      "controls": {
-        "difficulty": "Dificultad:",
-        "online": "Tus controles: ↑ / ↓ (o W / S)",
-        "ai": "Tus controles: W / S  (o ↑ / ↓)",
-        "local": "Izquierda: W / S     ·     Derecha: ↑ / ↓"
-      },
-      "button": {
-        "findMatch": "Buscar otra partida",
-        "rematch": "Revancha",
-        "backToMenu": "Volver al menú",
-        "chat": "Chat",
-        "editProfile": "Editar perfil"
-      },
-      "canvas": {
-        "getReady": "PREPÁRATE",
-        "youWin": "¡GANAS!",
-        "youLose": "PIERDES",
-        "leftWins": "GANA IZQUIERDA",
-        "rightWins": "GANA DERECHA",
-        "leftPlayer": "Jugador izquierdo",
-        "rightPlayer": "Jugador derecho",
-        "ai": "IA",
-        "opponent": "Oponente"
-      }
-    },
-    "tournament": {
-  "title": "Torneo",
-  "round": "Ronda",
-  "players": "Jugadores",
-  "player": "Jugador",
-  "addPlayers": "Añade entre 2 y 8 jugadores",
-  "uniqueNames": "Introduce un nombre único para cada jugador.",
-  "addPlayer": "+ Añadir jugador",
-  "start": "Empezar torneo",
-  "leave": "Salir del torneo",
-  "back": "Volver al menú",
-
-  "nextMatch": "Próximo partido",
-  "play": "Jugar",
-
-  "leftPlayer": "Jugador izquierdo",
-  "rightPlayer": "Jugador derecho",
-
-  "winner": "Ganador del partido",
-  "winnerText": "{{winner}} derrotó a {{loser}}",
-  "next": "Siguiente partido",
-
-  "bracket": "Cuadro del torneo",
-  "bracketDescription": "Partidos actuales y completados",
-  "final": "Final",
-
-  "champion": "Campeón del torneo",
-  "championDescription": "¡Enhorabuena! El torneo ha terminado.",
-  "newTournament": "Nuevo torneo",
-
-  "winnerLabel": "Ganador",
-  "playerNamesUnique": "Los nombres de los jugadores deben ser únicos."
+  "auth": {
+    "welcome": "Bienvenido",
+    "to": "a nuestro",
+    "ourPong": "Pong",
+    "game": "juego!",
+    "title": "¡Bienvenido a <0>nuestro</0> juego de <0>Pong</0>!",
+    "subtitle": "Creado para el proyecto 42 Transcendence por el mejor equipo.",
+    "login": "Iniciar sesión",
+    "register": "Registrarse",
+    "createAccount": "Crear cuenta",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "passwordPlaceholder": "Introduce tu contraseña",
+    "username": "Nombre de usuario",
+    "signingIn": "Iniciando sesión…",
+    "creating": "Creando…",
+    "or": "o",
+    "continueWithGoogle": "Continuar con Google",
+    "noAccount": "¿No tienes cuenta?",
+    "haveAccount": "¿Ya tienes cuenta?",
+    "loginFailed": "Error al iniciar sesión",
+    "registrationFailed": "Error al registrarse",
+    "networkError": "Error de red — ¿está el backend en marcha?",
+    "invalidCredentials": "Correo electrónico o contraseña incorrecta",
+    "emailInUse": "Correo electrónico ya registrado",
+    "usernameInUse": "Nombre de usuario ya en uso"
   },
-    "profile": {
-      "loading": "Cargando…",
-      "changeAvatar": "Cambiar",
-      "avatarUploading": "Subiendo…",
-      "avatarUpdated": "Avatar actualizado ✓",
-      "avatarUploadFailed": "Error al subir",
-      "username": "Nombre de usuario",
-      "changePassword": "Cambiar contraseña",
-      "currentPassword": "Contraseña actual",
-      "newPassword": "Nueva contraseña",
-      "confirmPassword": "Confirmar nueva contraseña",
-      "saving": "Guardando…",
-      "saved": "Guardado ✓",
-      "cancel": "Cancelar",
-      "saveChanges": "Guardar cambios",
-      "saveFailed": "Error al guardar — inténtalo de nuevo",
-      "fixFieldErrors": "Por favor, revisa los campos con errores.",
-      "profileUpdated": "¡Perfil actualizado con éxito!",
-      "logout": "Cerrar sesión",
-      "games": "Partidas",
+  "validation": {
+    "username": {
+      "min": "El nombre de usuario debe tener al menos 3 caracteres",
+      "max": "El nombre de usuario debe tener como máximo 20 caracteres",
+      "pattern": "Solo se permiten letras, números y guiones bajos",
+      "required": "Se necesita un nombre de usuario"
+    },
+    "password": {
+      "min": "La contraseña debe tener al menos 8 caracteres",
+      "max": "La contraseña debe tener como máximo 72 caracteres",
+      "required": "La contraseña es obligatoria"
+    },
+    "email": {
+      "invalid": "Introduce un correo electrónico válido",
+      "required": "El correo electrónico es obligatorio"
+    },
+    "confirmPassword": { "mismatch": "Las contraseñas no coinciden" },
+    "currentPassword": {
+      "required": "Se requiere la contraseña actual para establecer una nueva"
+    }
+  },
+  "friends": {
+    "loading": "Cargando amigos…",
+    "noIncomingRequests": "No hay solicitudes pendientes",
+    "noFriendsYet": "Aún no tienes amigos",
+    "usernamePlaceholder": "Nombre de usuario",
+    "add": "Añadir",
+    "sendFailed": "Error al enviar la solicitud",
+    "incomingRequests": "Solicitudes recibidas",
+    "outgoingRequests": "Solicitudes enviadas",
+    "pending": "pendiente",
+    "accept": "Aceptar",
+    "decline": "Rechazar",
+    "friendsCount": "Amigos ({{count}})",
+    "play": "Jugar",
+    "remove": "Eliminar",
+    "inviteSent": "Invitación enviada a {{username}}...",
+    "inviteAccepted": "¡{{username}} aceptó!",
+    "inviteExpired": "{{username}} no respondió a tiempo",
+    "inviteDeclined": "{{username}} rechazó la invitación",
+    "errors": {
+      "loadFailed": "No se pudieron cargar los amigos",
+      "requestFailed": "No se pudo enviar la solicitud",
+      "respondFailed": "No se pudo responder a la solicitud",
+      "removeFailed": "No se pudo eliminar al amigo",
+      "blockFailed": "No se pudo bloquear al usuario"
+    },
+    "notify": {
+      "requestReceived": "{{username}} te envió una solicitud de amistad",
+      "requestAccepted": "{{username}} aceptó tu solicitud de amistad",
+      "removed": "Un amigo te ha eliminado de su lista"
+    }
+  },
+  "game": {
+    "loading": "Cargando…",
+    "menu": {
+      "title": "Pong",
+      "playOnline": "Jugar Online",
+      "playLocal": "Jugar Local",
+      "playAi": "Jugar vs IA",
+      "tournament": "Torneo",
+      "gameSettings": "Configuración del juego",
+      "gameSettingsNote": "(para IA y local)",
+      "map": "Mapa",
+      "classic": "Clásico",
+      "obstacles": "Obstáculos",
+      "powerUps": "Potenciadores",
+      "powerUpsDescription": "Activa bonificaciones durante la partida",
+      "aiDifficulty": "Dificultad de la IA",
+      "description": "Online: te emparejamos con otro jugador. Local: dos jugadores en el mismo teclado."
+    },
+    "difficulty": { "easy": "Fácil", "medium": "Normal", "hard": "Difícil" },
+    "status": {
+      "connecting": "Conectando…",
+      "waiting": "Buscando rival…",
+      "playingLeft": "Eres el jugador IZQUIERDA",
+      "playingRight": "Eres el jugador DERECHA",
+      "won": "¡Has ganado! 🎉",
+      "lost": "Has perdido 😢",
+      "opponentLeft": "El rival abandonó — ganas por abandono"
+    },
+    "reconnect": "Rival desconectado — ganas en {{seconds}}s si no vuelve",
+    "title": {
+      "online": "Pong Online",
+      "ai": "Pong vs IA",
+      "local": "Pong Local"
+    },
+    "result": {
+      "finalScore": "Puntuación final",
+      "youWin": "¡Has ganado! 🎉",
+      "aiWins": "¡Gana la IA! 🤖",
+      "leftWins": "¡Gana el jugador IZQUIERDA! 🎉",
+      "rightWins": "¡Gana el jugador DERECHA! 🎉"
+    },
+    "subtitle": {
+      "ai": "Tú (izquierda) vs IA · {{difficulty}} — primero a 5 gana",
+      "local": "Primer jugador en llegar a 5 gana"
+    },
+    "controls": {
+      "difficulty": "Dificultad:",
+      "online": "Tus controles: ↑ / ↓ (o W / S)",
+      "ai": "Tus controles: W / S  (o ↑ / ↓)",
+      "local": "Izquierda: W / S     ·     Derecha: ↑ / ↓"
+    },
+    "button": {
+      "findMatch": "Buscar otra partida",
+      "rematch": "Revancha",
+      "backToMenu": "Volver al menú",
+      "chat": "Chat",
+      "editProfile": "Editar perfil"
+    },
+    "canvas": {
+      "getReady": "PREPÁRATE",
+      "youWin": "¡GANAS!",
+      "youLose": "PIERDES",
+      "leftWins": "GANA IZQUIERDA",
+      "rightWins": "GANA DERECHA",
+      "leftPlayer": "Jugador izquierdo",
+      "rightPlayer": "Jugador derecho",
+      "ai": "IA",
+      "opponent": "Oponente"
+    }
+  },
+  "tournament": {
+    "title": "Torneo",
+    "round": "Ronda",
+    "players": "Jugadores",
+    "player": "Jugador",
+    "addPlayers": "Añade entre 2 y 8 jugadores",
+    "uniqueNames": "Introduce un nombre único para cada jugador.",
+    "addPlayer": "+ Añadir jugador",
+    "start": "Empezar torneo",
+    "leave": "Salir del torneo",
+    "back": "Volver al menú",
+
+    "nextMatch": "Próximo partido",
+    "play": "Jugar",
+
+    "leftPlayer": "Jugador izquierdo",
+    "rightPlayer": "Jugador derecho",
+
+    "winner": "Ganador del partido",
+    "winnerText": "{{winner}} derrotó a {{loser}}",
+    "next": "Siguiente partido",
+
+    "bracket": "Cuadro del torneo",
+    "bracketDescription": "Partidos actuales y completados",
+    "final": "Final",
+
+    "champion": "Campeón del torneo",
+    "championDescription": "¡Enhorabuena! El torneo ha terminado.",
+    "newTournament": "Nuevo torneo",
+
+    "winnerLabel": "Ganador",
+    "playerNamesUnique": "Los nombres de los jugadores deben ser únicos."
+  },
+  "profile": {
+    "loading": "Cargando…",
+    "changeAvatar": "Cambiar",
+    "avatarUploading": "Subiendo…",
+    "avatarUpdated": "Avatar actualizado ✓",
+    "avatarUploadFailed": "Error al subir",
+    "username": "Nombre de usuario",
+    "changePassword": "Cambiar contraseña",
+    "currentPassword": "Contraseña actual",
+    "newPassword": "Nueva contraseña",
+    "confirmPassword": "Confirmar nueva contraseña",
+    "saving": "Guardando…",
+    "saved": "Guardado ✓",
+    "cancel": "Cancelar",
+    "saveChanges": "Guardar cambios",
+    "saveFailed": "Error al guardar — inténtalo de nuevo",
+    "fixFieldErrors": "Por favor, revisa los campos con errores.",
+    "profileUpdated": "¡Perfil actualizado con éxito!",
+    "logout": "Cerrar sesión",
+    "games": "Partidas",
+    "wins": "Victorias",
+    "losses": "Derrotas",
+    "winRate": "% de victorias",
+    "online": "En línea",
+    "offline": "Desconectado",
+    "avatarSelected": "Nuevo avatar seleccionado",
+    "currentPasswordRequired": "Se requiere la contraseña actual para establecer una nueva",
+    "oauthPasswordChangeForbidden": "No se puede cambiar la contraseña de cuentas de OAuth",
+    "currentPasswordIncorrect": "La contraseña actual es incorrecta"
+  },
+  "chat": {
+    "title": "Chat",
+    "backToMenu": "Volver al menú",
+    "profile": "Perfil",
+    "loading": "Cargando...",
+    "noFriends": "Aún no tienes amigos",
+    "selectFriend": "Selecciona un amigo para empezar a chatear",
+    "online": "En línea",
+    "offline": "Desconectado",
+    "invite": "Invitar a jugar",
+    "noMessages": "Aún no hay mensajes",
+    "messagePlaceholder": "Escribe un mensaje...",
+    "send": "Enviar",
+    "newMessage": "Nuevo Mensaje!"
+  },
+  "stats": {
+    "title": "Estadísticas",
+    "loading": "Cargando…",
+    "loadError": "No se pudieron cargar las estadísticas",
+    "tiles": {
+      "matches": "Partidas",
       "wins": "Victorias",
       "losses": "Derrotas",
-      "winRate": "% de victorias",
-      "online": "En línea",
-      "offline": "Desconectado",
-      "avatarSelected": "Nuevo avatar seleccionado"
+      "winRate": "% Victorias"
     },
-    "chat": {
-      "title": "Chat",
-      "backToMenu": "Volver al menú",
-      "profile": "Perfil",
-      "loading": "Cargando...",
-      "noFriends": "Aún no tienes amigos",
-      "selectFriend": "Selecciona un amigo para empezar a chatear",
-      "online": "En línea",
-      "offline": "Desconectado",
-      "invite": "Invitar a jugar",
-      "noMessages": "Aún no hay mensajes",
-      "messagePlaceholder": "Escribe un mensaje...",
-      "send": "Enviar",
-      "newMessage": "Nuevo Mensaje!"
-    },
-    "stats": {
-      "title": "Estadísticas",
-      "loading": "Cargando…",
-      "loadError": "No se pudieron cargar las estadísticas",
-      "tiles": { "matches": "Partidas", "wins": "Victorias", "losses": "Derrotas", "winRate": "% Victorias" },
-      "noMatches": "Todavía no has jugado ninguna partida. ¡Juega tu primer Pong para ver tus estadísticas aquí!",
-      "playNow": "Jugar ahora",
-      "winLossChart": "Victorias vs derrotas",
-      "scoreChart": "Puntuación — últimas {{count}} partidas",
-      "matchHistory": "Historial de partidas",
-      "chartWinsLabel": "victorias",
-      "you": "Tú",
+    "noMatches": "Todavía no has jugado ninguna partida. ¡Juega tu primer Pong para ver tus estadísticas aquí!",
+    "playNow": "Jugar ahora",
+    "winLossChart": "Victorias vs derrotas",
+    "scoreChart": "Puntuación — últimas {{count}} partidas",
+    "matchHistory": "Historial de partidas",
+    "chartWinsLabel": "victorias",
+    "you": "Tú",
+    "opponent": "Rival",
+    "table": {
       "opponent": "Rival",
-      "table": { "opponent": "Rival", "score": "Marcador", "result": "Resultado", "date": "Fecha" },
-      "result": { "win": "Victoria", "loss": "Derrota" },
-      "leaderboard": {
-        "title": "Tabla de clasificación",
-        "friends": "Amigos",
-        "global": "General",
-        "loading": "Cargando…",
-        "noFriendsMatches": "Todavía nadie de tu lista de amigos jugó una partida.",
-        "noMatches": "Todavía no hay partidas registradas.",
-        "rank": "#",
-        "player": "Jugador",
-        "wl": "V-D",
-        "winRate": "% Victorias",
-        "loadFailed": "No se pudo cargar el leaderboard"
+      "score": "Marcador",
+      "result": "Resultado",
+      "date": "Fecha"
+    },
+    "result": { "win": "Victoria", "loss": "Derrota" },
+    "leaderboard": {
+      "title": "Tabla de clasificación",
+      "friends": "Amigos",
+      "global": "General",
+      "loading": "Cargando…",
+      "noFriendsMatches": "Todavía nadie de tu lista de amigos jugó una partida.",
+      "noMatches": "Todavía no hay partidas registradas.",
+      "rank": "#",
+      "player": "Jugador",
+      "wl": "V-D",
+      "winRate": "% Victorias",
+      "loadFailed": "No se pudo cargar el leaderboard"
+    }
+  },
+  "home": {
+    "viewRules": "Ver las reglas del juego",
+    "rules": {
+      "title": "Cómo jugar",
+      "objectiveTitle": "Objetivo",
+      "objective": "Consigue puntos enviando la pelota más allá de la pala de tu oponente. El primer jugador que llegue a 5 puntos gana la partida.",
+      "controlsTitle": "Controles",
+      "leftControls": "Jugador izquierdo: usa W y S para mover la pala.",
+      "rightControls": "Jugador derecho: usa las flechas arriba y abajo para mover la pala.",
+      "onlineControls": "En las partidas online, cada jugador controla su propia pala.",
+      "mapsTitle": "Mapas",
+      "classicMap": "Clásico: una pista estándar de Pong.",
+      "obstaclesMap": "Obstáculos: las paredes adicionales cambian la trayectoria de la pelota.",
+      "powerupsTitle": "Potenciadores",
+      "powerups": "Cuando están activados, pueden aparecer potenciadores aleatorios durante la partida y afectar temporalmente al juego.",
+      "tournamentTitle": "Torneo",
+      "tournament": "El torneo utiliza un formato de eliminación directa. Gana cada partida para avanzar hasta que solo quede un campeón."
+    },
+    "common": {
+      "close": "Cerrar",
+      "gotIt": "Entendido"
+    },
+    "loading": "Cargando",
+    "play": "Jugar",
+    "chooseGame": "Elige tu juego",
+    "selectGameMode": "Selecciona un modo de juego y configura tu partida.",
+    "gameMode": "Modo de juego",
+    "profile": "Perfil",
+    "friends": "Amigos",
+    "chat": "Chat",
+    "stats": "Stats",
+    "logout": "Cerrar sesión",
+    "loggingOut": "Cerrando sesión..."
+  },
+  "notification": {
+    "friendOnline": "{{username}} está en línea",
+    "friendOfflineDefault": "Un amigo",
+    "friendOffline": "{{username}} se desconectó",
+    "requestDeclined": "Tu solicitud de amistad fue rechazada",
+    "wantsToPlay": "¡{{username}} quiere jugar!",
+    "accept": "Aceptar",
+    "decline": "Rechazar"
+  },
+  "legal": {
+    "back": "← Volver",
+    "lastUpdated": "Última actualización: {{date}}",
+    "privacy": {
+      "title": "Política de Privacidad",
+      "intro": "Esta Política de Privacidad describe cómo ft_transcendence (\"el Servicio\", \"nosotros\") recopila, utiliza y protege tus datos personales cuando usas nuestra aplicación web de Pong.",
+      "s1": {
+        "heading": "1. Quiénes Somos",
+        "body": "ft_transcendence es un proyecto estudiantil desarrollado como parte del plan de estudios de 42 School. No es un producto comercial. Contacto:"
+      },
+      "s2": {
+        "heading": "2. Datos Que Recopilamos",
+        "table": {
+          "headers": ["Dato", "Finalidad", "Origen"],
+          "rows": [
+            [
+              "Nombre de usuario",
+              "Identidad pública (leaderboards, historial de partidas, amigos)",
+              "Tú, al registrarte"
+            ],
+            [
+              "Correo electrónico",
+              "Inicio de sesión de la cuenta",
+              "Tú, al registrarte"
+            ],
+            ["Contraseña (hash)", "Autenticación", "Tú, al registrarte"],
+            [
+              "Imagen de avatar",
+              "Visualización del perfil",
+              "Subida por ti (opcional)"
+            ],
+            [
+              "Información de perfil OAuth",
+              "Inicio de sesión con Google",
+              "Google, si eliges iniciar sesión con OAuth"
+            ],
+            [
+              "Historial de partidas y estadísticas",
+              "Funciones de juego, leaderboards, torneos",
+              "Generado por el juego"
+            ],
+            [
+              "IP / metadatos de conexión",
+              "Seguridad, prevención de abuso, sesiones WebSocket",
+              "Automáticamente, durante el uso"
+            ]
+          ]
+        },
+        "outro": "No recopilamos información de pago, y no vendemos ni compartimos tus datos con terceros con fines publicitarios."
+      },
+      "s3": {
+        "heading": "3. Cómo Almacenamos Tus Datos",
+        "list": [
+          "Las contraseñas se almacenan como hash y nunca en texto plano.",
+          "Los avatares se almacenan como datos codificados en nuestra base de datos.",
+          "Los datos se almacenan en una base de datos PostgreSQL que corre dentro de nuestra infraestructura basada en Docker.",
+          "Los tokens de acceso (JWT) autentican las solicitudes y son de corta duración; los tokens de refresco se rotan al usarse."
+        ]
+      },
+      "s4": {
+        "heading": "4. Base Legal y Finalidad del Tratamiento",
+        "intro": "Procesamos tus datos para:",
+        "list": [
+          "Proporcionar la funcionalidad esencial de la cuenta y del juego (necesidad contractual).",
+          "Proteger tu cuenta (interés legítimo).",
+          "Habilitar funciones opcionales que elijas activar, como el inicio de sesión con OAuth (consentimiento)."
+        ]
+      },
+      "s5": {
+        "heading": "5. Tus Derechos",
+        "intro": "Según el RGPD y marcos similares, tienes derecho a:",
+        "list": [
+          "Acceder a los datos personales que tenemos sobre ti.",
+          "Rectificar datos inexactos, p. ej. desde la configuración de tu perfil.",
+          "Eliminar tu cuenta y los datos asociados (\"derecho al olvido\").",
+          "Exportar tus datos en un formato portátil.",
+          "Oponerte o restringir ciertos tratamientos."
+        ],
+        "contactPre": "Para ejercer estos derechos, contacta con"
+      },
+      "s6": {
+        "heading": "6. Conservación de Datos",
+        "body": "Conservamos los datos de tu cuenta mientras esta permanezca activa. Si eliminas tu cuenta, tus datos personales se eliminan de nuestra base de datos activa en un plazo de 7 días hábiles, salvo cuando la conservación sea necesaria por motivos legítimos de registro de seguridad."
+      },
+      "s7": {
+        "heading": "7. Servicios de Terceros",
+        "body": "Si inicias sesión mediante Google OAuth, la propia política de privacidad de Google rige los datos que procesan en su extremo. Solo recibimos los campos de perfil necesarios para crear o vincular tu cuenta: nombre, correo, avatar."
+      },
+      "s8": {
+        "heading": "8. Cookies y Almacenamiento Local",
+        "body": "Utilizamos tokens almacenados en el cliente únicamente para mantener tu sesión iniciada. No utilizamos cookies de seguimiento ni publicitarias."
+      },
+      "s9": {
+        "heading": "9. Privacidad de Menores",
+        "body": "Nuestro Servicio no está destinado ni dirigido a menores de 13 años. No recopilamos ni solicitamos conscientemente información personal de nadie menor de 13 años. Si descubrimos que un menor de 13 años se ha registrado y nos ha proporcionado datos personales, eliminaremos su cuenta y borraremos su información de nuestras bases de datos de inmediato. Si crees que un menor de 13 años nos ha proporcionado datos, contáctanos de inmediato."
+      },
+      "s10": {
+        "heading": "10. Cambios en Esta Política",
+        "body": "Podemos actualizar esta política a medida que el proyecto evoluciona. Los cambios importantes se indicarán con una fecha de \"Última actualización\" renovada."
+      },
+      "s11": {
+        "heading": "11. Contacto",
+        "pre": "Preguntas sobre esta política o tus datos:"
       }
     },
-    "home": {
-      "viewRules": "Ver las reglas del juego",
-    "rules": {
-    "title": "Cómo jugar",
-    "objectiveTitle": "Objetivo",
-    "objective": "Consigue puntos enviando la pelota más allá de la pala de tu oponente. El primer jugador que llegue a 5 puntos gana la partida.",
-    "controlsTitle": "Controles",
-    "leftControls": "Jugador izquierdo: usa W y S para mover la pala.",
-    "rightControls": "Jugador derecho: usa las flechas arriba y abajo para mover la pala.",
-    "onlineControls": "En las partidas online, cada jugador controla su propia pala.",
-    "mapsTitle": "Mapas",
-    "classicMap": "Clásico: una pista estándar de Pong.",
-    "obstaclesMap": "Obstáculos: las paredes adicionales cambian la trayectoria de la pelota.",
-    "powerupsTitle": "Potenciadores",
-    "powerups": "Cuando están activados, pueden aparecer potenciadores aleatorios durante la partida y afectar temporalmente al juego.",
-    "tournamentTitle": "Torneo",
-    "tournament": "El torneo utiliza un formato de eliminación directa. Gana cada partida para avanzar hasta que solo quede un campeón."
-  },
-  "common": {
-    "close": "Cerrar",
-    "gotIt": "Entendido"
-  },
-      "loading": "Cargando",
-      "play": "Jugar",
-      "chooseGame": "Elige tu juego",
-      "selectGameMode": "Selecciona un modo de juego y configura tu partida.",
-      "gameMode": "Modo de juego",
-      "profile": "Perfil",
-      "friends": "Amigos",
-      "chat": "Chat",
-      "stats": "Stats",
-      "logout": "Cerrar sesión",
-      "loggingOut": "Cerrando sesión..."
-    },
-    "notification": {
-      "friendOnline": "{{username}} está en línea",
-      "friendOfflineDefault": "Un amigo",
-      "friendOffline": "{{username}} se desconectó",
-      "requestDeclined": "Tu solicitud de amistad fue rechazada",
-      "wantsToPlay": "¡{{username}} quiere jugar!",
-      "accept": "Aceptar",
-      "decline": "Rechazar"
-    },
-    "legal": {
-      "back": "← Volver",
-      "lastUpdated": "Última actualización: {{date}}",
-      "privacy": {
-        "title": "Política de Privacidad",
-        "intro": "Esta Política de Privacidad describe cómo ft_transcendence (\"el Servicio\", \"nosotros\") recopila, utiliza y protege tus datos personales cuando usas nuestra aplicación web de Pong.",
-        "s1": { "heading": "1. Quiénes Somos", "body": "ft_transcendence es un proyecto estudiantil desarrollado como parte del plan de estudios de 42 School. No es un producto comercial. Contacto:" },
-        "s2": {
-          "heading": "2. Datos Que Recopilamos",
-          "table": {
-            "headers": ["Dato", "Finalidad", "Origen"],
-            "rows": [
-              ["Nombre de usuario", "Identidad pública (leaderboards, historial de partidas, amigos)", "Tú, al registrarte"],
-              ["Correo electrónico", "Inicio de sesión de la cuenta", "Tú, al registrarte"],
-              ["Contraseña (hash)", "Autenticación", "Tú, al registrarte"],
-              ["Imagen de avatar", "Visualización del perfil", "Subida por ti (opcional)"],
-              ["Información de perfil OAuth", "Inicio de sesión con Google", "Google, si eliges iniciar sesión con OAuth"],
-              ["Historial de partidas y estadísticas", "Funciones de juego, leaderboards, torneos", "Generado por el juego"],
-              ["IP / metadatos de conexión", "Seguridad, prevención de abuso, sesiones WebSocket", "Automáticamente, durante el uso"]
-            ]
-          },
-          "outro": "No recopilamos información de pago, y no vendemos ni compartimos tus datos con terceros con fines publicitarios."
-        },
-        "s3": {
-          "heading": "3. Cómo Almacenamos Tus Datos",
-          "list": [
-            "Las contraseñas se almacenan como hash y nunca en texto plano.",
-            "Los avatares se almacenan como datos codificados en nuestra base de datos.",
-            "Los datos se almacenan en una base de datos PostgreSQL que corre dentro de nuestra infraestructura basada en Docker.",
-            "Los tokens de acceso (JWT) autentican las solicitudes y son de corta duración; los tokens de refresco se rotan al usarse."
-          ]
-        },
-        "s4": {
-          "heading": "4. Base Legal y Finalidad del Tratamiento",
-          "intro": "Procesamos tus datos para:",
-          "list": [
-            "Proporcionar la funcionalidad esencial de la cuenta y del juego (necesidad contractual).",
-            "Proteger tu cuenta (interés legítimo).",
-            "Habilitar funciones opcionales que elijas activar, como el inicio de sesión con OAuth (consentimiento)."
-          ]
-        },
-        "s5": {
-          "heading": "5. Tus Derechos",
-          "intro": "Según el RGPD y marcos similares, tienes derecho a:",
-          "list": [
-            "Acceder a los datos personales que tenemos sobre ti.",
-            "Rectificar datos inexactos, p. ej. desde la configuración de tu perfil.",
-            "Eliminar tu cuenta y los datos asociados (\"derecho al olvido\").",
-            "Exportar tus datos en un formato portátil.",
-            "Oponerte o restringir ciertos tratamientos."
-          ],
-          "contactPre": "Para ejercer estos derechos, contacta con"
-        },
-        "s6": { "heading": "6. Conservación de Datos", "body": "Conservamos los datos de tu cuenta mientras esta permanezca activa. Si eliminas tu cuenta, tus datos personales se eliminan de nuestra base de datos activa en un plazo de 7 días hábiles, salvo cuando la conservación sea necesaria por motivos legítimos de registro de seguridad." },
-        "s7": { "heading": "7. Servicios de Terceros", "body": "Si inicias sesión mediante Google OAuth, la propia política de privacidad de Google rige los datos que procesan en su extremo. Solo recibimos los campos de perfil necesarios para crear o vincular tu cuenta: nombre, correo, avatar." },
-        "s8": { "heading": "8. Cookies y Almacenamiento Local", "body": "Utilizamos tokens almacenados en el cliente únicamente para mantener tu sesión iniciada. No utilizamos cookies de seguimiento ni publicitarias." },
-        "s9": { "heading": "9. Privacidad de Menores", "body": "Nuestro Servicio no está destinado ni dirigido a menores de 13 años. No recopilamos ni solicitamos conscientemente información personal de nadie menor de 13 años. Si descubrimos que un menor de 13 años se ha registrado y nos ha proporcionado datos personales, eliminaremos su cuenta y borraremos su información de nuestras bases de datos de inmediato. Si crees que un menor de 13 años nos ha proporcionado datos, contáctanos de inmediato." },
-        "s10": { "heading": "10. Cambios en Esta Política", "body": "Podemos actualizar esta política a medida que el proyecto evoluciona. Los cambios importantes se indicarán con una fecha de \"Última actualización\" renovada." },
-        "s11": { "heading": "11. Contacto", "pre": "Preguntas sobre esta política o tus datos:" }
+    "terms": {
+      "title": "Términos de Servicio",
+      "intro": "Bienvenido a ft_transcendence (\"el Servicio\"). Al crear una cuenta o usar el Servicio, aceptas estos Términos de Servicio (\"Términos\"). Este es un proyecto estudiantil desarrollado para el plan de estudios de 42 School y se ofrece con fines educativos y de demostración.",
+      "s1": {
+        "heading": "1. Elegibilidad",
+        "body": "Debes tener al menos 13 años para crear una cuenta. Al registrarte, confirmas que la información que proporcionas es exacta."
       },
-      "terms": {
-        "title": "Términos de Servicio",
-        "intro": "Bienvenido a ft_transcendence (\"el Servicio\"). Al crear una cuenta o usar el Servicio, aceptas estos Términos de Servicio (\"Términos\"). Este es un proyecto estudiantil desarrollado para el plan de estudios de 42 School y se ofrece con fines educativos y de demostración.",
-        "s1": { "heading": "1. Elegibilidad", "body": "Debes tener al menos 13 años para crear una cuenta. Al registrarte, confirmas que la información que proporcionas es exacta." },
-        "s2": {
-          "heading": "2. Tu Cuenta",
-          "list": [
-            "Eres responsable de mantener la confidencialidad de tus credenciales de acceso.",
-            "Eres responsable de toda actividad que ocurra bajo tu cuenta.",
-            "Puedes iniciar sesión mediante correo/contraseña o Google OAuth.",
-            "Puedes eliminar tu cuenta en cualquier momento contactándonos."
-          ]
-        },
-        "s3": {
-          "heading": "3. Uso Aceptable",
-          "intro": "Aceptas no:",
-          "list": [
-            "Usar el Servicio para acosar, abusar o dañar a otros usuarios.",
-            "Intentar interrumpir, explotar u obtener acceso no autorizado al Servicio, su infraestructura o las cuentas de otros usuarios, incluyendo hacer trampa o explotar errores.",
-            "Subir avatares o contenido que sea ilegal, ofensivo o que infrinja los derechos de terceros.",
-            "Usar herramientas automatizadas (bots) para jugar partidas o manipular los leaderboards, salvo cuando se juegue explícitamente contra la función de IA proporcionada."
-          ],
-          "outro": "Nos reservamos el derecho de suspender o eliminar cuentas que infrinjan estos Términos."
-        },
-        "s4": {
-          "heading": "4. Contenido Que Proporcionas",
-          "list": [
-            "Conservas la propiedad del contenido que subas, p. ej. tu avatar.",
-            "Al subir un avatar, nos otorgas una licencia limitada para almacenarlo y mostrarlo dentro del Servicio.",
-            "Eres responsable de asegurarte de tener derecho a subir cualquier contenido que envíes."
-          ]
-        },
-        "s5": { "heading": "5. Datos de Juego y Juego Limpio", "body": "El historial de partidas, las estadísticas y los resultados de torneos se registran en base al juego real a través del Servicio. Podemos reiniciar, borrar o modificar los datos de juego durante el desarrollo sin previo aviso, ya que este es un proyecto estudiantil en desarrollo activo." },
-        "s6": { "heading": "6. Disponibilidad", "body": "Este Servicio es un proyecto estudiantil y se ofrece \"tal cual\", sin garantías de ningún tipo, expresas o implícitas. No garantizamos un funcionamiento continuo, que el Servicio esté libre de errores, ni la conservación de datos a largo plazo más allá del período de desarrollo activo o evaluación del proyecto." },
-        "s7": { "heading": "7. Limitación de Responsabilidad", "body": "En la medida máxima permitida por la ley, los desarrolladores de ft_transcendence no son responsables de daños indirectos, incidentales o consecuentes derivados del uso del Servicio. Este Servicio no está destinado a uso comercial o de producción." },
-        "s8": { "heading": "8. Inicio de Sesión de Terceros", "body": "Si eliges iniciar sesión mediante Google OAuth, el uso de ese método también está sujeto a los propios Términos de Servicio de Google." },
-        "s9": { "heading": "9. Terminación", "body": "Podemos suspender o cancelar tu acceso al Servicio en cualquier momento, con o sin causa, incluyendo por infracciones de estos Términos." },
-        "s10": { "heading": "10. Cambios a Estos Términos", "body": "Podemos revisar estos Términos a medida que el proyecto evoluciona. El uso continuado del Servicio tras los cambios constituye la aceptación de los Términos revisados." },
-        "s11": { "heading": "11. Contexto Legal", "body": "Este proyecto se desarrolla como parte del plan de estudios de 42 School y estos Términos están pensados para ese contexto educativo, más que como un acuerdo comercialmente exigible." },
-        "s12": { "heading": "12. Contacto", "pre": "Preguntas sobre estos Términos:" }
+      "s2": {
+        "heading": "2. Tu Cuenta",
+        "list": [
+          "Eres responsable de mantener la confidencialidad de tus credenciales de acceso.",
+          "Eres responsable de toda actividad que ocurra bajo tu cuenta.",
+          "Puedes iniciar sesión mediante correo/contraseña o Google OAuth.",
+          "Puedes eliminar tu cuenta en cualquier momento contactándonos."
+        ]
+      },
+      "s3": {
+        "heading": "3. Uso Aceptable",
+        "intro": "Aceptas no:",
+        "list": [
+          "Usar el Servicio para acosar, abusar o dañar a otros usuarios.",
+          "Intentar interrumpir, explotar u obtener acceso no autorizado al Servicio, su infraestructura o las cuentas de otros usuarios, incluyendo hacer trampa o explotar errores.",
+          "Subir avatares o contenido que sea ilegal, ofensivo o que infrinja los derechos de terceros.",
+          "Usar herramientas automatizadas (bots) para jugar partidas o manipular los leaderboards, salvo cuando se juegue explícitamente contra la función de IA proporcionada."
+        ],
+        "outro": "Nos reservamos el derecho de suspender o eliminar cuentas que infrinjan estos Términos."
+      },
+      "s4": {
+        "heading": "4. Contenido Que Proporcionas",
+        "list": [
+          "Conservas la propiedad del contenido que subas, p. ej. tu avatar.",
+          "Al subir un avatar, nos otorgas una licencia limitada para almacenarlo y mostrarlo dentro del Servicio.",
+          "Eres responsable de asegurarte de tener derecho a subir cualquier contenido que envíes."
+        ]
+      },
+      "s5": {
+        "heading": "5. Datos de Juego y Juego Limpio",
+        "body": "El historial de partidas, las estadísticas y los resultados de torneos se registran en base al juego real a través del Servicio. Podemos reiniciar, borrar o modificar los datos de juego durante el desarrollo sin previo aviso, ya que este es un proyecto estudiantil en desarrollo activo."
+      },
+      "s6": {
+        "heading": "6. Disponibilidad",
+        "body": "Este Servicio es un proyecto estudiantil y se ofrece \"tal cual\", sin garantías de ningún tipo, expresas o implícitas. No garantizamos un funcionamiento continuo, que el Servicio esté libre de errores, ni la conservación de datos a largo plazo más allá del período de desarrollo activo o evaluación del proyecto."
+      },
+      "s7": {
+        "heading": "7. Limitación de Responsabilidad",
+        "body": "En la medida máxima permitida por la ley, los desarrolladores de ft_transcendence no son responsables de daños indirectos, incidentales o consecuentes derivados del uso del Servicio. Este Servicio no está destinado a uso comercial o de producción."
+      },
+      "s8": {
+        "heading": "8. Inicio de Sesión de Terceros",
+        "body": "Si eliges iniciar sesión mediante Google OAuth, el uso de ese método también está sujeto a los propios Términos de Servicio de Google."
+      },
+      "s9": {
+        "heading": "9. Terminación",
+        "body": "Podemos suspender o cancelar tu acceso al Servicio en cualquier momento, con o sin causa, incluyendo por infracciones de estos Términos."
+      },
+      "s10": {
+        "heading": "10. Cambios a Estos Términos",
+        "body": "Podemos revisar estos Términos a medida que el proyecto evoluciona. El uso continuado del Servicio tras los cambios constituye la aceptación de los Términos revisados."
+      },
+      "s11": {
+        "heading": "11. Contexto Legal",
+        "body": "Este proyecto se desarrolla como parte del plan de estudios de 42 School y estos Términos están pensados para ese contexto educativo, más que como un acuerdo comercialmente exigible."
+      },
+      "s12": {
+        "heading": "12. Contacto",
+        "pre": "Preguntas sobre estos Términos:"
       }
     }
   }
+}

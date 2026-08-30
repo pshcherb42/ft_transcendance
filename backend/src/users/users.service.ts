@@ -1,4 +1,10 @@
-import { Injectable, NotFoundException, ConflictException, BadRequestException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { User } from '../generated/prisma/client';
 import * as bcrypt from 'bcrypt';
@@ -25,19 +31,24 @@ export class UsersService {
     username: string;
     password: string | null;
   }): Promise<User> {
-  
     const existingEmail = await this.findByEmail(data.email);
     if (existingEmail)
-      throw new ConflictException('Email already in use');
-  
+      throw new ConflictException({
+        code: 'EMAIL_IN_USE',
+        message: 'Email already in use',
+      });
+
     const existingUsername = await this.findByUsername(data.username);
     if (existingUsername)
-      throw new ConflictException('Username already taken');
-  
+      throw new ConflictException({
+        code: 'USERNAME_IN_USE',
+        message: 'Username already taken',
+      });
+
     const hashedPassword = data.password
       ? await bcrypt.hash(data.password, 12)
       : null;
-  
+
     return this.prisma.user.create({
       data: {
         email: data.email,
@@ -47,7 +58,10 @@ export class UsersService {
     });
   }
 
-  async updateRefreshToken(userId: string, refreshToken: string | null): Promise<void> {
+  async updateRefreshToken(
+    userId: string,
+    refreshToken: string | null,
+  ): Promise<void> {
     const hashed = refreshToken ? await bcrypt.hash(refreshToken, 10) : null;
     await this.prisma.user.update({
       where: { id: userId },
@@ -58,7 +72,7 @@ export class UsersService {
   async updateAvatar(userId: string, avatarPath: string): Promise<User> {
     return this.prisma.user.update({
       where: { id: userId },
-      data: { avatar: avatarPath },  // now stores base64 string
+      data: { avatar: avatarPath }, // now stores base64 string
     });
   }
 
@@ -71,20 +85,32 @@ export class UsersService {
     if (dto.username) {
       const existing = await this.findByUsername(dto.username);
       if (existing && existing.id !== userId)
-        throw new ConflictException('Username already taken');
+        throw new ConflictException({
+          code: 'USERNAME_IN_USE',
+          message: 'Username already taken',
+        });
       updateData.username = dto.username;
     }
 
     if (dto.newPassword) {
       if (!dto.currentPassword)
-        throw new BadRequestException('Current password is required to set a new password');
+        throw new BadRequestException({
+          code: 'CURRENT_PASSWORD_REQUIRED',
+          message: 'Current password is required to set a new password',
+        });
 
       if (!user.password)
-        throw new BadRequestException('Cannot change password for OAuth accounts');
+        throw new BadRequestException({
+          code: 'OAUTH_PASSWORD_CHANGE_FORBIDDEN',
+          message: 'Cannot change password for OAuth accounts',
+        });
 
       const valid = await bcrypt.compare(dto.currentPassword, user.password);
       if (!valid)
-        throw new UnauthorizedException('Current password is incorrect');
+        throw new UnauthorizedException({
+          code: 'CURRENT_PASSWORD_INCORRECT',
+          message: 'Current password is incorrect',
+        });
 
       updateData.password = await bcrypt.hash(dto.newPassword, 12);
     }
@@ -118,7 +144,10 @@ export class UsersService {
       const opponent = isHome ? match.awayPlayer : match.homePlayer;
       return {
         id: match.id,
-        opponent: match.isAIGame && !opponent ? 'CPU' : (opponent?.username ?? 'Unknown'),
+        opponent:
+          match.isAIGame && !opponent
+            ? 'CPU'
+            : (opponent?.username ?? 'Unknown'),
         myScore: isHome ? match.homeScore : match.awayScore,
         opponentScore: isHome ? match.awayScore : match.homeScore,
         won: match.winnerId === userId,
@@ -163,9 +192,10 @@ export class UsersService {
 
   sanitize(user: User) {
     const { password, refreshToken, avatar, ...rest } = user;
+    void refreshToken;
     return {
       ...rest,
-      avatarPath:  avatar ?? this.defaultAvatar(user.username),
+      avatarPath: avatar ?? this.defaultAvatar(user.username),
       hasPassword: password !== null,
     };
   }
@@ -173,5 +203,4 @@ export class UsersService {
   private defaultAvatar(username: string): string {
     return `https://api.dicebear.com/9.x/pixel-art/png?seed=${encodeURIComponent(username)}`;
   }
-
 }

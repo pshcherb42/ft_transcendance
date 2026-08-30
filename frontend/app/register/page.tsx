@@ -6,7 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import Input from '@/components/input';
 import BouncingBall from '@/components/bouncingBall';
 import { Trans, useTranslation } from 'react-i18next';
-
+import { apiErrorKey } from '../lib/api-errors';
 
 export default function RegisterPage() {
   const { login } = useAuth();
@@ -69,7 +69,12 @@ export default function RegisterPage() {
         body: JSON.stringify({ username, email, password }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.message ?? t('auth.registrationFailed')); return; }
+      if (!res.ok) {
+        setError(
+          apiErrorKey(data) ?? data.message ?? 'auth.registrationFailed',
+        );
+        return;
+      }
       await login(data.accessToken, data.refreshToken);
       router.push('/');
     } catch {
@@ -80,12 +85,12 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="relative min-h-[calc(100dvh-48px)] bg-background flex flex-col">
+    <div className='relative min-h-[calc(100dvh-48px)] bg-background flex flex-col'>
       <BouncingBall />
 
       {/* Mobile / tablet */}
       <div
-        className="
+        className='
           relative
           z-10
           flex
@@ -96,11 +101,11 @@ export default function RegisterPage() {
           sm:px-6
           md:px-10
           min-[800px]:hidden
-        "
+        '
       >
         {!mobileFormOpen ? (
           <div
-            className="
+            className='
               flex
               w-full
               max-w-[720px]
@@ -110,14 +115,14 @@ export default function RegisterPage() {
               pt-8
               sm:pt-12
               md:pt-16
-            "
+            '
           >
-            <span className="text-xs font-bold uppercase tracking-widest text-brand-green">
+            <span className='text-xs font-bold uppercase tracking-widest text-brand-green'>
               42 Transcendence
             </span>
 
             <h1
-              className="
+              className='
                 mt-4
                 font-display
                 text-[72px]
@@ -127,9 +132,9 @@ export default function RegisterPage() {
                 max-[480px]:text-[56px]
                 max-[400px]:text-[48px]
                 max-[350px]:text-[42px]
-              "
+              '
             >
-                {/* Old title (4 spans) — temporarily commented out
+              {/* Old title (4 spans) — temporarily commented out
                 <span className="block text-foreground">
                   {t('auth.welcome')}
                 </span>
@@ -146,29 +151,29 @@ export default function RegisterPage() {
                   {t('auth.game')}
                 </span>
                 */}
-                <Trans i18nKey="auth.title">
-                  <span className="text-brand-red">nuestro Pong</span>
-                </Trans>
+              <Trans i18nKey='auth.title'>
+                <span className='text-brand-red'>nuestro Pong</span>
+              </Trans>
             </h1>
 
             <p
-              className="
+              className='
                 mt-5
                 max-w-[720px]
                 font-light
                 leading-snug
                 text-foreground
                 text-[clamp(1rem,2.4vw,1.75rem)]
-              "
+              '
             >
               {t('auth.subtitle')}
             </p>
 
-            <div className="mt-10 flex flex-col gap-3">
+            <div className='mt-10 flex flex-col gap-3'>
               <button
-                type="button"
+                type='button'
                 onClick={() => router.push('/login')}
-                className="
+                className='
                   h-[48px]
                   w-full
                   rounded-full
@@ -180,15 +185,15 @@ export default function RegisterPage() {
                   text-white
                   transition-colors
                   hover:bg-[#D6381C]
-                "
+                '
               >
                 {t('auth.login')}
               </button>
 
               <button
-                type="button"
+                type='button'
                 onClick={() => setMobileFormOpen(true)}
-                className="
+                className='
                   h-[48px]
                   w-full
                   rounded-full
@@ -201,7 +206,7 @@ export default function RegisterPage() {
                   text-[#615050]
                   transition-colors
                   hover:bg-[#D9D9D9]/20
-                "
+                '
               >
                 {t('auth.createAccount')}
               </button>
@@ -209,7 +214,7 @@ export default function RegisterPage() {
           </div>
         ) : (
           <div
-            className="
+            className='
               mx-auto
               flex
               w-full
@@ -217,13 +222,13 @@ export default function RegisterPage() {
               flex-1
               flex-col
               justify-center
-            "
+            '
           >
             <button
-              type="button"
+              type='button'
               onClick={() => setMobileFormOpen(false)}
-              aria-label="Back"
-              className="
+              aria-label='Back'
+              className='
                 mb-6
                 flex
                 h-10
@@ -236,26 +241,26 @@ export default function RegisterPage() {
                 text-[#615050]
                 transition-colors
                 hover:bg-[#D9D9D9]/20
-              "
+              '
             >
               <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-                className="h-5 w-5"
+                viewBox='0 0 24 24'
+                fill='none'
+                aria-hidden='true'
+                className='h-5 w-5'
               >
                 <path
-                  d="M15 18l-6-6 6-6"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                  d='M15 18l-6-6 6-6'
+                  stroke='currentColor'
+                  strokeWidth='1.8'
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
                 />
               </svg>
             </button>
 
             <div
-              className="
+              className='
                 w-full
                 rounded-[10px]
                 bg-white
@@ -264,22 +269,22 @@ export default function RegisterPage() {
                 shadow-[-8px_8px_32px_0_rgba(193,168,163,0.20)]
                 sm:px-8
                 sm:py-9
-              "
+              '
             >
-              <h2 className="mb-6 font-display text-[36px] uppercase leading-none text-brand-red sm:text-[42px]">
+              <h2 className='mb-6 font-display text-[36px] uppercase leading-none text-brand-red sm:text-[42px]'>
                 {t('auth.register')}
               </h2>
 
               <form
                 onSubmit={handleSubmit}
                 noValidate
-                className="space-y-[20px]"
+                className='space-y-[20px]'
               >
                 <Input
-                  id="mobile-username"
-                  name="username"
+                  id='mobile-username'
+                  name='username'
                   label={t('auth.username')}
-                  type="text"
+                  type='text'
                   value={username}
                   onChange={(e) => {
                     setUsername(e.target.value);
@@ -288,15 +293,15 @@ export default function RegisterPage() {
                       setUsernameError('');
                     }
                   }}
-                  placeholder="your_username"
+                  placeholder='your_username'
                   error={usernameError}
                 />
 
                 <Input
-                  id="mobile-register-email"
-                  name="email"
+                  id='mobile-register-email'
+                  name='email'
                   label={t('auth.email')}
-                  type="email"
+                  type='email'
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
@@ -305,15 +310,15 @@ export default function RegisterPage() {
                       setEmailError('');
                     }
                   }}
-                  placeholder="example@gmail.com"
+                  placeholder='example@gmail.com'
                   error={emailError}
                 />
 
                 <Input
-                  id="mobile-register-password"
-                  name="password"
+                  id='mobile-register-password'
+                  name='password'
                   label={t('auth.password')}
-                  type="password"
+                  type='password'
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value);
@@ -327,15 +332,15 @@ export default function RegisterPage() {
                 />
 
                 {error && (
-                  <p className="text-[12px] leading-[16px] text-[#EE4424]">
-                    {error}
+                  <p className='text-[12px] leading-[16px] text-[#EE4424]'>
+                    {t(error)}
                   </p>
                 )}
 
                 <button
-                  type="submit"
+                  type='submit'
                   disabled={loading}
-                  className="
+                  className='
                     h-[46px]
                     w-full
                     rounded-full
@@ -347,21 +352,18 @@ export default function RegisterPage() {
                     hover:bg-[#D6381C]
                     disabled:cursor-not-allowed
                     disabled:opacity-60
-                  "
+                  '
                 >
-                  {loading
-                    ? t('auth.creating')
-                    : t('auth.register')}
+                  {loading ? t('auth.creating') : t('auth.register')}
                 </button>
               </form>
 
-              <p className="mt-5 text-center text-sm text-zinc-400">
+              <p className='mt-5 text-center text-sm text-zinc-400'>
                 {t('auth.haveAccount')}{' '}
-
                 <button
-                  type="button"
+                  type='button'
                   onClick={() => router.push('/login?form=open')}
-                  className="font-bold text-zinc-900 hover:underline"
+                  className='font-bold text-zinc-900 hover:underline'
                 >
                   {t('auth.login')}
                 </button>
@@ -373,7 +375,7 @@ export default function RegisterPage() {
 
       {/* основной контент */}
       <div
-        className="
+        className='
           relative
           z-10
           mx-auto
@@ -393,17 +395,16 @@ export default function RegisterPage() {
           lg:px-16
           xl:gap-16
           xl:px-[108px]
-        "
+        '
       >
-
         {/* левая часть — заголовок */}
-        <div className="min-w-0 lg:flex-1">
-        <span className="text-xs font-bold uppercase tracking-widest text-brand-green sm:text-sm">
-          42 Transcendence
+        <div className='min-w-0 lg:flex-1'>
+          <span className='text-xs font-bold uppercase tracking-widest text-brand-green sm:text-sm'>
+            42 Transcendence
           </span>
 
           <h1
-            className="
+            className='
               font-display
               uppercase
               leading-[1.1]
@@ -411,7 +412,7 @@ export default function RegisterPage() {
               min-[900px]:text-[60px]
               lg:text-[72px]
               xl:text-[92px]
-            "
+            '
           >
             {/* Old title (4 spans) — temporarily commented out
             <span className="block text-foreground">
@@ -430,13 +431,13 @@ export default function RegisterPage() {
               {t('auth.game')}
             </span>
             */}
-            <Trans i18nKey="auth.title">
-              <span className="text-brand-red">nuestro Pong</span>
+            <Trans i18nKey='auth.title'>
+              <span className='text-brand-red'>nuestro Pong</span>
             </Trans>
           </h1>
 
           <p
-            className="
+            className='
               mt-5
               max-w-[520px]
               font-light
@@ -446,7 +447,7 @@ export default function RegisterPage() {
               min-[900px]:text-[18px]
               lg:text-[22px]
               xl:text-[28px]
-            "
+            '
           >
             {t('auth.subtitle')}
           </p>
@@ -454,7 +455,7 @@ export default function RegisterPage() {
 
         {/* правая часть — форма */}
         <div
-          className="
+          className='
             w-full
             max-w-[380px]
             shrink-0
@@ -471,10 +472,10 @@ export default function RegisterPage() {
             xl:max-w-[550px]
             xl:px-[70px]
             xl:py-[50px]
-          "
+          '
         >
-        <h2
-          className="
+          <h2
+            className='
             mb-6
             font-display
             uppercase
@@ -485,45 +486,45 @@ export default function RegisterPage() {
             lg:text-[42px]
             xl:mb-8
             xl:text-[48px]
-          "
-        >
-          {t('auth.register')}
-        </h2>
+          '
+          >
+            {t('auth.register')}
+          </h2>
 
-          <form onSubmit={handleSubmit} noValidate className="space-y-[20px]">
+          <form onSubmit={handleSubmit} noValidate className='space-y-[20px]'>
             <Input
-              id="username"
-              name="username"
+              id='username'
+              name='username'
               label={t('auth.username')}
-              type="text"
+              type='text'
               value={username}
               onChange={(e) => {
                 setUsername(e.target.value);
                 if (usernameError) setUsernameError('');
               }}
-              placeholder="your_username"
+              placeholder='your_username'
               error={usernameError}
             />
 
             <Input
-              id="email"
-              name="email"
+              id='email'
+              name='email'
               label={t('auth.email')}
-              type="email"
+              type='email'
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
                 if (emailError) setEmailError('');
               }}
-              placeholder="example@gmail.com"
+              placeholder='example@gmail.com'
               error={emailError}
             />
 
             <Input
-              id="password"
-              name="password"
+              id='password'
+              name='password'
               label={t('auth.password')}
-              type="password"
+              type='password'
               value={password}
               onChange={(e) => {
                 setPassword(e.target.value);
@@ -534,22 +535,27 @@ export default function RegisterPage() {
             />
 
             {error && (
-              <p className="text-[12px] leading-[16px] text-[#EE4424]">{error}</p>
+              <p className='text-[12px] leading-[16px] text-[#EE4424]'>
+                {t(error)}
+              </p>
             )}
 
             <button
-              type="submit"
+              type='submit'
               disabled={loading}
-              className="h-[46px] w-full rounded-[24px] bg-[#EE4424] text-[14px] font-medium text-white transition-colors hover:bg-[#D6381C] disabled:cursor-not-allowed disabled:opacity-60"
+              className='h-[46px] w-full rounded-[24px] bg-[#EE4424] text-[14px] font-medium text-white transition-colors hover:bg-[#D6381C] disabled:cursor-not-allowed disabled:opacity-60'
             >
               {loading ? t('auth.creating') : t('auth.register')}
             </button>
           </form>
 
-          <p className="mt-[20px] text-sm text-zinc-400">
+          <p className='mt-[20px] text-sm text-zinc-400'>
             {t('auth.haveAccount')}{' '}
-            <a href="/login" className="font-bold text-zinc-900 hover:underline">
-            {t('auth.login')}
+            <a
+              href='/login'
+              className='font-bold text-zinc-900 hover:underline'
+            >
+              {t('auth.login')}
             </a>
           </p>
         </div>

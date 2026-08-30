@@ -1,12 +1,6 @@
 'use client';
 
-import {
-  ChangeEvent,
-  FormEvent,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import imageCompression from 'browser-image-compression';
@@ -16,6 +10,8 @@ import Input from '@/components/input';
 import { useAuth } from '@/context/AuthContext';
 import { apiFetch } from '@/app/lib/api';
 import { updateProfileSchema } from '@/validation/auth.schema';
+
+import { apiErrorKey } from '../lib/api-errors';
 
 type EditProfileModalProps = {
   open: boolean;
@@ -28,61 +24,48 @@ export default function EditProfileModal({
 }: EditProfileModalProps) {
   const { t } = useTranslation();
 
-  const {
-    user,
-    logout,
-    refetchUser,
-  } = useAuth();
+  const { user, logout, refetchUser } = useAuth();
 
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const [username, setUsername] =
-    useState('');
+  const [username, setUsername] = useState('');
 
-  const [currentPassword, setCurrentPassword] =
-    useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
 
-  const [newPassword, setNewPassword] =
-    useState('');
+  const [newPassword, setNewPassword] = useState('');
 
-  const [confirmPassword, setConfirmPassword] =
-    useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
-  const [saveStatus, setSaveStatus] =
-    useState<
-      'idle' | 'saving' | 'saved' | 'error'
-    >('idle');
+  const [saveStatus, setSaveStatus] = useState<
+    'idle' | 'saving' | 'saved' | 'error'
+  >('idle');
 
-  const [saveError, setSaveError] =
-    useState('');
+  const [saveError, setSaveError] = useState('');
 
-  const [avatarStatus, setAvatarStatus] =
-    useState<
-      'idle' | 'uploading' | 'done' | 'error'
-    >('idle');
+  const [avatarStatus, setAvatarStatus] = useState<
+    'idle' | 'uploading' | 'done' | 'error'
+  >('idle');
 
-  const [avatarPreview, setAvatarPreview] =
-    useState<string | null>(null);
-  
-  const [pendingAvatar, setPendingAvatar] =
-    useState<string | null>(null);
-  
-  const [fieldErrors, setFieldErrors] =
-    useState<Record<string, string>>({});
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+
+  const [pendingAvatar, setPendingAvatar] = useState<string | null>(null);
+
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!open || !user) {
       return;
     }
-
-    setUsername(user.username);
-    setAvatarPreview(null);
-    setPendingAvatar(null);
-    setAvatarStatus('idle');
-    setSaveError('');
-    setFieldErrors({});
-    setSaveStatus('idle');
+    queueMicrotask(() => {
+      setUsername(user.username);
+      setAvatarPreview(null);
+      setPendingAvatar(null);
+      setAvatarStatus('idle');
+      setSaveError('');
+      setFieldErrors({});
+      setSaveStatus('idle');
+    });
   }, [open, user]);
 
   useEffect(() => {
@@ -98,18 +81,12 @@ export default function EditProfileModal({
 
     document.body.style.overflow = 'hidden';
 
-    window.addEventListener(
-      'keydown',
-      handleEscape,
-    );
+    window.addEventListener('keydown', handleEscape);
 
     return () => {
       document.body.style.overflow = '';
 
-      window.removeEventListener(
-        'keydown',
-        handleEscape,
-      );
+      window.removeEventListener('keydown', handleEscape);
     };
   }, [open]);
 
@@ -117,50 +94,42 @@ export default function EditProfileModal({
     return null;
   }
 
-  const avatarSrc =
-    avatarPreview ??
-    user.avatarPath ??
-    null;
+  const avatarSrc = avatarPreview ?? user.avatarPath ?? null;
 
-  const isOAuthUser =
-    !user.hasPassword;
+  const isOAuthUser = !user.hasPassword;
 
-    function handleClose() {
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-      setSaveError('');
-      setFieldErrors({});
-      setSaveStatus('idle');
-      setAvatarStatus('idle');
-      setAvatarPreview(null);
-      setPendingAvatar(null);
-    
-      onClose();
-    }
+  function handleClose() {
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+    setSaveError('');
+    setFieldErrors({});
+    setSaveStatus('idle');
+    setAvatarStatus('idle');
+    setAvatarPreview(null);
+    setPendingAvatar(null);
 
-  async function handleSave(
-    event: FormEvent,
-  ) {
+    onClose();
+  }
+
+  async function handleSave(event: FormEvent) {
     event.preventDefault();
 
     setSaveError('');
     setFieldErrors({});
 
-    const result =
-      updateProfileSchema.safeParse({
-        username,
-        currentPassword,
-        newPassword,
-        confirmPassword,
-      });
+    const result = updateProfileSchema.safeParse({
+      username,
+      currentPassword,
+      newPassword,
+      confirmPassword,
+    });
 
     if (!result.success) {
       const errors: Record<string, string> = {};
 
       for (const issue of result.error.issues) {
-        errors[issue.path[0] as string] =
-          issue.message;
+        errors[issue.path[0] as string] = issue.message;
       }
 
       setFieldErrors(errors);
@@ -177,79 +146,71 @@ export default function EditProfileModal({
       };
 
       if (newPassword && currentPassword) {
-        body.currentPassword =
-          currentPassword;
+        body.currentPassword = currentPassword;
 
-        body.newPassword =
-          newPassword;
+        body.newPassword = newPassword;
       }
 
-      const response = await apiFetch(
-        '/users/me',
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type':
-              'application/json',
-          },
-          body: JSON.stringify(body),
+      const response = await apiFetch('/users/me', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      );
+        body: JSON.stringify(body),
+      });
 
       if (!response.ok) {
-        const data = await response
-          .json()
-          .catch(() => ({}));
-      
-        const errorMessage =
-          data?.message ??
-          t('profile.saveFailed');
-      
-        setSaveError(errorMessage);
+        const data = await response.json().catch(() => ({}));
+
+        // const errorMessage =
+        //   data?.message ??
+        //   t('profile.saveFailed');
+
+        // setSaveError(errorMessage);
+        // setSaveStatus('error');
+        // toast.error(errorMessage);
+
+        const errorKey =
+          apiErrorKey(data) ?? data.message ?? 'profile.saveFailed';
+
+        setSaveError(errorKey);
         setSaveStatus('error');
-        toast.error(errorMessage);
-      
+        toast.error(t(errorKey));
+
         return;
       }
-      
+
       if (pendingAvatar) {
-        const avatarResponse = await apiFetch(
-          '/users/me/avatar',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type':
-                'application/json',
-            },
-            body: JSON.stringify({
-              avatar: pendingAvatar,
-            }),
+        const avatarResponse = await apiFetch('/users/me/avatar', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
           },
-        );
-      
+          body: JSON.stringify({
+            avatar: pendingAvatar,
+          }),
+        });
+
         if (!avatarResponse.ok) {
-          const errorMessage =
-            t('profile.avatarUploadFailed');
-      
+          const errorMessage = t('profile.avatarUploadFailed');
+
           setAvatarStatus('error');
           setSaveError(errorMessage);
           setSaveStatus('error');
           toast.error(errorMessage);
-      
+
           return;
         }
       }
-      
+
       await refetchUser();
-      
+
       setPendingAvatar(null);
       setAvatarPreview(null);
       setAvatarStatus('idle');
-      
+
       setSaveStatus('saved');
-      toast.success(
-        t('profile.profileUpdated'),
-      );
+      toast.success(t('profile.profileUpdated'));
 
       setCurrentPassword('');
       setNewPassword('');
@@ -259,8 +220,7 @@ export default function EditProfileModal({
         handleClose();
       }, 700);
     } catch {
-      const errorMessage =
-        t('profile.saveFailed');
+      const errorMessage = t('profile.saveFailed');
 
       setSaveError(errorMessage);
       setSaveStatus('error');
@@ -268,53 +228,41 @@ export default function EditProfileModal({
     }
   }
 
-  async function handleAvatarChange(
-    event: ChangeEvent<HTMLInputElement>,
-  ) {
+  async function handleAvatarChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
-  
+
     if (!file) {
       return;
     }
-  
+
     setAvatarStatus('uploading');
-  
+
     try {
-      const compressed =
-        await imageCompression(file, {
-          maxSizeMB: 0.8,
-          maxWidthOrHeight: 256,
-          useWebWorker: true,
-        });
-  
-      const base64 =
-        await new Promise<string>(
-          (resolve, reject) => {
-            const reader = new FileReader();
-  
-            reader.onloadend = () => {
-              resolve(
-                reader.result as string,
-              );
-            };
-  
-            reader.onerror = reject;
-  
-            reader.readAsDataURL(
-              compressed,
-            );
-          },
-        );
-  
+      const compressed = await imageCompression(file, {
+        maxSizeMB: 0.8,
+        maxWidthOrHeight: 256,
+        useWebWorker: true,
+      });
+
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onloadend = () => {
+          resolve(reader.result as string);
+        };
+
+        reader.onerror = reject;
+
+        reader.readAsDataURL(compressed);
+      });
+
       setAvatarPreview(base64);
       setPendingAvatar(base64);
       setAvatarStatus('done');
     } catch {
       setAvatarStatus('error');
-  
-      toast.error(
-        t('profile.avatarUploadFailed'),
-      );
+
+      toast.error(t('profile.avatarUploadFailed'));
     } finally {
       event.target.value = '';
     }
@@ -327,7 +275,7 @@ export default function EditProfileModal({
 
   return (
     <div
-      className="
+      className='
         fixed
         inset-0
         z-50
@@ -342,18 +290,15 @@ export default function EditProfileModal({
         sm:py-6
         md:items-center
         md:py-8
-      "
+      '
       onMouseDown={(event) => {
-        if (
-          event.target ===
-          event.currentTarget
-        ) {
+        if (event.target === event.currentTarget) {
           handleClose();
         }
       }}
     >
       <div
-        className="
+        className='
         relative
         w-full
         max-w-[560px]
@@ -366,13 +311,13 @@ export default function EditProfileModal({
         sm:py-8
         md:px-12
         md:py-10
-        "
+        '
       >
         <button
-          type="button"
+          type='button'
           onClick={handleClose}
-          aria-label="Close"
-          className="
+          aria-label='Close'
+          className='
             absolute
             right-5
             top-5
@@ -388,26 +333,22 @@ export default function EditProfileModal({
             text-[#615050]
             transition-colors
             hover:bg-[#D9D9D9]/20
-          "
+          '
         >
           ×
         </button>
 
-        <h2 className="pr-12 font-display text-[30px] uppercase leading-none text-brand-red sm:text-[36px] md:text-[40px]">
+        <h2 className='pr-12 font-display text-[30px] uppercase leading-none text-brand-red sm:text-[36px] md:text-[40px]'>
           {t('game.button.editProfile')}
         </h2>
 
-        <div className="mt-8 flex flex-col items-center">
-        <div className="relative">
-  <button
-    type="button"
-    onClick={() =>
-      fileRef.current?.click()
-    }
-    aria-label={t(
-      'profile.changeAvatar',
-    )}
-    className="
+        <div className='mt-8 flex flex-col items-center'>
+          <div className='relative'>
+            <button
+              type='button'
+              onClick={() => fileRef.current?.click()}
+              aria-label={t('profile.changeAvatar')}
+              className='
       group
       relative
       h-28
@@ -421,42 +362,40 @@ export default function EditProfileModal({
       focus:ring-2
       focus:ring-brand-red
       focus:ring-offset-2
-    "
-  >
-    {avatarSrc ? (
-      <img
-        src={avatarSrc}
-        alt={user.username}
-        className="
+    '
+            >
+              {avatarSrc ? (
+                <img
+                  src={avatarSrc}
+                  alt={user.username}
+                  className='
           h-full
           w-full
           object-cover
           transition-transform
           group-hover:scale-105
-        "
-      />
-    ) : (
-      <span className="flex h-full w-full items-center justify-center font-display text-[44px] uppercase text-white">
-        {user.username
-          .charAt(0)
-          .toUpperCase()}
-      </span>
-    )}
+        '
+                />
+              ) : (
+                <span className='flex h-full w-full items-center justify-center font-display text-[44px] uppercase text-white'>
+                  {user.username.charAt(0).toUpperCase()}
+                </span>
+              )}
 
-    <span
-      className="
+              <span
+                className='
         absolute
         inset-0
         bg-black/0
         transition-colors
         group-hover:bg-black/10
-      "
-    />
-      </button>
+      '
+              />
+            </button>
 
-      <div
-      aria-hidden="true"
-      className="
+            <div
+              aria-hidden='true'
+              className='
         pointer-events-none
         absolute
         bottom-0
@@ -472,86 +411,76 @@ export default function EditProfileModal({
         bg-brand-red
         text-white
         shadow-sm
-      "
-    >
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        aria-hidden="true"
-        className="h-4 w-4"
-      >
-        <path
-          d="M4 20h4l10.5-10.5a2.828 2.828 0 0 0-4-4L4 16v4Z"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
+      '
+            >
+              <svg
+                viewBox='0 0 24 24'
+                fill='none'
+                aria-hidden='true'
+                className='h-4 w-4'
+              >
+                <path
+                  d='M4 20h4l10.5-10.5a2.828 2.828 0 0 0-4-4L4 16v4Z'
+                  stroke='currentColor'
+                  strokeWidth='1.8'
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                />
 
-        <path
-          d="m13.5 6.5 4 4"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-        />
-      </svg>
-    </div>
-  </div>
+                <path
+                  d='m13.5 6.5 4 4'
+                  stroke='currentColor'
+                  strokeWidth='1.8'
+                  strokeLinecap='round'
+                />
+              </svg>
+            </div>
+          </div>
 
           <input
             ref={fileRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
+            type='file'
+            accept='image/*'
+            className='hidden'
             onChange={handleAvatarChange}
           />
 
-          <p className="mt-3 min-h-4 text-xs text-[#615050]">
-            {avatarStatus === 'uploading' &&
-              t('profile.avatarUploading')}
+          <p className='mt-3 min-h-4 text-xs text-[#615050]'>
+            {avatarStatus === 'uploading' && t('profile.avatarUploading')}
 
-            {avatarStatus === 'done' &&
-              t('profile.avatarSelected')}
+            {avatarStatus === 'done' && t('profile.avatarSelected')}
 
-            {avatarStatus === 'error' &&
-              t('profile.avatarUploadFailed')}
+            {avatarStatus === 'error' && t('profile.avatarUploadFailed')}
           </p>
         </div>
 
-        <form
-          onSubmit={handleSave}
-          className="mt-5 space-y-5"
-        >
+        <form onSubmit={handleSave} className='mt-5 space-y-5'>
           <Input
-            id="profile-username"
-            name="username"
+            id='profile-username'
+            name='username'
             label={t('profile.username')}
-            type="text"
+            type='text'
             value={username}
             required
-            error={
-              fieldErrors.username
-                ? t(fieldErrors.username)
-                : undefined
-            }
+            error={fieldErrors.username ? t(fieldErrors.username) : undefined}
             onValueChange={setUsername}
-            />
+          />
 
           {!isOAuthUser && (
             <>
-              <div className="border-t border-[#EEE9E6] pt-5">
-                <h3 className="text-sm font-bold uppercase tracking-wide text-[#615050]">
+              <div className='border-t border-[#EEE9E6] pt-5'>
+                <h3 className='text-sm font-bold uppercase tracking-wide text-[#615050]'>
                   {t('profile.changePassword')}
                 </h3>
               </div>
 
               <Input
-                id="current-password"
-                name="currentPassword"
+                id='current-password'
+                name='currentPassword'
                 label={t('profile.currentPassword')}
-                type="password"
+                type='password'
                 value={currentPassword}
-                autoComplete="current-password"
+                autoComplete='current-password'
                 error={
                   fieldErrors.currentPassword
                     ? t(fieldErrors.currentPassword)
@@ -561,51 +490,46 @@ export default function EditProfileModal({
               />
 
               <Input
-                    id="new-password"
-                    name="newPassword"
-                    label={t('profile.newPassword')}
-                    type="password"
-                    value={newPassword}
-                    autoComplete="new-password"
-                    error={
-                      fieldErrors.newPassword
-                        ? t(fieldErrors.newPassword)
-                        : undefined
-                    }
-                    onValueChange={setNewPassword}
-                />
+                id='new-password'
+                name='newPassword'
+                label={t('profile.newPassword')}
+                type='password'
+                value={newPassword}
+                autoComplete='new-password'
+                error={
+                  fieldErrors.newPassword
+                    ? t(fieldErrors.newPassword)
+                    : undefined
+                }
+                onValueChange={setNewPassword}
+              />
 
-            <Input
-                  id="confirm-password"
-                  name="confirmPassword"
-                  label={t('profile.confirmPassword')}
-                  type="password"
-                  value={confirmPassword}
-                  autoComplete="new-password"
-                  error={
-                    fieldErrors.confirmPassword
-                      ? t(fieldErrors.confirmPassword)
-                      : undefined
-                  }
-                  onValueChange={setConfirmPassword}
-                />
+              <Input
+                id='confirm-password'
+                name='confirmPassword'
+                label={t('profile.confirmPassword')}
+                type='password'
+                value={confirmPassword}
+                autoComplete='new-password'
+                error={
+                  fieldErrors.confirmPassword
+                    ? t(fieldErrors.confirmPassword)
+                    : undefined
+                }
+                onValueChange={setConfirmPassword}
+              />
             </>
           )}
 
-          {saveStatus === 'error' &&
-            saveError && (
-              <p className="text-center text-sm text-red-600">
-                {saveError}
-              </p>
-            )}
+          {saveStatus === 'error' && saveError && (
+            <p className='text-center text-sm text-red-600'>{t(saveError)}</p>
+          )}
 
-          <div className="flex flex-col gap-3 pt-2 sm:flex-row">
+          <div className='flex flex-col gap-3 pt-2 sm:flex-row'>
             <button
-              type="submit"
-              disabled={
-                saveStatus === 'saving'
-              }
-              className="
+              type='submit'
+              disabled={saveStatus === 'saving'}
+              className='
                 h-[46px]
                 min-h-[46px]
                 flex-1
@@ -621,7 +545,7 @@ export default function EditProfileModal({
                 hover:bg-[#D9361F]
                 disabled:cursor-not-allowed
                 disabled:opacity-50
-              "
+              '
             >
               {saveStatus === 'saving'
                 ? t('profile.saving')
@@ -631,9 +555,9 @@ export default function EditProfileModal({
             </button>
 
             <button
-              type="button"
+              type='button'
               onClick={handleClose}
-              className="
+              className='
                 h-[46px]
                 min-h-[46px]
                 flex-1
@@ -648,16 +572,16 @@ export default function EditProfileModal({
                 text-[#615050]
                 transition-colors
                 hover:bg-[#D9D9D9]/20
-              "
+              '
             >
               {t('profile.cancel')}
             </button>
           </div>
 
           <button
-            type="button"
+            type='button'
             onClick={handleLogout}
-            className="
+            className='
               h-[46px]
               min-h[46px]
               w-full
@@ -673,7 +597,7 @@ export default function EditProfileModal({
               transition-colors
               hover:bg-brand-red
               hover:text-white
-            "
+            '
           >
             {t('profile.logout')}
           </button>
