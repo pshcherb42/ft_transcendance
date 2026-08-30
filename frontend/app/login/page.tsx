@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Input from '@/components/input';
 import BouncingBall from '@/components/bouncingBall';
 import { Trans, useTranslation } from 'react-i18next';
-import { apiErrorKey } from '../lib/api-errors';
+import { apiErrorKey } from '@/app/lib/api-errors';
+import { isLoggedIn } from '@/app/lib/auth';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -25,6 +26,17 @@ export default function LoginPage() {
 
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    queueMicrotask(() => setMounted(true));
+    if (isLoggedIn()) router.replace('/');
+  }, [router]);
+
+  if (!mounted) return null;
+
+  if (isLoggedIn()) return null;
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
