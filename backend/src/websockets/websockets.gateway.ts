@@ -210,15 +210,10 @@ export class WebsocketsGateway
       side: client.data.side,
       queue: this.queue.map((s) => s.id),
     });
-    // Stale roomId from a previous match that wasn't cleaned up (the
-    // socket is long-lived across pages) → clear it so the user can
-    // actually join the queue. If the room is still live, we're already
-    // in a match and should stay out of the queue.
+
     if (client.data.roomId) {
-      const liveRoomId = client.data.user?.sub
-        ? this.gameService.getRoomIdByUserId(client.data.user.sub)
-        : undefined;
-      if (liveRoomId) return; // still in an active match
+      const players = this.gameService.getRoomPlayers(client.data.roomId);
+      if (players) return;
       client.data.roomId = undefined;
       client.data.side = undefined;
     }
