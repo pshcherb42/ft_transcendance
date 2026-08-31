@@ -135,10 +135,9 @@ export class GameService {
         awayScore: room.engine.scoreRight,
         winnerId: winnerId || '',
       })
-      .catch((err) => {
-        this.logger.error(
-          `❌ Error persistiendo forfeit voluntario: ${err.message}`,
-        );
+      .catch((err: unknown) => {
+        const msg = err instanceof Error ? err.message : String(err);
+        this.logger.error(`❌ Error persistiendo forfeit voluntario: ${msg}`);
       });
 
     this.removeGame(roomId, server);
@@ -204,11 +203,11 @@ export class GameService {
           // clear the room
           this.removeGame(roomId, server);
         }
-      } catch (dbError: any) {
+      } catch (dbError: unknown) {
         // 3. Si la base de datos falla por tipado, atrapamos el error para que NO congele la cola
-        this.logger.error(
-          `❌ Error al guardar registro en la BD: ${dbError.message}`,
-        );
+        const dbMsg =
+          dbError instanceof Error ? dbError.message : String(dbError);
+        this.logger.error(`❌ Error al guardar registro en la BD: ${dbMsg}`);
         // Forzamos la limpieza de la sala de todos modos para no romper la app
         this.removeGame(roomId, server);
       }
@@ -245,9 +244,10 @@ export class GameService {
           for (const socketId of roomSockets) {
             const socket = server.sockets.sockets.get(socketId);
             if (socket) {
-              socket.data.roomId = undefined; // clean this socket room
-              socket.data.side = undefined; // clear the side
-              socket.leave(roomId); // takeout socket from the room
+              const data = socket.data as { roomId?: string; side?: Side };
+              data.roomId = undefined; // clean this socket room
+              data.side = undefined; // clear the side
+              void socket.leave(roomId); // takeout socket from the room
             }
           }
         }
@@ -272,10 +272,9 @@ export class GameService {
         awayScore: engine.scoreRight,
         winnerId: winner === 'left' ? leftUserId : rightUserId,
       })
-      .catch((err) => {
-        this.logger.error(
-          `❌ Error persistiendo partida normal: ${err.message}`,
-        );
+      .catch((err: unknown) => {
+        const msg = err instanceof Error ? err.message : String(err);
+        this.logger.error(`❌ Error persistiendo partida normal: ${msg}`);
       });
   }
 }
