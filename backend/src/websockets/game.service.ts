@@ -29,7 +29,12 @@ export class GameService {
 
   constructor(private matchService: MatchService) {}
 
-  createGame(roomId: string, leftUserId: string, rightUserId: string, server: Server) {
+  createGame(
+    roomId: string,
+    leftUserId: string,
+    rightUserId: string,
+    server: Server,
+  ) {
     const room: Room = {
       engine: new PongEngine(),
       leftUserId,
@@ -53,8 +58,13 @@ export class GameService {
       server.to(roomId).emit('gameState', encode(room.engine.getSnapshot()));
 
       if (room.engine.status === 'finished' && room.engine.winner) {
-        const winnerId = room.engine.winner === 'left' ? room.leftUserId : room.rightUserId;
-        server.to(roomId).emit('gameOver', { reason: 'score', winner: room.engine.winner, winnerId });
+        const winnerId =
+          room.engine.winner === 'left' ? room.leftUserId : room.rightUserId;
+        server.to(roomId).emit('gameOver', {
+          reason: 'score',
+          winner: room.engine.winner,
+          winnerId,
+        });
         this.persist(roomId, room.engine.winner);
         this.removeGame(roomId, server);
       }
@@ -69,9 +79,13 @@ export class GameService {
     return this.userToRoom.get(userId);
   }
 
-  getRoomPlayers(roomId: string): { leftUserId: string; rightUserId: string } | undefined {
+  getRoomPlayers(
+    roomId: string,
+  ): { leftUserId: string; rightUserId: string } | undefined {
     const room = this.rooms.get(roomId);
-    return room ? { leftUserId: room.leftUserId, rightUserId: room.rightUserId } : undefined;
+    return room
+      ? { leftUserId: room.leftUserId, rightUserId: room.rightUserId }
+      : undefined;
   }
 
   // Llamado cuando un usuario abandona voluntariamente (leaveGame) — a
@@ -83,6 +97,10 @@ export class GameService {
     if (!roomId) return;
     const room = this.rooms.get(roomId);
     if (!room) return;
+    if (room.engine.status === 'finished') {
+      this.removeGame(roomId, server);
+      return;
+    }
 
     // Cancel any grace-period timer that might already be running for this
     // room (e.g. opponent had briefly dropped) — we're ending the match now
@@ -106,16 +124,22 @@ export class GameService {
       forfeitedBy: userId,
     });
 
-    this.logger.log(`💾 Guardando partida por abandono voluntario. Ganador: ${winnerId}`);
-    this.matchService.record({
-      homeId: room.leftUserId || '',
-      awayId: room.rightUserId || '',
-      homeScore: room.engine.scoreLeft,
-      awayScore: room.engine.scoreRight,
-      winnerId: winnerId || '',
-    }).catch((err) => {
-      this.logger.error(`❌ Error persistiendo forfeit voluntario: ${err.message}`);
-    });
+    this.logger.log(
+      `💾 Guardando partida por abandono voluntario. Ganador: ${winnerId}`,
+    );
+    this.matchService
+      .record({
+        homeId: room.leftUserId || '',
+        awayId: room.rightUserId || '',
+        homeScore: room.engine.scoreLeft,
+        awayScore: room.engine.scoreRight,
+        winnerId: winnerId || '',
+      })
+      .catch((err) => {
+        this.logger.error(
+          `❌ Error persistiendo forfeit voluntario: ${err.message}`,
+        );
+      });
 
     this.removeGame(roomId, server);
   }
@@ -123,7 +147,6 @@ export class GameService {
   // Llamado al desconectarse un socket: pausa el bucle y arranca un timer de
   // gracia. Si expira sin reconexión, el rival gana por abandono.
   handleDisconnect(userId: string, server: Server) {
-      
     const roomId = this.userToRoom.get(userId);
     if (!roomId) return;
     const room = this.rooms.get(roomId);
@@ -146,23 +169,30 @@ export class GameService {
       room.loop = null;
     }
     // warn the opponent that the user was disconnected
-    server.to(roomId).emit('opponentDisconnected', { userId, gracePeriodMs: RECONNECT_GRACE_MS });
+    server.to(roomId).emit('opponentDisconnected', {
+      userId,
+      gracePeriodMs: RECONNECT_GRACE_MS,
+    });
     // initialize the timer
     room.disconnectTimer = setTimeout(() => {
       try {
         if (room.disconnectedUserId === userId) {
           // determine the disconnected side
-          const winnerSide: Side = userId === room.leftUserId ? 'right' : 'left';
-          const winnerId = winnerSide === 'left' ? room.leftUserId : room.rightUserId;
+          const winnerSide: Side =
+            userId === room.leftUserId ? 'right' : 'left';
+          const winnerId =
+            winnerSide === 'left' ? room.leftUserId : room.rightUserId;
           // notify the other user that the game is over
           server.to(roomId).emit('gameOver', {
             reason: 'forfeit',
-            winner: winnerSide,   // <-- this is what the frontend actually reads
-            winnerId,             // keep for your matchService.record() call below
+            winner: winnerSide, // <-- this is what the frontend actually reads
+            winnerId, // keep for your matchService.record() call below
             forfeitedBy: userId,
           });
-  
-          this.logger.log(`💾 Guardando partida por abandono. Ganador: ${winnerId}`);
+
+          this.logger.log(
+            `💾 Guardando partida por abandono. Ganador: ${winnerId}`,
+          );
           // write match result to the database
           void this.matchService.record({
             homeId: room.leftUserId || '',
@@ -176,7 +206,9 @@ export class GameService {
         }
       } catch (dbError: any) {
         // 3. Si la base de datos falla por tipado, atrapamos el error para que NO congele la cola
-        this.logger.error(`❌ Error al guardar registro en la BD: ${dbError.message}`);
+        this.logger.error(
+          `❌ Error al guardar registro en la BD: ${dbError.message}`,
+        );
         // Forzamos la limpieza de la sala de todos modos para no romper la app
         this.removeGame(roomId, server);
       }
@@ -204,15 +236,15 @@ export class GameService {
 
   removeGame(roomId: string, server?: Server) {
     const room = this.rooms.get(roomId); // search for roomId
-    if (room) { 
+    if (room) {
       if (room.loop) clearInterval(room.loop); // clear room timer
       if (room.disconnectTimer) clearTimeout(room.disconnectTimer); // disconnect timer
-      if(server){
+      if (server) {
         const roomSockets = server.sockets.adapter.rooms.get(roomId); // what sockets are connected to this room
-        if(roomSockets){
-          for(const socketId of roomSockets){
+        if (roomSockets) {
+          for (const socketId of roomSockets) {
             const socket = server.sockets.sockets.get(socketId);
-            if(socket){
+            if (socket) {
               socket.data.roomId = undefined; // clean this socket room
               socket.data.side = undefined; // clear the side
               socket.leave(roomId); // takeout socket from the room
@@ -230,16 +262,20 @@ export class GameService {
     const room = this.rooms.get(roomId);
     if (!room) return;
     const { engine, leftUserId, rightUserId } = room;
-    
+
     // Envolvemos el guardado normal también en un hilo seguro controlado
-    this.matchService.record({
-      homeId: leftUserId || '',
-      awayId: rightUserId || '',
-      homeScore: engine.scoreLeft,
-      awayScore: engine.scoreRight,
-      winnerId: winner === 'left' ? leftUserId : rightUserId,
-    }).catch((err) => {
-      this.logger.error(`❌ Error persistiendo partida normal: ${err.message}`);
-    });
+    this.matchService
+      .record({
+        homeId: leftUserId || '',
+        awayId: rightUserId || '',
+        homeScore: engine.scoreLeft,
+        awayScore: engine.scoreRight,
+        winnerId: winner === 'left' ? leftUserId : rightUserId,
+      })
+      .catch((err) => {
+        this.logger.error(
+          `❌ Error persistiendo partida normal: ${err.message}`,
+        );
+      });
   }
 }

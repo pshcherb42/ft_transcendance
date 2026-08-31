@@ -433,7 +433,7 @@ export default function GamePage() {
   }
 
   const handleBackToMenu = () => {
-    if (mode === 'online' && socket) {
+    if (mode === 'online' && socket && !isGameFinished) {
       socket.emit('leaveGame');
     }
 
@@ -443,12 +443,12 @@ export default function GamePage() {
     }
 
     setReconnectSecondsLeft(null);
-    setWinner(null);
-    setLocalWinner(null);
-    setScore({
-      left: 0,
-      right: 0,
-    });
+    // setWinner(null);
+    // setLocalWinner(null);
+    // setScore({
+    //   left: 0,
+    //   right: 0,
+    // });
 
     router.push('/');
   };
