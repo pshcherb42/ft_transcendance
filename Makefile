@@ -33,6 +33,10 @@ install-deps:
 	@docker compose run --rm backend npx prisma generate
 	@docker compose run --rm backend npx prisma migrate deploy
 
+host-deps:
+	@echo "Installing host node_modules..."
+	@npm install
+
 clean-docker:
 	@echo "Cleaning Docker cache, unused items..."
 	@docker system prune -a --volumes -f
@@ -42,14 +46,15 @@ fclean: down
 	@docker system prune -a --volumes -f
 	@find . -name "node_modules" -type d -prune -exec rm -rf '{}' +
 
-re: fclean install-deps up
+re: fclean install-deps host-deps up
 
 help:
 	@echo "Available commands:"
 	@echo "  make              - Start the project. If it fails, run 'make install-deps'"
 	@echo "  make install-deps - Install backend dependencies if missing"
+	@echo "  make host-deps    - Install node_modules on your machine (editor autocomplete/types)"
 	@echo "  make clean-docker - Clean cache and unused Docker items if running out of space"
 	@echo "  make fclean       - Deep clean (Docker + local node_modules)"
 	@echo "  make re           - Reset completely"
 
-.PHONY: all up down build install-deps clean-docker fclean re help
+.PHONY: all up down build install-deps host-deps clean-docker fclean re help

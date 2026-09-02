@@ -1,11 +1,28 @@
 // context/SocketContext.tsx
 'use client';
 
-import { createContext, useContext, useEffect, useRef, useState, ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  ReactNode,
+} from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useRouter } from 'next/navigation';
 import { useAuth } from './AuthContext';
 import { getAccessToken } from '@/app/lib/auth';
+import { tryRefresh } from '@/app/lib/api';
+
+function isTokenExpired(token: string): boolean {
+  try {
+    const { exp } = JSON.parse(atob(token.split('.')[1]));
+    return typeof exp !== 'number' || exp * 1000 < Date.now() + 30_000;
+  } catch {
+    return true;
+  }
+}
 
 interface SocketContextValue {
   socket: Socket | null;
@@ -21,7 +38,6 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!user) {
-      // Logged out (or never logged in): make sure no stray socket lingers.
       if (socketRef.current) {
         socketRef.current.disconnect();
         socketRef.current = null;
@@ -36,17 +52,52 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 
     const s = io(window.location.origin, {
       path: '/socket.io',
-      auth: (cb) => cb({ token: getAccessToken() || '' }),
+      auth: async (cb) => {
+        try {
+          let token = getAccessToken();
+          if (token && isTokenExpired(token)) {
+            await tryRefresh();
+            token = getAccessToken();
+          }
+          cb({ token: token || '' });
+        } catch {
+          cb({ token: getAccessToken() || '' });
+        }
+      },
       reconnection: true,
       reconnectionAttempts: Infinity,
       reconnectionDelay: 1000,
-      // No forceNew: this is the ONE long-lived socket for the whole app.
     });
 
+    let kicked = false;
+
     s.on('forceDisconnect', (data: { reason: string }) => {
+      kicked = true;
       console.warn('Session replaced:', data.reason);
       logout();
       router.replace('/login');
+    });
+
+    // Server rejects a bad/expired token by calling socket.disconnect()
+    // If server disconects socket.io doesn't auto-reconnect, so it needs to be recovered manually
+    /*s.on('disconnect', async (reason) => {
+      if (kicked) return;
+      if (reason === 'io server disconnect') {
+        const ok = await tryRefresh();
+        if (ok) {
+          s.auth = { token: getAccessToken() || '' };
+          s.connect();
+        } else {
+          logout();
+          router.replace('/login');
+        }
+      }
+    });*/
+
+    s.on('disconnect', (reason) => {
+      if (!kicked && reason === 'io server disconnect' && !s.connected) {
+        s.connect();
+      }
     });
 
     socketRef.current = s;

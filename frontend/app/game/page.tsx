@@ -380,6 +380,7 @@ export default function GamePage() {
 
     return () => {
       cancelAnimationFrame(raf);
+      socket.emit('leaveQueue'); // frees a tale queued slot
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
       if (disconnectTimerRef.current) {
@@ -433,8 +434,9 @@ export default function GamePage() {
   }
 
   const handleBackToMenu = () => {
-    if (mode === 'online' && socket && !isGameFinished) {
-      socket.emit('leaveGame');
+    if (mode === 'online' && socket) {
+      socket.emit('leaveQueue');
+      if (!isGameFinished) socket.emit('leaveGame');
     }
 
     if (disconnectTimerRef.current) {

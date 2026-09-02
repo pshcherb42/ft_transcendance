@@ -66,6 +66,7 @@
     "inviteAccepted": "{{username}} accepted!",
     "inviteExpired": "{{username}} didn't respond in time",
     "inviteDeclined": "{{username}} declined the invite",
+    "inviteFailed": "{{username}} seems to be offline",
     "errors": {
       "loadFailed": "Could not load friends",
       "requestFailed": "Could not send request",

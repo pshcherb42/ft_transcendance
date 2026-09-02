@@ -15,8 +15,14 @@ export function useGameInvite() {
   const inviteToPlay = (friendId: string, friendUsername: string) => {
     if (!socket || !user) return;
 
-    socket.emit('sendGameInvite', { receiverId: friendId, senderUsername: user.username });
-    const toastId = toast.loading(t('friends.inviteSent', { username: friendUsername }), { duration: 15000 });
+    socket.emit('sendGameInvite', {
+      receiverId: friendId,
+      senderUsername: user.username,
+    });
+    const toastId = toast.loading(
+      t('friends.inviteSent', { username: friendUsername }),
+      { duration: 15000 },
+    );
 
     const onSent = (payload: { inviteId: string; gameRoomId: string }) => {
       const cleanup = () => {
@@ -26,18 +32,27 @@ export function useGameInvite() {
       };
       const onAccepted = (p: { roomId: string }) => {
         if (p.roomId !== payload.gameRoomId) return;
-        toast.success(t('friends.inviteAccepted', { username: friendUsername }), { id: toastId, duration: 3000 });
+        toast.success(
+          t('friends.inviteAccepted', { username: friendUsername }),
+          { id: toastId, duration: 3000 },
+        );
         cleanup();
         router.push('/game?mode=online');
       };
       const onExpired = (p: { inviteId: string }) => {
         if (p.inviteId !== payload.inviteId) return;
-        toast.error(t('friends.inviteExpired', { username: friendUsername }), { id: toastId, duration: 3000 });
+        toast.error(t('friends.inviteExpired', { username: friendUsername }), {
+          id: toastId,
+          duration: 3000,
+        });
         cleanup();
       };
       const onDeclined = (p: { inviteId: string }) => {
         if (p.inviteId !== payload.inviteId) return;
-        toast.error(t('friends.inviteDeclined', { username: friendUsername }), { id: toastId, duration: 3000 });
+        toast.error(t('friends.inviteDeclined', { username: friendUsername }), {
+          id: toastId,
+          duration: 3000,
+        });
         cleanup();
       };
       socket.on('gameInviteAccepted', onAccepted);
@@ -45,7 +60,22 @@ export function useGameInvite() {
       socket.on('gameInviteDeclined', onDeclined);
     };
 
-    socket.once('gameInviteSent', onSent);
+    const onFailed = () => {
+      socket.off('gameInviteSent', onSent);
+      toast.error(t('friends.inviteFailed', { username: friendUsername }), {
+        id: toastId,
+        duration: 3000,
+      });
+    };
+
+    socket.once(
+      'gameInviteSent',
+      (payload: { inviteId: string; gameRoomId: string }) => {
+        socket.off('gameInviteFailed', onFailed);
+        onSent(payload);
+      },
+    );
+    socket.once('gameInviteFailed', onFailed);
   };
 
   return { inviteToPlay };

@@ -33,11 +33,17 @@ export class PresenceService {
     this.server = server;
   }
 
-  emitToUser(userId: string, event: string, payload: unknown) {
+  emitToUser(userId: string, event: string, payload: unknown): boolean {
     const socketId = this.userSockets.get(userId);
-    if (socketId && this.server) {
-      this.server.to(socketId).emit(event, payload);
+    if (!socketId || !this.server) return false;
+
+    const sock = this.server.sockets.sockets.get(socketId);
+    if (!sock || !sock.connected) {
+      this.userSockets.delete(userId);
+      return false;
     }
+    sock.emit(event, payload);
+    return true;
   }
 
   setOffline(userId: string, socketId: string, onConfirmedOffline: () => void) {

@@ -66,6 +66,7 @@
     "inviteAccepted": "¡{{username}} aceptó!",
     "inviteExpired": "{{username}} no respondió a tiempo",
     "inviteDeclined": "{{username}} rechazó la invitación",
+    "inviteFailed": "{{username}} parece estar desconectado",
     "errors": {
       "loadFailed": "No se pudieron cargar los amigos",
       "requestFailed": "No se pudo enviar la solicitud",

@@ -13,6 +13,8 @@ interface Room {
   loop: NodeJS.Timeout | null; // null while paused for a disconnect
   disconnectedUserId: string | null;
   disconnectTimer: NodeJS.Timeout | null;
+  pausedSince: number | null;
+  emptySince: number | null;
 }
 
 /**
@@ -26,6 +28,10 @@ export class GameService {
   private readonly logger = new Logger(GameService.name);
   private rooms: Map<string, Room> = new Map();
   private userToRoom: Map<string, string> = new Map(); // userId -> roomId
+  private server: Server | null = null;
+  private watchdog: NodeJS.Timeout | null = null;
+  private static readonly EMPTY_GRACE_MS = 30_000;
+  private static readonly PAUSE_GRACE_MS = 45_000;
 
   constructor(private matchService: MatchService) {}
 
@@ -35,6 +41,7 @@ export class GameService {
     rightUserId: string,
     server: Server,
   ) {
+    this.server = server;
     const room: Room = {
       engine: new PongEngine(),
       leftUserId,
@@ -42,10 +49,68 @@ export class GameService {
       loop: null,
       disconnectedUserId: null,
       disconnectTimer: null,
+      pausedSince: null,
+      emptySince: null,
     };
     this.rooms.set(roomId, room);
     this.userToRoom.set(leftUserId, roomId);
     this.userToRoom.set(rightUserId, roomId);
+    this.startLoop(roomId, server);
+    this.startWatchdog();
+  }
+
+  // Every 10s: drop rooms that have been empty for > 30s or frozen for > 45s.
+  // Catches games both players abandoned without quitting — otherwise the room
+  // lingers forever and traps both players in it on their next online match.
+  private startWatchdog() {
+    if (this.watchdog) return;
+    this.watchdog = setInterval(() => this.sweepRooms(), 10_000);
+  }
+
+  private sweepRooms() {
+    const server = this.server;
+    if (!server) return;
+    const now = Date.now();
+
+    for (const [roomId, room] of this.rooms) {
+      if (room.engine.status === 'finished') continue;
+
+      const n = server.sockets.adapter.rooms.get(roomId)?.size ?? 0;
+      if (n === 0) {
+        room.emptySince ??= now;
+        if (now - room.emptySince > GameService.EMPTY_GRACE_MS) {
+          this.logger.warn(`🧹 Voiding abandoned room ${roomId}`);
+          server.to(roomId).emit('matchVoided', { reason: 'abandoned' });
+          this.removeGame(roomId, server);
+          continue;
+        }
+      } else {
+        room.emptySince = null;
+      }
+      if (!room.loop && !room.disconnectTimer) {
+        room.pausedSince ??= now;
+        if (now - room.pausedSince > GameService.PAUSE_GRACE_MS) {
+          this.logger.warn(`🧹 Voiding stalled room ${roomId}`);
+          server.to(roomId).emit('matchVoided', { reason: 'stalled' });
+          this.removeGame(roomId, server);
+          continue;
+        }
+      } else if (room.loop) {
+        room.pausedSince = null;
+      }
+    }
+    if (this.rooms.size === 0 && this.watchdog) {
+      clearInterval(this.watchdog);
+      this.watchdog = null;
+    }
+  }
+
+  resumeIfReady(roomId: string, server: Server, bothConnected: boolean) {
+    const room = this.rooms.get(roomId);
+    if (!room || room.engine.status === 'finished') return;
+    if (room.loop || room.disconnectedUserId || room.disconnectTimer) return;
+    if (!bothConnected) return;
+    room.pausedSince = null;
     this.startLoop(roomId, server);
   }
 
@@ -227,7 +292,6 @@ export class GameService {
       clearTimeout(room.disconnectTimer); // clear the timer
       room.disconnectTimer = null;
     }
-    if (!room.loop) this.startLoop(roomId, server); // start room loop again
 
     server.to(roomId).emit('opponentReconnected', { userId }); // emit notification to server that the user reconnected
     return roomId; // return roomId

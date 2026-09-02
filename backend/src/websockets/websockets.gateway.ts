@@ -121,7 +121,7 @@ export class WebsocketsGateway
       if (existingSocketId && existingSocketId !== client.id) {
         const existingSocket =
           this.server.sockets.sockets.get(existingSocketId);
-        if (existingSocket) {
+        if (existingSocket && existingSocket.connected) {
           console.log(
             `Kicking previous session ${existingSocketId} for user ${userId}`,
           );
@@ -131,6 +131,10 @@ export class WebsocketsGateway
           existingSocket.emit('forceDisconnect', {
             reason: 'Logged in from another location',
           });
+          existingSocket.disconnect(true);
+        } else if (existingSocket) {
+          //zombie leftover from dropped connection. Needs to be cleaned up
+          this.kickedSockets.add(existingSocketId);
           existingSocket.disconnect(true);
         }
       }
@@ -192,7 +196,7 @@ export class WebsocketsGateway
       });
     }
 
-    if (roomId && userId) {
+    if (userId && this.gameService.getRoomIdByUserId(userId)) {
       // Periodo de gracia en vez de forfeit instantáneo — se avisa al rival y
       // se pausa el bucle hasta reconexión o hasta que expiren los 15s.
       this.gameService.handleDisconnect(userId, this.server);
@@ -211,12 +215,25 @@ export class WebsocketsGateway
       queue: this.queue.map((s) => s.id),
     });
 
-    if (client.data.roomId) {
-      const players = this.gameService.getRoomPlayers(client.data.roomId);
-      if (players) return;
-      client.data.roomId = undefined;
-      client.data.side = undefined;
+    const liveRoomId = this.gameService.getRoomIdByUserId(
+      client.data.user?.sub,
+    );
+    if (liveRoomId) {
+      const players = this.gameService.getRoomPlayers(liveRoomId);
+      if (players) {
+        const side: Side =
+          players.leftUserId === client.data.user?.sub ? 'left' : 'right';
+        this.assignToRoom(client, liveRoomId, side);
+        client.emit('rejoinedGame', {
+          roomId: liveRoomId,
+          side,
+          opponentUsername: null,
+        });
+        return;
+      }
     }
+    client.data.roomId = undefined;
+    client.data.side = undefined;
 
     // Evitar duplicados o entrar en cola mientras ya se juega.
     if (this.queue.some((s) => s.id === client.id)) {
@@ -350,6 +367,11 @@ export class WebsocketsGateway
 
         this.assignToRoom(client, roomId, side);
 
+        const bothHere =
+          !!this.presence.getSocketId(players.leftUserId) &&
+          !!this.presence.getSocketId(players.rightUserId);
+        this.gameService.resumeIfReady(roomId, this.server, bothHere);
+
         client.emit('rejoinedGame', {
           roomId,
           side,
@@ -398,13 +420,22 @@ export class WebsocketsGateway
       timeout,
     });
 
-    this.presence.emitToUser(data.receiverId, 'gameInviteReceived', {
-      inviteId,
-      senderId,
-      senderUsername: data.senderUsername,
-      gameRoomId,
-    });
-
+    const delivered = this.presence.emitToUser(
+      data.receiverId,
+      'gameInviteReceived',
+      {
+        inviteId,
+        senderId,
+        senderUsername: data.senderUsername,
+        gameRoomId,
+      },
+    );
+    if (!delivered) {
+      clearTimeout(timeout);
+      this.pendingInvites.delete(inviteId);
+      client.emit('gameInviteFailed', { reason: 'offline' });
+      return;
+    }
     client.emit('gameInviteSent', { inviteId, gameRoomId });
   }
 

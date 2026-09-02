@@ -61,7 +61,7 @@ export class PongEngine {
   ballVY = 0;
   ballSpeed = BALL_SPEED_START;
 
-  leftPaddleVY = 0;   // desplazamiento vertical REAL de la pala en el último tick (post-clamp)
+  leftPaddleVY = 0; // desplazamiento vertical REAL de la pala en el último tick (post-clamp)
   rightPaddleVY = 0;
 
   scoreLeft = 0;
@@ -107,9 +107,10 @@ export class PongEngine {
   getSnapshot(): GameSnapshot {
     return {
       status: this.status,
-      countdown: this.status === 'countdown'
-        ? Math.ceil(this.countdownTicks / TICK_RATE)
-        : 0,
+      countdown:
+        this.status === 'countdown'
+          ? Math.ceil(this.countdownTicks / TICK_RATE)
+          : 0,
       leftPaddleY: this.leftPaddleY,
       rightPaddleY: this.rightPaddleY,
       ballX: this.ballX,

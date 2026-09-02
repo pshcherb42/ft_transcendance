@@ -68,6 +68,7 @@
     "inviteAccepted": "{{username}} pieņēma uzaicinājumu!",
     "inviteExpired": "{{username}} neatbildēja laikus",
     "inviteDeclined": "{{username}} noraidīja uzaicinājumu",
+    "inviteFailed": "{{username}} šķiet ir bezsaistē",
     "errors": {
       "loadFailed": "Neizdevās ielādēt draugu sarakstu",
       "requestFailed": "Neizdevās nosūtīt pieprasījumu",
