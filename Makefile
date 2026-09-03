@@ -46,7 +46,11 @@ fclean: down
 	@docker system prune -a --volumes -f
 	@find . -name "node_modules" -type d -prune -exec rm -rf '{}' +
 
-re: fclean install-deps host-deps up
+defclean: 
+	@docker compose down -v --remove-orphans
+	@$(MAKE) fclean
+
+re: fclean install-deps host-deps up 
 
 help:
 	@echo "Available commands:"
@@ -57,4 +61,4 @@ help:
 	@echo "  make fclean       - Deep clean (Docker + local node_modules)"
 	@echo "  make re           - Reset completely"
 
-.PHONY: all up down build install-deps host-deps clean-docker fclean re help
+.PHONY: all up down build install-deps host-deps clean-docker fclean defclean re help

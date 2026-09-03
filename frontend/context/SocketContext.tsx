@@ -17,10 +17,25 @@ import { tryRefresh } from '@/app/lib/api';
 
 function isTokenExpired(token: string): boolean {
   try {
-    const { exp } = JSON.parse(atob(token.split('.')[1]));
-    return typeof exp !== 'number' || exp * 1000 < Date.now() + 30_000;
+    const payloadSegment = token.split('.')[1];
+    // 1. JWTs use "base64url" format, which breaks standard decoders like atob().
+    // We use regex with 'g' (global) to replace all '-' back to '+' and '_' back to '/'.
+    const base64 = payloadSegment.replace(/-/g, '+').replace(/_/g, '/');
+
+    // 2. Standard Base64 requires the string length to be an exact multiple of 4.
+    // JWTs strip the trailing '=' padding characters to save space.
+    // This math calculates exactly how many '=' are missing and appends them to the end.
+    const padded = base64.padEnd(
+      base64.length + ((4 - (base64.length % 4)) % 4),
+      '=',
+    );
+    const payload = JSON.parse(atob(padded));
+    return (
+      typeof payload.exp !== 'number' ||
+      payload.exp * 1000 < Date.now() + 30_000
+    );
   } catch {
-    return true;
+    return true; // unparseable token -> treat as expired
   }
 }
 
@@ -52,6 +67,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 
     const s = io(window.location.origin, {
       path: '/socket.io',
+      //transports: ['websocket'],
       auth: async (cb) => {
         try {
           let token = getAccessToken();
