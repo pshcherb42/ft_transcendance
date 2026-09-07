@@ -7,10 +7,9 @@ import Input from '@/components/input';
 import BouncingBall from '@/components/bouncingBall';
 import { Trans, useTranslation } from 'react-i18next';
 import { apiErrorKey } from '@/app/lib/api-errors';
-import { isLoggedIn } from '@/app/lib/auth';
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, user, loading: authLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { t } = useTranslation();
@@ -31,12 +30,12 @@ export default function LoginPage() {
 
   useEffect(() => {
     queueMicrotask(() => setMounted(true));
-    if (isLoggedIn()) router.replace('/');
-  }, [router]);
+    if (user) router.replace('/');
+  }, [router, user]);
 
   if (!mounted) return null;
-
-  if (isLoggedIn()) return null;
+  if (authLoading) return null;
+  if (user) return null;
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();

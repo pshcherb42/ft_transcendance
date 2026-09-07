@@ -42,18 +42,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     try {
       const res = await apiFetch('/users/me');
-      if (res.ok) setUser(await res.json());
-      else setUser(null);
+      if (res.ok) {
+        setUser(await res.json());
+      } else if (res.status === 401 || res.status === 403) {
+        setUser(null);
+      }
     } catch {
-      setUser(null);
+      // Backend unreachable (maybe restarting) but not a logout
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // useEffect(() => {
-  //   fetchUser();
-  // }, [fetchUser]);
+  useEffect(() => {
+    if (loading || user || !isLoggedIn()) return;
+    const id = setTimeout(() => void fetchUser(), 3000);
+    return () => clearTimeout(id);
+  }, [loading, user, fetchUser]);
 
   useEffect(() => {
     let cancelled = false;
