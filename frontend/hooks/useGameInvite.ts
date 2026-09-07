@@ -39,9 +39,13 @@ export function useGameInvite() {
         cleanup();
         router.push('/game?mode=online');
       };
-      const onExpired = (p: { inviteId: string }) => {
+      const onExpired = (p: { inviteId: string; reason?: string }) => {
         if (p.inviteId !== payload.inviteId) return;
-        toast.error(t('friends.inviteExpired', { username: friendUsername }), {
+        const key =
+          p.reason === 'superseded'
+            ? 'friends.inviteCancelled'
+            : 'friends.inviteExpired';
+        toast.error(t(key, { username: friendUsername }), {
           id: toastId,
           duration: 3000,
         });
@@ -60,9 +64,17 @@ export function useGameInvite() {
       socket.on('gameInviteDeclined', onDeclined);
     };
 
-    const onFailed = () => {
+    const onFailed = (p?: { reason?: string }) => {
       socket.off('gameInviteSent', onSent);
-      toast.error(t('friends.inviteFailed', { username: friendUsername }), {
+      const key =
+        {
+          offline: 'friends.inviteFailedOffline',
+          busy: 'friends.inviteFailedBusy',
+          'opponent-busy': 'friends.inviteFailedOpponentBusy',
+          'opponent-pending': 'friends.inviteFailedOpponentPending',
+          'too-many-invites': 'friends.invitedFailedTooMany',
+        }[p?.reason ?? ''] ?? 'friends.inviteFailed';
+      toast.error(t(key, { username: friendUsername }), {
         id: toastId,
         duration: 3000,
       });

@@ -41,6 +41,18 @@ export class GameService {
     rightUserId: string,
     server: Server,
   ) {
+    // Neither player should still be mapped to a room.
+    //  If one is, something upstream let two games overlap.
+    // Just tear that old room down (no more "empty rooms").
+    for (const uid of [leftUserId, rightUserId]) {
+      const existingRoomId = this.userToRoom.get(uid);
+      if (existingRoomId && existingRoomId !== roomId) {
+        this.logger.warn(
+          `createGame: ${uid} still in ${existingRoomId}, removing before starting ${roomId}`,
+        );
+        this.removeGame(existingRoomId, server);
+      }
+    }
     this.server = server;
     const room: Room = {
       engine: new PongEngine(),

@@ -67,6 +67,13 @@
     "inviteExpired": "{{username}} didn't respond in time",
     "inviteDeclined": "{{username}} declined the invite",
     "inviteFailed": "{{username}} seems to be offline",
+    "inviteCancelled": "Invite to {{username}} cancelled",
+    "inviteFailedOffline": "{{username}} seems to be offline",
+    "inviteFailedBusy": "You're already in a match",
+    "inviteFailedOpponentBusy": "{{username}} is already in a match",
+    "inviteFailedOpponentPending": "{{username}} already has a pending invite",
+    "inviteFailedTooMany": "You have too many pending invites",
+    "inviteNoLongerValid": "That invite is no longer available",
     "errors": {
       "loadFailed": "Could not load friends",
       "requestFailed": "Could not send request",

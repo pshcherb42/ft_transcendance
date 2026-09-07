@@ -67,6 +67,13 @@
     "inviteExpired": "{{username}} no respondió a tiempo",
     "inviteDeclined": "{{username}} rechazó la invitación",
     "inviteFailed": "{{username}} parece estar desconectado",
+    "inviteCancelled": "Invitación a {{username}} cancelada",
+    "inviteFailedOffline": "{{username}} parece estar desconectado",
+    "inviteFailedBusy": "Ya estás en una partida",
+    "inviteFailedOpponentBusy": "{{username}} ya está en una partida",
+    "inviteFailedOpponentPending": "{{username}} ya tiene una invitación pendiente",
+    "inviteFailedTooMany": "Tienes demasiadas invitaciones pendientes",
+    "inviteNoLongerValid": "Esa invitación ya no está disponible",
     "errors": {
       "loadFailed": "No se pudieron cargar los amigos",
       "requestFailed": "No se pudo enviar la solicitud",

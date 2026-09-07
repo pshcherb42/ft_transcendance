@@ -16,6 +16,7 @@ import { PresenceService } from '../presence/presence.service';
 import { FriendsService } from '../friends/friends.service';
 import { OnGatewayInit } from '@nestjs/websockets';
 import { randomUUID } from 'crypto';
+import { send } from 'process';
 
 // Habilitamos CORS igual que en HTTP para que el frontend pueda conectarse.
 // 8080 = acceso vía nginx (mismo origen que la app); 3000 = frontend directo en dev.
@@ -89,6 +90,7 @@ export class WebsocketsGateway
     }[]
   >();
   private readonly MAX_HISTORY_PER_CONVO = 200;
+  private readonly MAX_OUTGOING_INVITES = 5;
 
   private chatKey(a: string, b: string) {
     return [a, b].sort().join(':');
@@ -397,7 +399,29 @@ export class WebsocketsGateway
   ) {
     const senderId = client.data.user?.sub;
     if (!senderId || !data?.receiverId) return;
-
+    if (senderId === data.receiverId) return; // can't invite yourself, but who knows
+    if (this.gameService.getRoomIdByUserId(senderId)) {
+      // am I busy?
+      client.emit('gameInviteFailed', { reason: 'busy' });
+      return;
+    }
+    if (this.gameService.getRoomIdByUserId(data.receiverId)) {
+      // is my opponent busy?
+      client.emit('gameInviteFailed', { reason: 'opponent-busy' });
+      return;
+    }
+    let outgoing = 0;
+    for (const inv of this.pendingInvites.values()) {
+      if (inv.receiverId === data.receiverId) {
+        client.emit('gameInviteFailed', { reason: 'opponent-pending' });
+        return;
+      }
+      if (inv.senderId === senderId) outgoing++;
+    }
+    if (outgoing >= this.MAX_OUTGOING_INVITES) {
+      client.emit('gameInviteFailed', { reason: 'too-many-invites' });
+      return;
+    }
     const inviteId = randomUUID();
     const gameRoomId = `invite-${inviteId}`;
 
@@ -452,18 +476,26 @@ export class WebsocketsGateway
 
     const receiverId = client.data.user?.sub;
     if (receiverId !== invite.receiverId) return; // not this user's invite to accept
-
+    // The sender may have been pulled into another game, so don't build a new room
+    // if sender is already playing (can't join the new one).
+    if (this.gameService.getRoomIdByUserId(invite.senderId)) {
+      clearTimeout(invite.timeout);
+      this.pendingInvites.delete(data.inviteId);
+      client.emit('gameInviteExpired', { inviteId: data.inviteId });
+      return;
+    }
     clearTimeout(invite.timeout);
     this.pendingInvites.delete(data.inviteId);
 
-    // Both players are entering a game now — pull them out of matchmaking
-    // so a stale queue entry can't pair them into a second, orphaned match.
+    // Remove every other pending invite for both players so they cannot second-accept
+    this.cancelInvitesForUsers([invite.senderId, receiverId]);
+
+    // Pull both out of matchmaking
     this.queue = this.queue.filter(
       (s) => s.id !== client.id && s.data.user?.sub !== invite.senderId,
     );
 
-    // Only the receiver can possibly be mid-game — the friends-page invite
-    // button is unreachable without having already left any active match.
+    // Receiver might have joined a game so we also remove it.
     this.forfeitExistingGameIfAny(receiverId, client);
 
     this.gameService.createGame(
@@ -482,6 +514,23 @@ export class WebsocketsGateway
       this.server
         .to(senderSocketId)
         .emit('gameInviteAccepted', { roomId: invite.gameRoomId });
+    }
+  }
+
+  private cancelInvitesForUsers(userIds: string[]) {
+    const involved = new Set(userIds);
+    for (const [id, inv] of this.pendingInvites) {
+      if (!involved.has(inv.senderId) && !involved.has(inv.receiverId))
+        continue;
+      clearTimeout(inv.timeout);
+      this.pendingInvites.delete(id);
+      for (const uid of [inv.senderId, inv.receiverId]) {
+        const sid = this.presence.getSocketId(uid);
+        if (sid)
+          this.server
+            .to(sid)
+            .emit('gameInviteExpired', { inviteId: id, reason: 'superseded' });
+      }
     }
   }
 

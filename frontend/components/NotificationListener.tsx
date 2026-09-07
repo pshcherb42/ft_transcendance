@@ -1,7 +1,7 @@
 // components/NotificationListener.tsx
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { useSocket } from '@/context/SocketContext';
@@ -14,20 +14,35 @@ export function NotificationListener() {
   const router = useRouter();
   const pathname = usePathname();
   const { user } = useAuth();
+  const receivedInvites = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     if (!socket) return;
 
     const onFriendOnline = (data: { userId: string; username?: string }) => {
-      toast.success(t('notification.friendOnline', { username: data.username ?? t('notification.friendOfflineDefault') }));
+      toast.success(
+        t('notification.friendOnline', {
+          username: data.username ?? t('notification.friendOfflineDefault'),
+        }),
+      );
     };
     const onFriendOffline = (data: { userId: string; username?: string }) => {
-      toast.info(t('notification.friendOffline', { username: data.username ?? t('notification.friendOfflineDefault') }));
+      toast.info(
+        t('notification.friendOffline', {
+          username: data.username ?? t('notification.friendOfflineDefault'),
+        }),
+      );
     };
-    const onRequestReceived = (data: { messageKey: string; username: string }) => {
+    const onRequestReceived = (data: {
+      messageKey: string;
+      username: string;
+    }) => {
       toast.info(t(data.messageKey, { username: data.username }));
     };
-    const onRequestAccepted = (data: { messageKey: string; username: string }) => {
+    const onRequestAccepted = (data: {
+      messageKey: string;
+      username: string;
+    }) => {
       toast.success(t(data.messageKey, { username: data.username }));
     };
     const onRequestDeclined = () => {
@@ -36,32 +51,43 @@ export function NotificationListener() {
     const onFriendRemoved = (data: { messageKey: string }) => {
       toast.warning(t(data.messageKey));
     };
-    const onChatMessage = (data: { senderId: string; receiverId: string; text: string }) => {
+    const onChatMessage = (data: {
+      senderId: string;
+      receiverId: string;
+      text: string;
+    }) => {
       if (!user || data.senderId === user.id) return;
       if (pathname === '/chat') return;
       toast.info(t('chat.newMessage'));
     };
 
-    const onGameInviteReceived = (data: { inviteId: string; senderUsername: string; gameRoomId: string }) => {
-      const toastId = toast.custom(
+    const onGameInviteReceived = (data: {
+      inviteId: string;
+      senderUsername: string;
+      gameRoomId: string;
+    }) => {
+      receivedInvites.current.add(data.inviteId);
+      toast.custom(
         () => (
-          <div className="bg-zinc-800 text-white p-4 rounded-lg shadow-lg border border-zinc-700">
-            <p className="font-semibold mb-2">{t('notification.wantsToPlay', { username: data.senderUsername })}</p>
-            <div className="flex gap-2 justify-end">
+          <div className='bg-zinc-800 text-white p-4 rounded-lg shadow-lg border border-zinc-700'>
+            <p className='font-semibold mb-2'>
+              {t('notification.wantsToPlay', { username: data.senderUsername })}
+            </p>
+            <div className='flex gap-2 justify-end'>
               <button
-                className="text-xs px-2 py-1 rounded bg-zinc-600 text-white"
+                className='text-xs px-2 py-1 rounded bg-zinc-600 text-white'
                 onClick={() => {
                   socket.emit('declineGameInvite', { inviteId: data.inviteId });
-                  toast.dismiss(toastId);
+                  toast.dismiss(`invite-${data.inviteId}`);
                 }}
               >
                 {t('notification.decline')}
               </button>
               <button
-                className="text-xs px-2 py-1 rounded bg-emerald-600 text-white font-bold"
+                className='text-xs px-2 py-1 rounded bg-emerald-600 text-white font-bold'
                 onClick={() => {
                   socket.emit('acceptGameInvite', { inviteId: data.inviteId });
-                  toast.dismiss(toastId);
+                  toast.dismiss(`invite-${data.inviteId}`);
                 }}
               >
                 {t('notification.accept')}
@@ -69,16 +95,22 @@ export function NotificationListener() {
             </div>
           </div>
         ),
-        { duration: 15000 },
+        { id: `invite-${data.inviteId}`, duration: 15000 },
       );
     };
 
     const onGameInviteAccepted = () => {
       router.push('/game?mode=online');
     };
+    const onGameInviteExpired = (data: { inviteId: string }) => {
+      if (!receivedInvites.current.has(data.inviteId)) return;
+      toast.dismiss(`invite-${data.inviteId}`);
+      toast.info(t('friends.inviteNoLongerValid'));
+    };
 
     socket.on('gameInviteReceived', onGameInviteReceived);
     socket.on('gameInviteAccepted', onGameInviteAccepted);
+    socket.on('gameInviteExpired', onGameInviteExpired);
     socket.on('friendOnline', onFriendOnline);
     socket.on('friendOffline', onFriendOffline);
     socket.on('friendRequestReceived', onRequestReceived);
@@ -96,6 +128,7 @@ export function NotificationListener() {
       socket.off('friendRemoved', onFriendRemoved);
       socket.off('gameInviteReceived', onGameInviteReceived);
       socket.off('gameInviteAccepted', onGameInviteAccepted);
+      socket.off('gameInviteExpired', onGameInviteExpired);
       socket.off('chatMessageReceived', onChatMessage);
     };
   }, [socket, router, t, pathname, user]);

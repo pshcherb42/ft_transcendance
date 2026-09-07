@@ -69,6 +69,13 @@
     "inviteExpired": "{{username}} neatbildēja laikus",
     "inviteDeclined": "{{username}} noraidīja uzaicinājumu",
     "inviteFailed": "{{username}} šķiet ir bezsaistē",
+    "inviteCancelled": "Uzaicinājums lietotājam {{username}} atcelts",
+    "inviteFailedOffline": "{{username}} šķiet ir bezsaistē",
+    "inviteFailedBusy": "Tu jau esi spēlē",
+    "inviteFailedOpponentBusy": "{{username}} jau ir spēlē",
+    "inviteFailedOpponentPending": "{{username}} jau ir neizskatīts uzaicinājums",
+    "inviteFailedTooMany": "Tev ir par daudz neizskatītu uzaicinājumu",
+    "inviteNoLongerValid": "Šis uzaicinājums vairs nav derīgs",
     "errors": {
       "loadFailed": "Neizdevās ielādēt draugu sarakstu",
       "requestFailed": "Neizdevās nosūtīt pieprasījumu",

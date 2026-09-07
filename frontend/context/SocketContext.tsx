@@ -67,7 +67,6 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 
     const s = io(window.location.origin, {
       path: '/socket.io',
-      //transports: ['websocket'],
       auth: async (cb) => {
         try {
           let token = getAccessToken();
