@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="100%" height="100%">
+  <!-- Background with slightly rounded corners -->
+  <rect width="256" height="256" rx="40" fill="#F4F2EE" />
+
+  <!-- Left Paddle -->
+  <rect x="48" y="64" width="24" height="128" rx="8" fill="#1A1A1A" />
+
+  <!-- Right Paddle -->
+  <rect x="184" y="64" width="24" height="128" rx="8" fill="#1A1A1A" />
+
+  <!-- Ball -->
+  <circle cx="128" cy="128" r="32" fill="#EE4424" />
+</svg>

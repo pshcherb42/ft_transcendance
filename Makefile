@@ -15,9 +15,12 @@ BACKEND_PACKS = @nestjs/passport \
 				@types/passport-google-oauth20 \
 				browser-image-compression
 
+CERT_DIR = nginx/certs
+
 all: up
 
 up:
+	@bash createCertSSL.sh
 	@echo "Starting project..."
 	@docker compose up || (echo "\n[!] Error: Failed to start. Try running 'make install-deps' to ensure all packages are installed." && exit 1)
 
@@ -45,6 +48,7 @@ clean-docker:
 fclean: down
 	@docker system prune -a --volumes -f
 	@find . -name "node_modules" -type d -prune -exec rm -rf '{}' +
+	@rm -f $(CERT_DIR)/fullchain.crt $(CERT_DIR)/privkey.key
 
 defclean: 
 	@docker compose down -v --remove-orphans
