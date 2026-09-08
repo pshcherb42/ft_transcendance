@@ -1,11 +1,11 @@
 /**
- * IA para el modo 1 jugador. Controla la pala DERECHA como un humano: solo lee
- * estado público del motor y responde con engine.setInput('right', ...).
+ * AI for 1-player mode. Controls the RIGHT paddle like a human: it only reads
+ * the engine's public state and responds with engine.setInput('right', ...).
  *
- * Movimiento FLUIDO: cada tick avanza hacia su objetivo a velocidad completa.
- * La dificultad no limita su velocidad, sino sus REFLEJOS (cada cuánto re-lee la
- * bola, su error de puntería, su zona muerta y si anticipa el rebote). Con
- * multibola, apunta a la bola entrante que llegará antes.
+ * SMOOTH movement: every tick it moves toward its target at full speed.
+ * Difficulty doesn't limit its speed, but its REFLEXES (how often it re-reads
+ * the ball, its aim error, its dead zone, and whether it anticipates the
+ * bounce). With multiball, it aims at the incoming ball that will arrive first.
  */
 
 import { HEIGHT, BALL_RADIUS, RIGHT_PADDLE_X } from './constants';
@@ -14,10 +14,10 @@ import type { PongEngine } from './pong-engine';
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
 interface AiParams {
-  reactionTicks: number; // cada cuántos ticks re-lee el objetivo
-  deadZone: number; // px de tolerancia (debe ser >= PADDLE_SPEED para no hacer zigzag)
-  aimNoise: number; // px ± de error de puntería
-  predict: boolean; // anticipa dónde caerá la bola (rebotes incluidos)
+  reactionTicks: number; // how many ticks between re-reading the target
+  deadZone: number; // px of tolerance (must be >= PADDLE_SPEED to avoid zigzag)
+  aimNoise: number; // px ± of aim error
+  predict: boolean; // anticipates where the ball will land (bounces included)
 }
 
 const PARAMS: Record<Difficulty, AiParams> = {
@@ -26,7 +26,7 @@ const PARAMS: Record<Difficulty, AiParams> = {
   hard: { reactionTicks: 2, deadZone: 14, aimNoise: 6, predict: true },
 };
 
-// Predice la Y de una bola al llegar a la pala derecha, reflejando en las paredes.
+// Predicts a ball's Y when it reaches the right paddle, reflecting off the walls.
 function predictInterceptY(x: number, y: number, vx: number, vy: number): number {
   if (vx <= 0) return HEIGHT / 2;
   const ticks = (RIGHT_PADDLE_X - x) / vx;
@@ -34,8 +34,8 @@ function predictInterceptY(x: number, y: number, vx: number, vy: number): number
   const max = HEIGHT - BALL_RADIUS;
   const span = max - min;
   let ry = y + vy * ticks - min;
-  ry = ((ry % (2 * span)) + 2 * span) % (2 * span); // onda triangular
-  if (ry > span) ry = 2 * span - ry; // reflexión en las paredes
+  ry = ((ry % (2 * span)) + 2 * span) % (2 * span); // triangular wave
+  if (ry > span) ry = 2 * span - ry; // reflection off the walls
   return ry + min;
 }
 
@@ -48,12 +48,12 @@ export class PongAi {
     this.p = PARAMS[difficulty];
   }
 
-  /** Llamar una vez por tick, ANTES de engine.step(). Controla la pala DERECHA. */
+  /** Call once per tick, BEFORE engine.step(). Controls the RIGHT paddle. */
   update(engine: PongEngine) {
     if (this.ticksToReplan <= 0) {
       this.ticksToReplan = this.p.reactionTicks;
 
-      // Bola entrante (vx>0) que llegará antes a la pala derecha.
+      // Incoming ball (vx>0) that will reach the right paddle first.
       let target: { x: number; y: number; vx: number; vy: number } | null = null;
       let bestTicks = Infinity;
       for (const b of engine.balls) {
@@ -72,7 +72,7 @@ export class PongAi {
           : target.y;
         this.targetY = aimY + (Math.random() * 2 - 1) * this.p.aimNoise;
       } else {
-        this.targetY = HEIGHT / 2; // ninguna bola viene → vuelve al centro
+        this.targetY = HEIGHT / 2; // no ball incoming → return to the center
       }
     }
     this.ticksToReplan--;

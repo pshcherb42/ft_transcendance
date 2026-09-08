@@ -38,7 +38,7 @@ export default function ChatPage() {
   }, [loading, user, router]);
 
   /*
-   * Автоматически открываем первый чат после загрузки друзей.
+   * Automatically open the first chat after the friends list loads.
    */
 
 
@@ -85,7 +85,7 @@ export default function ChatPage() {
   return (
     <div className="relative flex min-h-[calc(100dvh-48px)] flex-col bg-background">
     <main className="relative z-10 flex flex-1 flex-col">
-      {/* Верхняя навигация */}
+      {/* Top navigation */}
       <header
         className="
           flex
@@ -156,7 +156,7 @@ export default function ChatPage() {
         </button>
       </header>
 
-      {/* Область чата */}
+      {/* Chat area */}
       <section
         className="
           flex
@@ -187,7 +187,7 @@ export default function ChatPage() {
             md:h-[calc(100dvh-210px)]
           "
         >
-          {/* Левая колонка */}
+          {/* Left column */}
           <aside
             className={`
               w-full
@@ -309,7 +309,7 @@ export default function ChatPage() {
             </div>
           </aside>
 
-          {/* Правая колонка */}
+          {/* Right column */}
           <section
             className={`
               min-w-0
@@ -337,7 +337,7 @@ export default function ChatPage() {
               </div>
             ) : (
               <>
-                {/* Заголовок активного чата */}
+                {/* Active chat header */}
                 <header
                   className="
                     flex
@@ -461,7 +461,7 @@ export default function ChatPage() {
                   </button>
                 </header>
 
-                {/* Сообщения */}
+                {/* Messages */}
                 <div
                   className="
                     flex
@@ -534,7 +534,7 @@ export default function ChatPage() {
                   })}
                 </div>
 
-                {/* Поле отправки */}
+                {/* Message input */}
                 <form
                   onSubmit={handleSend}
                   className="

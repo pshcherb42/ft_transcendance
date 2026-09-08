@@ -384,7 +384,7 @@ export default function RegisterPage() {
         )}
       </div>
 
-      {/* основной контент */}
+      {/* main content */}
       <div
         className='
           relative
@@ -408,7 +408,7 @@ export default function RegisterPage() {
           xl:px-[108px]
         '
       >
-        {/* левая часть — заголовок */}
+        {/* left side — heading */}
         <div className='min-w-0 lg:flex-1'>
           <span className='text-xs font-bold uppercase tracking-widest text-brand-green sm:text-sm'>
             42 Transcendence
@@ -464,7 +464,7 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        {/* правая часть — форма */}
+        {/* right side — form */}
         <div
           className='
             w-full

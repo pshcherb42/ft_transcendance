@@ -7,11 +7,11 @@ async function loginUser(email, password) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
-    if (!response.ok) throw new Error(`Error en login HTTP: ${response.status}`);
+    if (!response.ok) throw new Error(`HTTP login error: ${response.status}`);
     const data = await response.json();
     return data.accessToken;
   } catch (error) {
-    console.error(`No se pudo obtener el token para ${email}:`, error.message);
+    console.error(`Could not get the token for ${email}:`, error.message);
     process.exit(1);
   }
 }
@@ -25,55 +25,55 @@ function connect(name, token) {
   });
 
   socket.on('connect', () => {
-    console.log(`[${name}] conectado con ID: ${socket.id}`);
+    console.log(`[${name}] connected with ID: ${socket.id}`);
     socket.emit('joinQueue');
   });
 
-  socket.on('waiting', () => console.log(`[${name}] en cola, esperando rival...`));
-  socket.on('matchFound', (data) => console.log(`[${name}] ¡Partida encontrada! ID Sala: ${data.roomId} | Lado: ${data.side}`));
-  socket.on('rejoinedGame', (data) => console.log(`[${name}] Reincorporado a la sala: ${data.roomId}`));
-  socket.on('opponentDisconnected', (data) => console.log(`[${name}] El rival se desconectó. Periodo de gracia: ${data.gracePeriodMs}ms`));
+  socket.on('waiting', () => console.log(`[${name}] in queue, waiting for an opponent...`));
+  socket.on('matchFound', (data) => console.log(`[${name}] Match found! Room ID: ${data.roomId} | Side: ${data.side}`));
+  socket.on('rejoinedGame', (data) => console.log(`[${name}] Rejoined the room: ${data.roomId}`));
+  socket.on('opponentDisconnected', (data) => console.log(`[${name}] The opponent disconnected. Grace period: ${data.gracePeriodMs}ms`));
   socket.on('opponentReconnected', (data) => {
-    console.log(`[${name}] El rival se ha reconectado: ${data.userId}`);
+    console.log(`[${name}] The opponent reconnected: ${data.userId}`);
     if (name === 'B') {
-      console.log('=== TEST PASADO: la partida se reanudó tras la reconexión ===');
+      console.log('=== TEST PASSED: the match resumed after the reconnection ===');
       socket.disconnect();
       process.exit(0);
     }
   });
   socket.on('gameOver', (data) => {
-    console.log(`[${name}] PARTIDA TERMINADA (inesperado en este test). Razón: ${data.reason}`);
+    console.log(`[${name}] GAME OVER (unexpected in this test). Reason: ${data.reason}`);
     process.exit(1); // reconnect test should never reach forfeit
   });
-  socket.on('connect_error', (err) => console.log(`[${name}] error de conexión:`, err.message));
-  socket.on('disconnect', (reason) => console.log(`[${name}] desconectado debido a:`, reason));
+  socket.on('connect_error', (err) => console.log(`[${name}] connection error:`, err.message));
+  socket.on('disconnect', (reason) => console.log(`[${name}] disconnected due to:`, reason));
 
   return socket;
 }
 
 async function startTest() {
-  console.log('=== TEST: RECONEXIÓN dentro del periodo de gracia ===');
-  console.log('Solicitando tokens...');
+  console.log('=== TEST: RECONNECTION within the grace period ===');
+  console.log('Requesting tokens...');
   const tokenA = await loginUser('userA@test.com', 'yourpassword');
   const tokenB = await loginUser('userB@test.com', 'yourpassword');
-  console.log('Tokens obtenidos con éxito.');
+  console.log('Tokens obtained successfully.');
 
   let a = connect('A', tokenA);
   connect('B', tokenB);
 
   setTimeout(() => {
-    console.log(`--- Desconectando al Jugador A en: ${new Date().toISOString()} ---`);
+    console.log(`--- Disconnecting Player A at: ${new Date().toISOString()} ---`);
     a.disconnect();
   }, 5000);
 
   setTimeout(() => {
-    console.log(`--- Reconectando al Jugador A en: ${new Date().toISOString()} (dentro de los 15s) ---`);
-    a = connect('A (reconectado)', tokenA);
+    console.log(`--- Reconnecting Player A at: ${new Date().toISOString()} (within the 15s) ---`);
+    a = connect('A (reconnected)', tokenA);
   }, 11000); // disconnect at 5s + reconnect 6s later = well within the 15s window
 
   // Safety timeout in case opponentReconnected never fires
   setTimeout(() => {
-    console.error('TIMEOUT: opponentReconnected nunca se emitió. Revisa el backend.');
+    console.error('TIMEOUT: opponentReconnected was never emitted. Check the backend.');
     process.exit(1);
   }, 25000);
 }

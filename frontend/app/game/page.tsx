@@ -28,7 +28,7 @@ export default function GamePage() {
   const mapParam = searchParams.get('map');
   const powerupsParam = searchParams.get('powerups');
 
-  const canvasRef = useRef<HTMLCanvasElement>(null); // solo modo online
+  const canvasRef = useRef<HTMLCanvasElement>(null); // online mode only
   const rendererRef = useRef(new PongRenderer());
 
   const [reconnectSecondsLeft, setReconnectSecondsLeft] = useState<
@@ -529,7 +529,7 @@ export default function GamePage() {
           lg:px-16
         '
         >
-          {/* Верхняя часть */}
+          {/* Top section */}
           <div className='flex flex-col items-center gap-5 sm:gap-6 lg:relative lg:min-h-[70px] lg:items-start lg:justify-center justify-center'>
             <button
               type='button'
@@ -610,7 +610,7 @@ export default function GamePage() {
             </div>
           </div>
 
-          {/* Карточка игры */}
+          {/* Game card */}
           <div
             className='
             mx-auto
@@ -629,7 +629,7 @@ export default function GamePage() {
             md:pb-5
           '
           >
-            {/* Игроки и счёт */}
+            {/* Players and score */}
             <div
               className='
             grid
@@ -881,7 +881,7 @@ export default function GamePage() {
               )}
             </div>
 
-            {/* Mobile result — вместо игрового поля */}
+            {/* Mobile result — in place of the game field */}
             {isGameFinished && (
               <div
                 className='
@@ -1026,7 +1026,7 @@ export default function GamePage() {
               </div>
             )}
 
-            {/* Информация под игровым полем */}
+            {/* Info below the game field */}
             {mode !== 'online' && !isGameFinished && (
               <div className='mx-auto mt-5 min-h-[28px] text-center'>
                 <p className='text-[12px] leading-5 text-[#615050] sm:text-[14px]'>

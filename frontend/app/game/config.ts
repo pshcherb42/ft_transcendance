@@ -1,9 +1,9 @@
 /**
- * Configuración de una partida local: mapa y power-ups.
+ * Configuration for a local match: map and power-ups.
  *
- * SOLO afecta al modo local (el motor del frontend). El online usa el motor
- * autoritativo del backend, que no conoce esta config. Con `DEFAULT_CONFIG` el
- * motor se comporta exactamente como el Pong clásico.
+ * ONLY affects local mode (the frontend engine). Online uses the backend's
+ * authoritative engine, which doesn't know about this config. With
+ * `DEFAULT_CONFIG` the engine behaves exactly like classic Pong.
  */
 
 import { WIDTH, HEIGHT } from './constants';
@@ -25,10 +25,10 @@ export interface GameConfig {
 
 export const DEFAULT_CONFIG: GameConfig = { map: 'classic', powerups: false };
 
-// Definición de obstáculos por mapa (rectángulos AABB donde rebota la bola).
+// Obstacle definitions per map (AABB rectangles the ball bounces off).
 export const MAPS: Record<MapId, Obstacle[]> = {
   classic: [],
-  // Dos bloques centrales dejando un hueco por el medio.
+  // Two central blocks leaving a gap in the middle.
   obstacles: [
     { x: WIDTH / 2 - 10, y: 60, w: 20, h: 160 },
     { x: WIDTH / 2 - 10, y: HEIGHT - 220, w: 20, h: 160 },
@@ -36,6 +36,6 @@ export const MAPS: Record<MapId, Obstacle[]> = {
 };
 
 export const MAP_LABEL: Record<MapId, string> = {
-  classic: 'Clásico',
-  obstacles: 'Obstáculos',
+  classic: 'Classic',
+  obstacles: 'Obstacles',
 };

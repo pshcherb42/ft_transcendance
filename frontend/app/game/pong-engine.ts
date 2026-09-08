@@ -1,14 +1,14 @@
 /**
- * Motor de Pong del frontend (modo LOCAL: 2 jugadores, vs IA y torneo).
+ * Frontend Pong engine (LOCAL mode: 2 players, vs AI and tournament).
  *
- * Es un espejo del motor autoritativo del backend
- * (backend/src/websockets/pong-engine.ts) para la física base, pero además es
- * CONFIGURABLE: acepta un GameConfig con mapa (obstáculos) y power-ups.
+ * It mirrors the backend's authoritative engine
+ * (backend/src/websockets/pong-engine.ts) for the base physics, but it is also
+ * CONFIGURABLE: it accepts a GameConfig with a map (obstacles) and power-ups.
  *
- * ⚠️ Con `DEFAULT_CONFIG` (sin obstáculos ni power-ups) el comportamiento es
- *    EXACTAMENTE el del Pong clásico — no debe cambiar. Toda la lógica nueva va
- *    detrás de `obstacles.length` / `config.powerups`. En modo online NO se usa
- *    este motor: el servidor calcula la física y el cliente solo pinta el snapshot.
+ * ⚠️ With `DEFAULT_CONFIG` (no obstacles or power-ups) the behavior is
+ *    EXACTLY that of classic Pong — it must not change. All the new logic sits
+ *    behind `obstacles.length` / `config.powerups`. Online mode does NOT use
+ *    this engine: the server computes the physics and the client just paints the snapshot.
  */
 
 import {
@@ -60,7 +60,7 @@ interface Ball {
   vx: number;
   vy: number;
   speed: number;
-  lastHitBy: Side | null; // última pala que la golpeó (para asignar power-ups)
+  lastHitBy: Side | null; // last paddle that hit it (for assigning power-ups)
 }
 
 interface Pickup {
@@ -75,7 +75,7 @@ export class PongEngine {
   private config: GameConfig;
   private obstacles: Obstacle[];
 
-  balls: Ball[]; // público: la IA lee las bolas entrantes
+  balls: Ball[]; // public: the AI reads the incoming balls
 
   leftPaddleY: number;
   rightPaddleY: number;
@@ -96,7 +96,7 @@ export class PongEngine {
 
   private pickups: Pickup[] = [];
   private spawnTicks = POWERUP_SPAWN_TICKS;
-  private leftEffectTicks = 0; // ticks restantes del efecto de tamaño en la pala izq.
+  private leftEffectTicks = 0; // ticks left of the size effect on the left paddle
   private rightEffectTicks = 0;
 
   constructor(config: GameConfig = DEFAULT_CONFIG) {
@@ -107,7 +107,7 @@ export class PongEngine {
     this.balls = [this.centerBall()];
   }
 
-  // Compatibilidad: la bola "principal" (la IA y el snapshot base la usan).
+  // Compatibility: the "main" ball (used by the AI and the base snapshot).
   get ballX() { return this.balls[0]?.x ?? WIDTH / 2; }
   get ballY() { return this.balls[0]?.y ?? HEIGHT / 2; }
   get ballVX() { return this.balls[0]?.vx ?? 0; }
@@ -154,7 +154,7 @@ export class PongEngine {
       scoreRight: this.scoreRight,
       winner: this.winner,
     };
-    // Campos opcionales: solo cuando aportan algo (clásico → snapshot idéntico a antes).
+    // Optional fields: only when they add something (classic → snapshot identical to before).
     if (this.obstacles.length) snap.obstacles = this.obstacles;
     if (this.balls.length > 1) {
       snap.balls = this.balls.map((b) => ({ x: b.x, y: b.y }));
@@ -169,7 +169,7 @@ export class PongEngine {
     return snap;
   }
 
-  // ------------------------------------------------------------------ privados
+  // ------------------------------------------------------------------ private
 
   private centerBall(): Ball {
     return {
@@ -202,7 +202,7 @@ export class PongEngine {
     this.status = 'countdown';
     this.countdownTicks = COUNTDOWN_TICKS;
     this.serveDir = serveDir;
-    this.balls = [this.centerBall()]; // vuelve a una sola bola en el centro
+    this.balls = [this.centerBall()]; // back to a single ball in the center
   }
 
   private serve() {
@@ -234,7 +234,7 @@ export class PongEngine {
       ball.x += ball.vx;
       ball.y += ball.vy;
 
-      // Paredes.
+      // Walls.
       if (ball.y - BALL_RADIUS <= 0) {
         ball.y = BALL_RADIUS;
         ball.vy = Math.abs(ball.vy);
@@ -248,7 +248,7 @@ export class PongEngine {
       this.bounceOnPaddle(ball, 'right');
       if (this.config.powerups) this.collectPickups(ball);
 
-      // Goles.
+      // Goals.
       if (ball.x - BALL_RADIUS <= 0) {
         this.scoreRight++;
         scored = 'right';
@@ -266,7 +266,7 @@ export class PongEngine {
       this.status = 'finished';
       this.winner = this.scoreLeft >= WINNING_SCORE ? 'left' : 'right';
     } else if (this.balls.length === 0) {
-      // Sin bolas en juego → saque hacia quien acaba de encajar el punto.
+      // No balls in play → serve toward whoever just conceded the point.
       this.startCountdown(scored === 'left' ? 1 : -1);
     }
   }
@@ -313,7 +313,7 @@ export class PongEngine {
     ball.lastHitBy = side;
   }
 
-  // Rebote círculo–AABB por eje de menor penetración (sin quedar pegada).
+  // Circle–AABB bounce along the axis of least penetration (without sticking).
   private bounceOnObstacles(ball: Ball) {
     for (const o of this.obstacles) {
       const closestX = clamp(ball.x, o.x, o.x + o.w);
@@ -352,7 +352,7 @@ export class PongEngine {
   // -------------------------------------------------------------- power-ups
 
   private collectPickups(ball: Ball) {
-    if (!ball.lastHitBy) return; // nadie la ha tocado aún → no se puede asignar
+    if (!ball.lastHitBy) return; // nobody has touched it yet → can't assign
     const reach = POWERUP_RADIUS + BALL_RADIUS;
     for (let i = this.pickups.length - 1; i >= 0; i--) {
       const p = this.pickups[i];
@@ -428,7 +428,7 @@ export class PongEngine {
 
     const type = POWERUP_TYPES[Math.floor(Math.random() * POWERUP_TYPES.length)];
     this.pickups.push({
-      x: WIDTH * 0.3 + Math.random() * WIDTH * 0.4, // banda central
+      x: WIDTH * 0.3 + Math.random() * WIDTH * 0.4, // central band
       y: 60 + Math.random() * (HEIGHT - 120),
       type,
     });

@@ -20,11 +20,11 @@ export default function BouncingBall() {
 
     const ballSize = 32;
 
-    // Случайная стартовая позиция внутри контейнера
+    // Random starting position inside the container
     let x = Math.random() * Math.max(0, parent.clientWidth - ballSize);
     let y = Math.random() * Math.max(0, parent.clientHeight - ballSize);
 
-    // Случайное направление движения
+    // Random movement direction
     let velocityX = Math.random() > 0.5 ? 1.2 : -1.2;
     let velocityY = Math.random() > 0.5 ? 0.9 : -0.9;
 
@@ -62,8 +62,8 @@ export default function BouncingBall() {
       animationFrameId = requestAnimationFrame(animate);
     };
 
-    // Сразу ставим шарик в случайную позицию,
-    // чтобы он не мигал сначала в левом верхнем углу
+    // Place the ball at a random position right away,
+    // so it doesn't flash in the top-left corner first
     ball.style.transform = `translate3d(${x}px, ${y}px, 0)`;
     ball.style.opacity = '1';
 

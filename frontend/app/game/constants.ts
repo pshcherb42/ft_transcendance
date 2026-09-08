@@ -1,59 +1,59 @@
 /**
- * Constantes del Pong (frontend).
+ * Pong constants (frontend).
  *
- * ⚠️ Las constantes de FÍSICA deben coincidir EXACTAMENTE con
- *    backend/src/websockets/pong-engine.ts para que el modo local se vea y se
- *    comporte igual que el modo online (que corre en el servidor).
+ * ⚠️ The PHYSICS constants must match EXACTLY those in
+ *    backend/src/websockets/pong-engine.ts so local mode looks and behaves
+ *    the same as online mode (which runs on the server).
  */
 
-// --- Campo ---
+// --- Field ---
 export const WIDTH = 1066;
 export const HEIGHT = 578;
 
-// --- Palas ---
+// --- Paddles ---
 export const PADDLE_WIDTH = 12;
 export const PADDLE_HEIGHT = 90;
-export const PADDLE_SPEED = 11; // subido de 8 para que el juego no se sienta lento
+export const PADDLE_SPEED = 11; // bumped up from 8 so the game doesn't feel sluggish
 export const LEFT_PADDLE_X = 24;
 export const RIGHT_PADDLE_X = WIDTH - 24 - PADDLE_WIDTH; // 764
 
-// --- Pelota ---
+// --- Ball ---
 export const BALL_RADIUS = 9;
 export const BALL_SPEED_START = 7;
 export const BALL_SPEED_MAX = 15;
 export const BALL_SPEEDUP = 0.6;
 export const MAX_BOUNCE_RAD = Math.PI / 4;
-export const SERVE_JITTER_RAD = Math.PI / 36; // ±5° de variación aleatoria en el saque
-export const BALL_SPIN = 0.25;                // arrastre vertical de la pala sobre la bola (spin)
+export const SERVE_JITTER_RAD = Math.PI / 36; // ±5° random variation on the serve
+export const BALL_SPIN = 0.25;                // vertical drag of the paddle on the ball (spin)
 
-// --- Partida ---
+// --- Match ---
 export const WINNING_SCORE = 5;
 export const TICK_RATE = 30;
 export const COUNTDOWN_TICKS = TICK_RATE * 3;
 
-// --- Power-ups y multibola (SOLO modo local) ---
+// --- Power-ups and multiball (LOCAL mode ONLY) ---
 export const POWERUP_RADIUS = 16;
-export const POWERUP_SPAWN_TICKS = TICK_RATE * 5; // aparece uno cada ~5 s
-export const POWERUP_MAX = 2; // máximo en el campo a la vez
-export const POWERUP_EFFECT_TICKS = TICK_RATE * 8; // duración de los efectos de pala (~8 s)
-export const PADDLE_GROW_FACTOR = 1.6; // agranda tu pala
-export const PADDLE_SHRINK_FACTOR = 0.6; // encoge la del rival
+export const POWERUP_SPAWN_TICKS = TICK_RATE * 5; // one appears every ~5 s
+export const POWERUP_MAX = 2; // max on the field at once
+export const POWERUP_EFFECT_TICKS = TICK_RATE * 8; // duration of the paddle effects (~8 s)
+export const PADDLE_GROW_FACTOR = 1.6; // grows your paddle
+export const PADDLE_SHRINK_FACTOR = 0.6; // shrinks the opponent's
 export const PADDLE_MIN_HEIGHT = 45;
 export const PADDLE_MAX_HEIGHT = 170;
-export const SPEED_POWERUP_FACTOR = 1.4; // acelera la bola que lo recoge
-export const SPEED_POWERUP_CAP = BALL_SPEED_MAX * 1.4; // tope de velocidad con el power-up
-export const MAX_BALLS = 4; // tope de bolas simultáneas con multibola
+export const SPEED_POWERUP_FACTOR = 1.4; // speeds up the ball that picks it up
+export const SPEED_POWERUP_CAP = BALL_SPEED_MAX * 1.4; // speed cap with the power-up
+export const MAX_BALLS = 4; // max simultaneous balls with multiball
 
-// Colores de los obstáculos y de cada tipo de power-up (los usa el renderer).
+// Colors of the obstacles and of each power-up type (used by the renderer).
 export const COLOR_OBSTACLE = '#52525b';
 export const POWERUP_COLORS: Record<string, string> = {
-  grow: '#5B8DEF',      // мягкий синий
-  shrink: '#C87AB6',    // пыльная фуксия
-  speed: '#F2A65A',     // тёплый янтарный
-  multiball: '#7B6EF6', // насыщенный фиолетовый
+  grow: '#5B8DEF',      // soft blue
+  shrink: '#C87AB6',    // dusty fuchsia
+  speed: '#F2A65A',     // warm amber
+  multiball: '#7B6EF6', // rich purple
 };
 
-// --- Estilo (solo lo usa el renderer) ---
+// --- Style (used only by the renderer) ---
 export const COLOR_BG = '#0a0a0a';
 export const COLOR_FG = '#f4f4f5';
 export const COLOR_ACCENT = '#4ade80';

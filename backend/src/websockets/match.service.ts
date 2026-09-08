@@ -2,17 +2,17 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 export interface MatchResult {
-  homeId: string; // jugador de la izquierda
-  awayId: string; // jugador de la derecha
+  homeId: string; // left player
+  awayId: string; // right player
   homeScore: number;
   awayScore: number;
   winnerId: string;
 }
 
 /**
- * Persiste el resultado de una partida: crea un registro Match y actualiza las
- * Stats (wins/losses) de cada jugador. Es tolerante a fallos: si la BD no está
- * disponible, registra el error pero no rompe la partida en curso.
+ * Persists a match result: creates a Match record and updates each player's
+ * Stats (wins/losses). It is fault-tolerant: if the DB is unavailable, it
+ * logs the error but doesn't break the match in progress.
  */
 @Injectable()
 export class MatchService {
@@ -36,11 +36,11 @@ export class MatchService {
         result.winnerId === result.homeId ? result.awayId : result.homeId;
 
       await this.bumpStats(result.winnerId, 'win');
-      // Evitamos contar victoria y derrota al mismo usuario (p.ej. dos pestañas).
+      // Avoid counting a win and a loss for the same user (e.g. two tabs).
       if (loserId !== result.winnerId) await this.bumpStats(loserId, 'loss');
     } catch (err) {
       this.logger.error(
-        `No se pudo guardar la partida: ${err?.message ?? err}`,
+        `Could not save the match: ${err?.message ?? err}`,
       );
     }
   }

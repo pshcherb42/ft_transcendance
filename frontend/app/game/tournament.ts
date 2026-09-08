@@ -1,11 +1,11 @@
 /**
- * Torneo local de eliminación directa (2–8 jugadores por alias).
+ * Local single-elimination tournament (2–8 players by alias).
  *
- * Módulo PURO (sin React ni canvas): construye el bracket, dice qué partida toca
- * y avanza a los ganadores. Los "byes" (cuando el nº de jugadores no es potencia
- * de 2) se reparten para que ningún cruce quede vacío: cada partida de la primera
- * ronda tiene siempre al menos un jugador real (en `p1`), y si `p2` es null ese
- * jugador pasa automáticamente.
+ * PURE module (no React or canvas): builds the bracket, says which match is up
+ * and advances the winners. The "byes" (when the player count isn't a power of
+ * 2) are distributed so no matchup is empty: every first-round match always has
+ * at least one real player (in `p1`), and if `p2` is null that player advances
+ * automatically.
  */
 
 export interface TournamentMatch {
@@ -39,7 +39,7 @@ export class Tournament {
     const size = Math.max(2, nextPow2(players.length));
     const numRounds = Math.round(Math.log2(size));
 
-    // Rondas vacías (matches0, matches0/2, …, 1).
+    // Empty rounds (matches0, matches0/2, …, 1).
     let count = size / 2;
     for (let r = 0; r < numRounds; r++) {
       this.rounds.push(
@@ -54,14 +54,14 @@ export class Tournament {
       count /= 2;
     }
 
-    // Primera ronda: p1 siempre real; p2 real o null (bye).
+    // First round: p1 always real; p2 real or null (bye).
     const matches0 = size / 2;
     for (let i = 0; i < matches0; i++) {
       this.rounds[0][i].p1 = players[i] ?? null;
       this.rounds[0][i].p2 = players[matches0 + i] ?? null;
     }
 
-    // Resolver byes de la primera ronda (p2 null → pasa p1).
+    // Resolve first-round byes (p2 null → p1 advances).
     for (const m of this.rounds[0]) {
       if (m.p1 && !m.p2) {
         m.winner = m.p1;
@@ -70,7 +70,7 @@ export class Tournament {
     }
   }
 
-  // Próxima partida real por jugar (ambos jugadores conocidos, sin ganador).
+  // Next real match to play (both players known, no winner yet).
   get current(): TournamentMatch | null {
     for (const round of this.rounds) {
       for (const m of round) {
@@ -89,7 +89,7 @@ export class Tournament {
     return this.rounds[this.rounds.length - 1][0].winner;
   }
 
-  // Reporta el ganador de la partida en curso (por alias) y lo hace avanzar.
+  // Reports the winner of the current match (by alias) and advances them.
   reportWinner(alias: string) {
     const m = this.current;
     if (!m) return;

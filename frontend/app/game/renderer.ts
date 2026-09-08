@@ -1,9 +1,9 @@
 /**
- * Renderer puro del Pong: dibuja un GameSnapshot en un canvas 2D.
+ * Pure Pong renderer: draws a GameSnapshot onto a 2D canvas.
  *
- * No conoce la física ni la red: recibe un estado y lo pinta.
- * Los obstáculos, power-ups, bolas extra y alturas variables
- * se dibujan solo cuando vienen en el snapshot.
+ * It knows nothing about physics or the network: it receives a state and paints it.
+ * Obstacles, power-ups, extra balls and variable heights
+ * are drawn only when they come in the snapshot.
  */
 
 import {

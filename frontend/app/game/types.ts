@@ -1,11 +1,11 @@
 /**
- * Tipos del protocolo del juego, compartidos entre el motor local, el renderer
- * y la comunicación por socket. Los campos base deben coincidir con los del
- * backend (backend/src/websockets/pong-engine.ts).
+ * Game protocol types, shared between the local engine, the renderer and the
+ * socket communication. The base fields must match those in the backend
+ * (backend/src/websockets/pong-engine.ts).
  *
- * Los campos OPCIONALES (obstáculos, bolas extra, power-ups, alturas de pala)
- * solo los rellena el motor LOCAL; los snapshots del backend (online) no los
- * traen y el renderer los ignora → el online sigue pintándose igual.
+ * The OPTIONAL fields (obstacles, extra balls, power-ups, paddle heights) are
+ * only filled by the LOCAL engine; the backend (online) snapshots don't carry
+ * them and the renderer ignores them → online still renders the same.
  */
 
 import type { PowerUpType, Obstacle } from './config';
@@ -14,7 +14,7 @@ export type Side = 'left' | 'right';
 export type Dir = 'up' | 'down' | 'stop';
 export type Status = 'countdown' | 'playing' | 'finished';
 
-// Modo de juego elegido en la pantalla de inicio.
+// Game mode chosen on the start screen.
 export type Mode = 'online' | 'local' | 'ai' | 'tournament';
 
 export interface BallView {
@@ -28,10 +28,10 @@ export interface PickupView {
   type: PowerUpType;
 }
 
-// Estado serializable de una partida en un instante dado.
+// Serializable state of a match at a given instant.
 export interface GameSnapshot {
   status: Status;
-  countdown: number; // segundos que faltan para el saque (0 si ya se juega)
+  countdown: number; // seconds left before the serve (0 if already playing)
   leftPaddleY: number;
   rightPaddleY: number;
   ballX: number;
@@ -40,10 +40,10 @@ export interface GameSnapshot {
   scoreRight: number;
   winner: Side | null;
 
-  // --- Opcionales (solo modo local con mapas/power-ups) ---
+  // --- Optional (local mode only, with maps/power-ups) ---
   leftPaddleH?: number;
   rightPaddleH?: number;
-  balls?: BallView[]; // todas las bolas cuando hay multibola
+  balls?: BallView[]; // all the balls when multiball is active
   obstacles?: Obstacle[];
   pickups?: PickupView[];
 }

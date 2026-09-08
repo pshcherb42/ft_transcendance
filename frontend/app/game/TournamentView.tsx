@@ -689,7 +689,7 @@ setScore(finalScore);
               md:px-6
             "
           >
-  {/* Ники и счёт — только во время самой игры */}
+  {/* Nicknames and score — only during the game itself */}
   {ready && (
   <div
     className="
@@ -702,7 +702,7 @@ setScore(finalScore);
       sm:pb-4
     "
   >
-    {/* Левый игрок */}
+    {/* Left player */}
     <div className="min-w-0">
       <p
         className="
@@ -718,7 +718,7 @@ setScore(finalScore);
       </p>
     </div>
 
-    {/* Счёт */}
+    {/* Score */}
     <div
       className="
         flex
@@ -744,7 +744,7 @@ setScore(finalScore);
       <span>{score.right}</span>
     </div>
 
-    {/* Правый игрок */}
+    {/* Right player */}
     <div className="min-w-0 text-right">
       <p
         className="
@@ -762,7 +762,7 @@ setScore(finalScore);
   </div>
 )}
 
-  {/* Чёрное поле ограничено шириной белой карточки */}
+  {/* Black field constrained to the width of the white card */}
   <div
     className={`
       relative
@@ -788,7 +788,7 @@ setScore(finalScore);
         onFinish={handleWinner}
       />
     ) : lastResult ? (
-      /* Результат предыдущего матча */
+      /* Result of the previous match */
       <div
         className="
           flex
@@ -887,7 +887,7 @@ setScore(finalScore);
         </button>
       </div>
     ) : (
-      /* Следующий матч */
+      /* Next match */
       <div
         className="
           flex

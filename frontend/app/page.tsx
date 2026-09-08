@@ -86,7 +86,7 @@ export default function HomePage() {
       <BouncingBall />
 
       <main className="relative z-10 flex flex-1 flex-col">
-        {/* Верхние кнопки */}
+        {/* Top buttons */}
         <header
           className="
             flex
@@ -163,7 +163,7 @@ export default function HomePage() {
           </button>
         </header>
 
-        {/* Основной контент - белая карточка*/}
+        {/* Main content - white card */}
         <section
           className="
             mx-auto
@@ -235,7 +235,7 @@ export default function HomePage() {
             </div>
 
             <div className="grid gap-10 lg:grid-cols-2 lg:gap-14">
-              {/* Левая часть — режимы игры */}
+              {/* Left side — game modes */}
               <div>
                 <p className="mb-4 text-sm font-bold uppercase tracking-wide text-[#615050]">
                   {t('home.gameMode')}
@@ -328,13 +328,13 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Правая часть — настройки */}
+              {/* Right side — settings */}
               <div className="lg:border-l lg:border-[#EEE9E6] lg:pl-14">
                 <p className="mb-5 text-sm font-bold uppercase tracking-wide text-[#615050]">
                 {t('game.menu.gameSettings')}{' '} <span className="lowercase font-medium">{t('game.menu.gameSettingsNote')}</span>
                 </p>
 
-                {/* Карта */}
+                {/* Map */}
                 <div>
                   <p className="mb-3 text-sm text-[#615050]">
                   {t('game.menu.map')}
@@ -443,7 +443,7 @@ export default function HomePage() {
                   </button>
                 </div>
 
-                {/* Сложность AI */}
+                {/* AI difficulty */}
                 <div className="mt-7">
                   <p className="mb-3 text-sm text-[#615050]">
                   {t('game.menu.aiDifficulty')}

@@ -18,10 +18,10 @@ interface Room {
 }
 
 /**
- * Orquesta las partidas online: por cada sala mantiene un PongEngine
- * autoritativo, corre su bucle a TICK_RATE Hz, difunde el estado, y ahora
- * también gestiona desconexiones con periodo de gracia (15s) antes de
- * declarar forfeit.
+ * Orchestrates the online matches: for each room it keeps an authoritative
+ * PongEngine, runs its loop at TICK_RATE Hz, broadcasts the state, and now
+ * also handles disconnects with a grace period (15s) before declaring a
+ * forfeit.
  */
 @Injectable()
 export class GameService {
@@ -165,10 +165,10 @@ export class GameService {
       : undefined;
   }
 
-  // Llamado cuando un usuario abandona voluntariamente (leaveGame) — a
-  // diferencia de handleDisconnect, no hay periodo de gracia: se declara
-  // forfeit al instante porque sabemos que fue una salida deliberada, no
-  // una caída de red.
+  // Called when a user leaves voluntarily (leaveGame) — unlike
+  // handleDisconnect, there's no grace period: a forfeit is declared
+  // instantly because we know it was a deliberate exit, not a network
+  // drop.
   forfeitImmediately(userId: string, server: Server) {
     const roomId = this.userToRoom.get(userId);
     if (!roomId) return;
@@ -202,7 +202,7 @@ export class GameService {
     });
 
     this.logger.log(
-      `💾 Guardando partida por abandono voluntario. Ganador: ${winnerId}`,
+      `💾 Saving match after voluntary forfeit. Winner: ${winnerId}`,
     );
     this.matchService
       .record({
@@ -214,23 +214,23 @@ export class GameService {
       })
       .catch((err: unknown) => {
         const msg = err instanceof Error ? err.message : String(err);
-        this.logger.error(`❌ Error persistiendo forfeit voluntario: ${msg}`);
+        this.logger.error(`❌ Error persisting voluntary forfeit: ${msg}`);
       });
 
     this.removeGame(roomId, server);
   }
 
-  // Llamado al desconectarse un socket: pausa el bucle y arranca un timer de
-  // gracia. Si expira sin reconexión, el rival gana por abandono.
+  // Called when a socket disconnects: pauses the loop and starts a grace
+  // timer. If it expires without a reconnection, the opponent wins by forfeit.
   handleDisconnect(userId: string, server: Server) {
     const roomId = this.userToRoom.get(userId);
     if (!roomId) return;
     const room = this.rooms.get(roomId);
     if (!room) return;
 
-    // Ya hay un jugador desconectado (y no es este mismo) -> los DOS se fueron.
-    // No hay forfeit posible, no hay nadie para "ganar". Cancelamos la partida
-    // como si nunca hubiera pasado: sin persistir, sin declarar ganador.
+    // A player is already disconnected (and it's not this same one) -> BOTH left.
+    // No forfeit is possible, there's nobody to "win". Cancel the match as if
+    // it never happened: no persisting, no declaring a winner.
     if (room.disconnectedUserId && room.disconnectedUserId !== userId) {
       if (room.disconnectTimer) clearTimeout(room.disconnectTimer);
       server.to(roomId).emit('matchVoided', { reason: 'both-disconnected' });
@@ -267,7 +267,7 @@ export class GameService {
           });
 
           this.logger.log(
-            `💾 Guardando partida por abandono. Ganador: ${winnerId}`,
+            `💾 Saving match after forfeit. Winner: ${winnerId}`,
           );
           // write match result to the database
           void this.matchService.record({
@@ -281,18 +281,18 @@ export class GameService {
           this.removeGame(roomId, server);
         }
       } catch (dbError: unknown) {
-        // 3. Si la base de datos falla por tipado, atrapamos el error para que NO congele la cola
+        // 3. If the database fails (e.g. typing issues), catch the error so it does NOT freeze the queue
         const dbMsg =
           dbError instanceof Error ? dbError.message : String(dbError);
-        this.logger.error(`❌ Error al guardar registro en la BD: ${dbMsg}`);
-        // Forzamos la limpieza de la sala de todos modos para no romper la app
+        this.logger.error(`❌ Error saving record to the DB: ${dbMsg}`);
+        // Force the room cleanup anyway so we don't break the app
         this.removeGame(roomId, server);
       }
     }, RECONNECT_GRACE_MS);
   }
 
-  // Llamado cuando un usuario reconecta con un JWT válido antes de que
-  // expire el periodo de gracia. Devuelve el roomId si había una sala activa.
+  // Called when a user reconnects with a valid JWT before the grace period
+  // expires. Returns the roomId if there was an active room.
   handleReconnect(userId: string, server: Server): string | null {
     const roomId = this.userToRoom.get(userId); // find the right room
     if (!roomId) return null;
@@ -339,7 +339,7 @@ export class GameService {
     if (!room) return;
     const { engine, leftUserId, rightUserId } = room;
 
-    // Envolvemos el guardado normal también en un hilo seguro controlado
+    // Wrap the normal save in a controlled safe path as well
     this.matchService
       .record({
         homeId: leftUserId || '',
@@ -350,7 +350,7 @@ export class GameService {
       })
       .catch((err: unknown) => {
         const msg = err instanceof Error ? err.message : String(err);
-        this.logger.error(`❌ Error persistiendo partida normal: ${msg}`);
+        this.logger.error(`❌ Error persisting normal match: ${msg}`);
       });
   }
 }

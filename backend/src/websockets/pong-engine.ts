@@ -1,22 +1,22 @@
 /**
- * Motor de Pong PURO y autoritativo.
+ * PURE, authoritative Pong engine.
  *
- * No depende de NestJS, sockets ni canvas: solo física y estado. Esto lo hace
- * fácil de testear y reutilizable. El backend lo usa como fuente de verdad de
- * cada partida online; el frontend tiene un espejo idéntico para el modo local.
+ * No dependency on NestJS, sockets or canvas: just physics and state. That makes
+ * it easy to test and reusable. The backend uses it as the source of truth for
+ * every online match; the frontend has an identical mirror for local mode.
  *
- * ⚠️ Las CONSTANTES y la física deben mantenerse SINCRONIZADAS con
- *    frontend/app/game/constants.ts y frontend/app/game/pong-engine.ts
+ * ⚠️ The CONSTANTS and the physics must stay IN SYNC with
+ *    frontend/app/game/constants.ts and frontend/app/game/pong-engine.ts
  */
 
 export type Side = 'left' | 'right';
 export type Dir = 'up' | 'down' | 'stop';
 export type Status = 'countdown' | 'playing' | 'finished';
 
-// Snapshot serializable que se envía al cliente en cada tick.
+// Serializable snapshot sent to the client on every tick.
 export interface GameSnapshot {
   status: Status;
-  countdown: number; // segundos que faltan para el saque (0 si ya se juega)
+  countdown: number; // seconds left before the serve (0 if already playing)
   leftPaddleY: number;
   rightPaddleY: number;
   ballX: number;
@@ -26,30 +26,30 @@ export interface GameSnapshot {
   winner: Side | null;
 }
 
-// --- Dimensiones del campo (px) ---
+// --- Field dimensions (px) ---
 export const WIDTH = 1066;
 export const HEIGHT = 578;
 
-// --- Palas ---
+// --- Paddles ---
 export const PADDLE_WIDTH = 12;
 export const PADDLE_HEIGHT = 90;
-export const PADDLE_SPEED = 11; // subido de 8 para que el juego no se sienta lento
+export const PADDLE_SPEED = 11; // bumped up from 8 so the game doesn't feel sluggish
 export const LEFT_PADDLE_X = 24;
 export const RIGHT_PADDLE_X = WIDTH - 24 - PADDLE_WIDTH; // 764
 
-// --- Pelota ---
+// --- Ball ---
 export const BALL_RADIUS = 9;
 export const BALL_SPEED_START = 7;
 export const BALL_SPEED_MAX = 15;
-export const BALL_SPEEDUP = 0.6; // se suma en cada golpe de pala
-export const MAX_BOUNCE_RAD = Math.PI / 4; // 45º de deflexión máxima
-export const SERVE_JITTER_RAD = Math.PI / 36; // ±5° de variación aleatoria en el saque
-export const BALL_SPIN = 0.25; // arrastre vertical de la pala sobre la bola (spin)
+export const BALL_SPEEDUP = 0.6; // added on every paddle hit
+export const MAX_BOUNCE_RAD = Math.PI / 4; // 45º max deflection
+export const SERVE_JITTER_RAD = Math.PI / 36; // ±5° random variation on the serve
+export const BALL_SPIN = 0.25; // vertical drag of the paddle on the ball (spin)
 
-// --- Partida ---
+// --- Match ---
 export const WINNING_SCORE = 5;
-export const TICK_RATE = 30; // ticks por segundo
-export const COUNTDOWN_TICKS = TICK_RATE * 3; // 3 segundos de cuenta atrás
+export const TICK_RATE = 30; // ticks per second
+export const COUNTDOWN_TICKS = TICK_RATE * 3; // 3 second countdown
 
 export class PongEngine {
   leftPaddleY: number;
@@ -61,7 +61,7 @@ export class PongEngine {
   ballVY = 0;
   ballSpeed = BALL_SPEED_START;
 
-  leftPaddleVY = 0; // desplazamiento vertical REAL de la pala en el último tick (post-clamp)
+  leftPaddleVY = 0; // REAL vertical displacement of the paddle in the last tick (post-clamp)
   rightPaddleVY = 0;
 
   scoreLeft = 0;
@@ -79,18 +79,18 @@ export class PongEngine {
   constructor() {
     this.leftPaddleY = (HEIGHT - PADDLE_HEIGHT) / 2;
     this.rightPaddleY = (HEIGHT - PADDLE_HEIGHT) / 2;
-    // Saque inicial en dirección aleatoria.
+    // Initial serve in a random direction.
     this.serveDir = Math.random() < 0.5 ? 1 : -1;
   }
 
-  // Registra la intención de movimiento de una pala.
+  // Records a paddle's movement intent.
   setInput(side: Side, dir: Dir) {
     const input = side === 'left' ? this.leftInput : this.rightInput;
     input.up = dir === 'up';
     input.down = dir === 'down';
   }
 
-  // Avanza la simulación un tick (llamar a TICK_RATE Hz).
+  // Advances the simulation by one tick (call at TICK_RATE Hz).
   step() {
     if (this.status === 'finished') return;
 
@@ -121,7 +121,7 @@ export class PongEngine {
     };
   }
 
-  // ------------------------------------------------------------------ privados
+  // ------------------------------------------------------------------ private
 
   private movePaddles() {
     const prevLeft = this.leftPaddleY;
@@ -135,13 +135,13 @@ export class PongEngine {
     this.leftPaddleY = clamp(this.leftPaddleY, 0, HEIGHT - PADDLE_HEIGHT);
     this.rightPaddleY = clamp(this.rightPaddleY, 0, HEIGHT - PADDLE_HEIGHT);
 
-    // Velocidad vertical real de cada pala este tick (después del clamp): si la
-    // pala está pegada a un borde su velocidad es 0 y no imprime efecto.
+    // Real vertical velocity of each paddle this tick (after the clamp): if the
+    // paddle is pinned against an edge its velocity is 0 and it imparts no spin.
     this.leftPaddleVY = this.leftPaddleY - prevLeft;
     this.rightPaddleVY = this.rightPaddleY - prevRight;
   }
 
-  // Coloca la pelota en el centro y arranca la cuenta atrás antes del saque.
+  // Places the ball in the center and starts the countdown before the serve.
   private startCountdown(serveDir: 1 | -1) {
     this.status = 'countdown';
     this.countdownTicks = COUNTDOWN_TICKS;
@@ -153,24 +153,24 @@ export class PongEngine {
     this.ballSpeed = BALL_SPEED_START;
   }
 
-  // Lanza la pelota al terminar la cuenta atrás.
+  // Launches the ball when the countdown ends.
   private serve() {
     this.status = 'playing';
 
-    // Centro vertical de la pala que va a recibir el saque.
+    // Vertical center of the paddle that will receive the serve.
     const targetY =
       this.serveDir === 1
         ? this.rightPaddleY + PADDLE_HEIGHT / 2
         : this.leftPaddleY + PADDLE_HEIGHT / 2;
 
-    // Distancia horizontal (>0) del centro a la cara de la pala receptora.
+    // Horizontal distance (>0) from the center to the face of the receiving paddle.
     const dx =
       this.serveDir === 1
         ? RIGHT_PADDLE_X - this.ballX
         : this.ballX - (LEFT_PADDLE_X + PADDLE_WIDTH);
 
-    // Ángulo que apunta al centro de la pala receptora + pequeña variación,
-    // limitado a un cono seguro y alcanzable (±MAX_BOUNCE_RAD).
+    // Angle pointing at the center of the receiving paddle + a small variation,
+    // clamped to a safe, reachable cone (±MAX_BOUNCE_RAD).
     const aim = Math.atan2(targetY - this.ballY, dx);
     const jitter = (Math.random() * 2 - 1) * SERVE_JITTER_RAD;
     const angle = clamp(aim + jitter, -MAX_BOUNCE_RAD, MAX_BOUNCE_RAD);
@@ -183,7 +183,7 @@ export class PongEngine {
     this.ballX += this.ballVX;
     this.ballY += this.ballVY;
 
-    // Rebote en techo y suelo (con corrección para no quedar pegada).
+    // Bounce off ceiling and floor (with a correction so it doesn't stick).
     if (this.ballY - BALL_RADIUS <= 0) {
       this.ballY = BALL_RADIUS;
       this.ballVY = Math.abs(this.ballVY);
@@ -195,7 +195,7 @@ export class PongEngine {
     this.bounceOnPaddle('left');
     this.bounceOnPaddle('right');
 
-    // Goles.
+    // Goals.
     if (this.ballX - BALL_RADIUS <= 0) {
       this.scoreRight++;
       this.afterGoal('right');
@@ -205,8 +205,8 @@ export class PongEngine {
     }
   }
 
-  // Rebote contra una pala con ángulo dependiente del punto de impacto y
-  // aumento progresivo de la velocidad.
+  // Bounce off a paddle with an angle that depends on the impact point and a
+  // progressive speed increase.
   private bounceOnPaddle(side: Side) {
     const paddleX = side === 'left' ? LEFT_PADDLE_X : RIGHT_PADDLE_X;
     const paddleY = side === 'left' ? this.leftPaddleY : this.rightPaddleY;
@@ -221,7 +221,7 @@ export class PongEngine {
       this.ballY - BALL_RADIUS < paddleY + PADDLE_HEIGHT;
     if (!overlapX || !overlapY) return;
 
-    // Posición relativa del impacto respecto al centro de la pala: [-1, 1].
+    // Impact position relative to the paddle center: [-1, 1].
     const relative = clamp(
       (this.ballY - (paddleY + PADDLE_HEIGHT / 2)) / (PADDLE_HEIGHT / 2),
       -1,
@@ -234,19 +234,19 @@ export class PongEngine {
     this.ballVX = dirX * this.ballSpeed * Math.cos(angle);
     this.ballVY = this.ballSpeed * Math.sin(angle);
 
-    // Spin: la velocidad vertical real de la pala arrastra a la bola.
+    // Spin: the paddle's real vertical velocity drags the ball.
     const paddleVY = side === 'left' ? this.leftPaddleVY : this.rightPaddleVY;
     this.ballVY += BALL_SPIN * paddleVY;
 
-    // Renormalizamos: el spin curva la trayectoria pero NO cambia el módulo de la
-    // velocidad, así que |v| sigue siendo exactamente ballSpeed (<= BALL_SPEED_MAX).
+    // Renormalize: spin curves the trajectory but does NOT change the speed
+    // magnitude, so |v| stays exactly ballSpeed (<= BALL_SPEED_MAX).
     const mag = Math.hypot(this.ballVX, this.ballVY);
     if (mag > 0) {
       this.ballVX = (this.ballVX / mag) * this.ballSpeed;
       this.ballVY = (this.ballVY / mag) * this.ballSpeed;
     }
 
-    // Sacamos la pelota de la pala para evitar rebotes múltiples.
+    // Push the ball out of the paddle to avoid multiple bounces.
     this.ballX =
       side === 'left'
         ? paddleX + PADDLE_WIDTH + BALL_RADIUS
@@ -259,7 +259,7 @@ export class PongEngine {
       this.winner = this.scoreLeft >= WINNING_SCORE ? 'left' : 'right';
       return;
     }
-    // Saca hacia el jugador que acaba de encajar el punto.
+    // Serve toward the player who just conceded the point.
     this.startCountdown(scorer === 'left' ? 1 : -1);
   }
 }

@@ -18,8 +18,8 @@ import { OnGatewayInit } from '@nestjs/websockets';
 import { randomUUID } from 'crypto';
 import { send } from 'process';
 
-// Habilitamos CORS igual que en HTTP para que el frontend pueda conectarse.
-// 8080 = acceso vía nginx (mismo origen que la app); 3000 = frontend directo en dev.
+// Enable CORS just like on HTTP so the frontend can connect.
+// 8080 = access via nginx (same origin as the app); 3000 = frontend directly in dev.
 @WebSocketGateway({
   cors: {
     origin: (origin, callback) => {
@@ -39,7 +39,7 @@ import { send } from 'process';
         /^https?:\/\/[a-zA-Z0-9_-]+(:\d+)?$/.test(origin) || // Matches raw hostname mappings
         /^https?:\/\/192\.168\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(origin) ||
         /^https?:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(origin) ||
-        // 172.16.0.0/12: red por defecto de Docker y hotspot de móvil (172.20.10.x)
+        // 172.16.0.0/12: Docker's default network and phone hotspot (172.20.10.x)
         /^https?:\/\/172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(
           origin,
         );
@@ -62,7 +62,7 @@ export class WebsocketsGateway
   @WebSocketServer()
   server!: Server;
 
-  // Cola de matchmaking: sockets esperando rival.
+  // Matchmaking queue: sockets waiting for an opponent.
   private queue: Socket[] = [];
   private userSockets = new Map<string, string>(); // userId -> current socketId
   private kickedSockets = new Set<string>(); // sockets we deliberately disconnected
@@ -104,7 +104,7 @@ export class WebsocketsGateway
     private friendsService: FriendsService,
   ) {}
 
-  // Este método salta automáticamente cuando un cliente intenta conectarse
+  // This method fires automatically when a client tries to connect
   async handleConnection(client: Socket) {
     try {
       const token = client.handshake.auth.token;
@@ -164,7 +164,7 @@ export class WebsocketsGateway
     }
   }
 
-  // Este método salta cuando un cliente cierra la pestaña o pierde internet
+  // This method fires when a client closes the tab or loses internet
   handleDisconnect(client: Socket) {
     console.log(`Client disconnected: ${client.id}`);
     console.log('DISCONNECT', client.id, client.data.roomId);
@@ -199,14 +199,14 @@ export class WebsocketsGateway
     }
 
     if (userId && this.gameService.getRoomIdByUserId(userId)) {
-      // Periodo de gracia en vez de forfeit instantáneo — se avisa al rival y
-      // se pausa el bucle hasta reconexión o hasta que expiren los 15s.
+      // Grace period instead of an instant forfeit — the opponent is notified and
+      // the loop is paused until reconnection or until the 15s expire.
       this.gameService.handleDisconnect(userId, this.server);
     }
   }
 
   // ---- MATCHMAKING ----
-  // El frontend pide entrar en la cola. Si hay rival esperando, empezamos partida.
+  // The frontend asks to join the queue. If an opponent is waiting, start a match.
   @SubscribeMessage('joinQueue')
   handleJoinQueue(@ConnectedSocket() client: Socket) {
     console.log('JOIN QUEUE', client.id);
@@ -237,7 +237,7 @@ export class WebsocketsGateway
     client.data.roomId = undefined;
     client.data.side = undefined;
 
-    // Evitar duplicados o entrar en cola mientras ya se juega.
+    // Avoid duplicates or joining the queue while already in a game.
     if (this.queue.some((s) => s.id === client.id)) {
       return;
     }
@@ -253,13 +253,13 @@ export class WebsocketsGateway
     }
 
     if (!opponent) {
-      // No hay nadie: encolamos y avisamos.
+      // Nobody here: queue up and notify.
       this.queue.push(client);
       client.emit('waiting');
       return;
     }
 
-    // Emparejamos: el que esperaba es 'left', el nuevo es 'right'.
+    // Pair them up: the one who was waiting is 'left', the new one is 'right'.
     const roomId = `game-${opponent.id}-${client.id}`;
 
     this.assignToRoom(opponent, roomId, 'left');
@@ -299,7 +299,7 @@ export class WebsocketsGateway
   }
 
   // ---- INPUT DE JUEGO ----
-  // El jugador solo controla su propia pala (según el 'side' asignado).
+  // The player only controls their own paddle (based on the assigned 'side').
   @SubscribeMessage('paddleInput')
   handlePaddleInput(
     @ConnectedSocket() client: Socket,
@@ -319,15 +319,15 @@ export class WebsocketsGateway
     client.data.side = side;
   }
 
-  // ---- EVENTO DE PRUEBA (depuración) ----
+  // ---- TEST EVENT (debugging) ----
   @SubscribeMessage('ping')
   handlePing(@ConnectedSocket() client: Socket, @MessageBody() data: any) {
     const userEmail = client.data.user.email;
     console.log(`Ping received from ${userEmail} | Data:`, data);
 
-    // Respondemos solo a ese cliente
+    // Respond only to that client
     client.emit('pong', {
-      message: `Hola ${userEmail}, conexión WebSocket exitosa!`,
+      message: `Hi ${userEmail}, WebSocket connection successful!`,
     });
   }
 

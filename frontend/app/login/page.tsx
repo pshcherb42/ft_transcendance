@@ -393,7 +393,7 @@ export default function LoginPage() {
         )}
       </div>
 
-      {/* основной контент */}
+      {/* main content */}
       <div
         className='
           relative
@@ -417,7 +417,7 @@ export default function LoginPage() {
           xl:px-[108px]
         '
       >
-        {/* левая часть — заголовок */}
+        {/* left side — heading */}
         <div className='min-w-0 lg:flex-1'>
           <span className='text-xs font-bold tracking-widest text-brand-green uppercase sm:text-sm'>
             42 Transcendence
@@ -460,7 +460,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* правая часть — форма */}
+        {/* right side — form */}
         <div
           className='
             w-full
@@ -560,7 +560,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* разделитель */}
+          {/* divider */}
           <div className='relative flex items-center my-[20px]'>
             <div className='flex-1 border-t border-zinc-200' />
             <span className='mx-3 text-xs text-zinc-400'>{t('auth.or')}</span>

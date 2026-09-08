@@ -1,4 +1,4 @@
-# Disconnection/conncetion logic
+# Disconnection/connection logic
 
 docker compose exec backend node test-stale-queue.js
 
@@ -8,9 +8,9 @@ curl -X POST http://localhost:3001/auth/register \
 
 
 
-## Disconection logic
+## Disconnection logic
 
-Cuando un jugador pierda la conexión, el juego se pausará durante 15 segundos. Si el jugador regresa con un token válido dentro de ese tiempo, el juego continuará; de lo contrario, el rival que se mantuvo conectado ganará automáticamente.
+When a player loses their connection, the game pauses for 15 seconds. If the player comes back with a valid token within that time, the game continues; otherwise, the opponent who stayed connected wins automatically.
 
 docker compose exec db psql -U postgres -d transcendence -c "SELECT id, \"homeId\", \"awayId\", \"homeScore\", \"awayScore\", \"winnerId\", \"createdAt\" FROM \"Match\" ORDER BY \"createdAt\" DESC LIMIT 5;"
 
@@ -37,7 +37,7 @@ docker compose exec db psql -U postgres -d transcendence -c "SELECT * FROM \"Sta
 
  the handleJoinQueue liveness guard is a best-effort optimization that catches most cases (a socket that's been dead for a while before someone else joins the queue), but it cannot close a true simultaneous-timing race — that's covered instead by the existing disconnect/grace-period/forfeit system, which is authoritative and always eventually consistent. That's actually a stronger, more honest story for eval than claiming the guard is airtight.
 
- # API publica
+ # Public API
 
  curl -H "x-api-key: 79e6355691973817e4a7cbce4cf703f45acae82078d2e67c0b5ff370d4817c45" http://localhost:8080/api/api/public/users
 
@@ -48,4 +48,4 @@ curl -X POST http://localhost:8080/api/api/public/users \
 
 curl -H "x-api-key: 79e6355691973817e4a7cbce4cf703f45acae82078d2e67c0b5ff370d4817c45" http://localhost:8080/api/public/users
 
-La documentación de Swagger es accesible en /api/api/docs debido a la arquitectura de nuestro Proxy Inverso (Nginx). Para las rutas internas de la aplicación, Nginx está configurado para limpiar el prefijo /api/ de forma dinámica y evitar redundancias en el backend. Como Swagger está configurado nativamente dentro de NestJS bajo el path api/docs, la duplicación en la URL externa es el resultado esperado para mantener la compatibilidad con las reglas globales de enrutamiento y aislamiento de contenedores."
+The Swagger documentation is accessible at /api/api/docs because of the architecture of our reverse proxy (Nginx). For the app's internal routes, Nginx is configured to strip the /api/ prefix dynamically and avoid redundancy in the backend. Since Swagger is configured natively inside NestJS under the path api/docs, the duplication in the external URL is the expected result in order to stay compatible with the global routing and container-isolation rules."

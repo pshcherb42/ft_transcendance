@@ -27,9 +27,9 @@ describe('WebsocketsGateway', () => {
     gateway = module.get<WebsocketsGateway>(WebsocketsGateway);
   });
 
-  it('debería estar definido', () => {
+  it('should be defined', () => {
     expect(gateway).toBeDefined();
   });
 });
 
-// docker compose run --rm backend npm run test websockets.gateway.spec.ts // Chequeamos que la logica funcione y no haya errores con NEST.JS (2-3 min)
+// docker compose run --rm backend npm run test websockets.gateway.spec.ts // Check that the logic works and there are no NEST.JS errors (2-3 min)

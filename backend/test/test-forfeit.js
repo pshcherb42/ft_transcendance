@@ -7,11 +7,11 @@ async function loginUser(email, password) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
-    if (!response.ok) throw new Error(`Error en login HTTP: ${response.status}`);
+    if (!response.ok) throw new Error(`HTTP login error: ${response.status}`);
     const data = await response.json();
     return data.accessToken;
   } catch (error) {
-    console.error(`No se pudo obtener el token para ${email}:`, error.message);
+    console.error(`Could not get the token for ${email}:`, error.message);
     process.exit(1);
   }
 }
@@ -25,46 +25,46 @@ function connect(name, token) {
   });
 
   socket.on('connect', () => {
-    console.log(`[${name}] conectado con ID: ${socket.id}`);
+    console.log(`[${name}] connected with ID: ${socket.id}`);
     socket.emit('joinQueue');
   });
 
-  socket.on('waiting', () => console.log(`[${name}] en cola, esperando rival...`));
-  socket.on('matchFound', (data) => console.log(`[${name}] ¡Partida encontrada! ID Sala: ${data.roomId} | Lado: ${data.side}`));
-  socket.on('opponentDisconnected', (data) => console.log(`[${name}] El rival se desconectó. Periodo de gracia: ${data.gracePeriodMs}ms`));
-  socket.on('opponentReconnected', (data) => console.log(`[${name}] El rival se ha reconectado: ${data.userId}`));
+  socket.on('waiting', () => console.log(`[${name}] in queue, waiting for an opponent...`));
+  socket.on('matchFound', (data) => console.log(`[${name}] Match found! Room ID: ${data.roomId} | Side: ${data.side}`));
+  socket.on('opponentDisconnected', (data) => console.log(`[${name}] The opponent disconnected. Grace period: ${data.gracePeriodMs}ms`));
+  socket.on('opponentReconnected', (data) => console.log(`[${name}] The opponent reconnected: ${data.userId}`));
   socket.on('gameOver', (data) => {
-    console.log(`[${name}] PARTIDA TERMINADA. Razón: ${data.reason} | Ganador: ${data.winnerId} | Abandonó: ${data.forfeitedBy}`);
+    console.log(`[${name}] GAME OVER. Reason: ${data.reason} | Winner: ${data.winnerId} | Forfeited by: ${data.forfeitedBy}`);
     if (name.startsWith('B')) {
       socket.disconnect();
       process.exit(0);
     }
   });
-  socket.on('connect_error', (err) => console.log(`[${name}] error de conexión:`, err.message));
-  socket.on('disconnect', (reason) => console.log(`[${name}] desconectado debido a:`, reason));
+  socket.on('connect_error', (err) => console.log(`[${name}] connection error:`, err.message));
+  socket.on('disconnect', (reason) => console.log(`[${name}] disconnected due to:`, reason));
 
   return socket;
 }
 
 async function startTest() {
-  console.log('=== TEST: FORFEIT (sin reconexión) ===');
-  console.log('Solicitando tokens...');
+  console.log('=== TEST: FORFEIT (no reconnection) ===');
+  console.log('Requesting tokens...');
   const tokenA = await loginUser('userA@test.com', 'yourpassword');
   const tokenB = await loginUser('userB@test.com', 'yourpassword');
-  console.log('Tokens obtenidos con éxito.');
+  console.log('Tokens obtained successfully.');
 
   const a = connect('A', tokenA);
   connect('B', tokenB);
 
   setTimeout(() => {
-    console.log(`--- Desconectando al Jugador A en: ${new Date().toISOString()} (sin reconexión) ---`);
+    console.log(`--- Disconnecting Player A at: ${new Date().toISOString()} (no reconnection) ---`);
     a.disconnect();
-    console.log('--- Esperando periodo de gracia (15s) para confirmar forfeit... ---');
+    console.log('--- Waiting for the grace period (15s) to confirm the forfeit... ---');
   }, 5000);
 
   // Safety timeout in case gameOver never fires — fail loudly instead of hanging
   setTimeout(() => {
-    console.error('TIMEOUT: gameOver nunca se emitió. Revisa el backend.');
+    console.error('TIMEOUT: gameOver was never emitted. Check the backend.');
     process.exit(1);
   }, 25000);
 }

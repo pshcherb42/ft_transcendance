@@ -1,11 +1,11 @@
 'use client';
 
 /**
- * Componente de UNA partida local (2 jugadores o vs IA), reutilizable por el
- * modo local, el modo IA y el torneo. Encapsula el motor, el bucle a paso fijo,
- * el teclado y el render. Avisa del ganador por `onFinish`.
+ * Component for ONE local match (2 players or vs AI), reused by local mode,
+ * AI mode and the tournament. It wraps the engine, the fixed-step loop, the
+ * keyboard and the rendering. It reports the winner via `onFinish`.
  *
- * Para "revancha"/"siguiente partida" el padre lo remonta cambiando su `key`.
+ * For "rematch"/"next match" the parent remounts it by changing its `key`.
  */
 
 import { useEffect, useRef } from 'react';
@@ -48,8 +48,8 @@ export function PongMatch({ config, vsAi, difficulty = 'medium', onFinish, onSco
       right: 0,
     });
 
-    // Teclado: vs IA → el humano lleva la IZQUIERDA (W/S o flechas).
-    //          2 jugadores → izquierda W/S, derecha ↑/↓.
+    // Keyboard: vs AI → the human plays the LEFT paddle (W/S or arrows).
+    //           2 players → left W/S, right ↑/↓.
     const pressed = new Set<string>();
     const refresh = () => {
       if (vsAi) {
@@ -87,7 +87,7 @@ export function PongMatch({ config, vsAi, difficulty = 'medium', onFinish, onSco
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
 
-    // Física a paso fijo (TICK_RATE Hz).
+    // Fixed-step physics (TICK_RATE Hz).
     const stepTimer = setInterval(() => {
       if (ai) {
         ai.update(engine);
@@ -116,7 +116,7 @@ export function PongMatch({ config, vsAi, difficulty = 'medium', onFinish, onSco
       }
     }, 1000 / TICK_RATE);
 
-    // Render a la tasa del navegador.
+    // Render at the browser's refresh rate.
     let raf: number;
     const loop = () => {
       renderer.draw(ctx, engine.getSnapshot(), vsAi ? 'left' : undefined);
@@ -130,7 +130,7 @@ export function PongMatch({ config, vsAi, difficulty = 'medium', onFinish, onSco
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
     };
-    // Deps primitivas: el padre remonta con `key` para reiniciar la partida.
+    // Primitive deps: the parent remounts with `key` to restart the match.
   }, [config.map, config.powerups, vsAi, difficulty]);
 
   return (

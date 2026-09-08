@@ -79,7 +79,7 @@ export default function FriendsPanel() {
 
   return (
     <div className="w-full">
-      {/* Добавление друга */}
+      {/* Add a friend */}
       <form
         onSubmit={handleSend}
         className="
@@ -162,7 +162,7 @@ export default function FriendsPanel() {
       )}
 
       <div className="mt-8 grid gap-10 lg:grid-cols-2 lg:gap-0">
-        {/* Список друзей */}
+        {/* Friends list */}
         <section className="lg:border-r lg:border-[#EEE9E6] lg:pr-10">
           <h2 className="mb-5 font-display text-[28px] uppercase leading-none text-brand-red">
             {t('friends.friendsCount', {
@@ -291,7 +291,7 @@ export default function FriendsPanel() {
           )}
         </section>
 
-        {/* Запросы */}
+        {/* Requests */}
         <section className="lg:pl-10">
           <h2 className="mb-5 font-display text-[28px] uppercase leading-none text-brand-red">
             {t('friends.incomingRequests')}

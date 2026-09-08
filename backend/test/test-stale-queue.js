@@ -7,11 +7,11 @@ async function loginUser(email, password) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
-    if (!response.ok) throw new Error(`Error en login HTTP: ${response.status}`);
+    if (!response.ok) throw new Error(`HTTP login error: ${response.status}`);
     const data = await response.json();
     return data.accessToken;
   } catch (error) {
-    console.error(`No se pudo obtener el token para ${email}:`, error.message);
+    console.error(`Could not get the token for ${email}:`, error.message);
     process.exit(1);
   }
 }
@@ -36,75 +36,74 @@ function killConnectionAbruptly(socket) {
   }
 }
 
-// No podemos evitar de forma síncrona que B sea emparejado contra el socket
-// recién muerto de A (ver test-stale-queue.js) — es un límite físico: el
-// servidor no puede saber que A murió antes de recibir la notificación de
-// red. Lo que SÍ podemos y debemos garantizar es que, una vez emparejados,
-// el sistema se autorepare: cuando la desconexión de A llegue (unos ms
-// después), debe activarse el mismo periodo de gracia de 15s y, al no haber
-// reconexión, B debe ganar por abandono — igual que en cualquier
-// desconexión "normal" a mitad de partida.
+// We can't synchronously prevent B from being paired against A's just-dead
+// socket (see test-stale-queue.js) — it's a physical limit: the server
+// can't know A died before it receives the network notification. What we
+// CAN and must guarantee is that, once paired, the system self-heals:
+// when A's disconnect arrives (a few ms later), the same 15s grace period
+// must kick in and, with no reconnection, B must win by forfeit — just
+// like any "normal" mid-match disconnect.
 async function startTest() {
-  console.log('=== TEST: AUTO-RECUPERACIÓN TRAS EMPAREJAMIENTO CONTRA SOCKET MUERTO ===');
-  console.log('Solicitando tokens...');
+  console.log('=== TEST: SELF-HEALING AFTER BEING PAIRED AGAINST A DEAD SOCKET ===');
+  console.log('Requesting tokens...');
   const tokenA = await loginUser('userA@test.com', 'yourpassword');
   const tokenB = await loginUser('userB@test.com', 'yourpassword');
-  console.log('Tokens obtenidos.');
+  console.log('Tokens obtained.');
 
-  const a = connect('A', tokenA, { reconnection: false }); // A no debe reconectar solo
+  const a = connect('A', tokenA, { reconnection: false }); // A must not reconnect on its own
   const b = connect('B', tokenB);
 
   a.connect();
 
   a.on('connect', () => {
-    console.log(`[A] conectado con ID: ${a.id}`);
+    console.log(`[A] connected with ID: ${a.id}`);
     a.emit('joinQueue');
   });
 
   a.once('waiting', () => {
-    console.log('[A] está en cola. Provocando la condición de carrera...');
+    console.log('[A] is in the queue. Triggering the race condition...');
     b.connect();
 
     b.on('connect', () => {
-      console.log(`[B] conectado con ID: ${b.id}. Ataque simultáneo...`);
+      console.log(`[B] connected with ID: ${b.id}. Simultaneous attack...`);
       killConnectionAbruptly(a);
       b.emit('joinQueue');
     });
 
     b.once('matchFound', (data) => {
-      // Esto es el resultado ESPERADO ahora: sabemos que a veces B se
-      // empareja contra el socket agonizante de A. Lo que probamos es lo
-      // que pasa DESPUÉS.
-      console.log(`[B] Emparejado (posiblemente contra el socket muerto de A). Sala: ${data.roomId}`);
-      console.log('--- Esperando la autorecuperación vía periodo de gracia... ---');
+      // This is the EXPECTED result now: we know B sometimes gets paired
+      // against A's dying socket. What we're testing is what happens
+      // AFTERWARD.
+      console.log(`[B] Paired (possibly against A's dead socket). Room: ${data.roomId}`);
+      console.log('--- Waiting for self-healing via the grace period... ---');
     });
 
     b.once('opponentDisconnected', (data) => {
-      console.log(`[B] El rival se desconectó. Periodo de gracia: ${data.gracePeriodMs}ms`);
+      console.log(`[B] The opponent disconnected. Grace period: ${data.gracePeriodMs}ms`);
     });
 
     b.once('gameOver', (data) => {
       if (data.reason === 'forfeit') {
-        console.log(`PASADO: El sistema se autoreparó. B gana por abandono. Ganador: ${data.winnerId}`);
+        console.log(`PASSED: The system self-healed. B wins by forfeit. Winner: ${data.winnerId}`);
         process.exit(0);
       } else {
-        console.error(`FALLO: gameOver con razón inesperada: ${data.reason}`);
+        console.error(`FAILED: gameOver with an unexpected reason: ${data.reason}`);
         process.exit(1);
       }
     });
 
-    // Si B nunca fue emparejado (el guard sí lo atrapó esta vez — también
-    // válido, ambos desenlaces son aceptables) confirmamos por esa vía.
+    // If B was never paired (the guard did catch it this time — also
+    // valid, both outcomes are acceptable) we confirm via that path.
     b.once('waiting', () => {
-      console.log('PASADO (alternativo): El guard de liveness sí atrapó el socket muerto esta vez.');
-      console.log('B fue puesto en espera de forma segura — no hace falta autorreparación.');
+      console.log('PASSED (alternative): the liveness guard did catch the dead socket this time.');
+      console.log('B was safely put back to waiting — no self-healing needed.');
       process.exit(0);
     });
 
-    // Debe llegar un gameOver dentro de ~15-20s si quedó emparejado contra
-    // el socket muerto. Si no llega nada, la autorreparación está rota.
+    // A gameOver should arrive within ~15-20s if it was paired against
+    // the dead socket. If nothing arrives, the self-healing is broken.
     setTimeout(() => {
-      console.error('TIMEOUT: Ni matchFound->gameOver ni waiting llegaron a tiempo. Revisa el backend.');
+      console.error('TIMEOUT: neither matchFound->gameOver nor waiting arrived in time. Check the backend.');
       process.exit(1);
     }, 20000);
   });
