@@ -233,7 +233,10 @@
     "noMessages": "No messages yet",
     "messagePlaceholder": "Type a message...",
     "send": "Send",
-    "newMessage": "New Message!"
+    "newMessage": "New Message!",
+    "newMessageFrom": "{{name}} sent you a message",
+    "someone": "Someone",
+    "open": "Open"
   },
   "stats": {
     "title": "Statistics",

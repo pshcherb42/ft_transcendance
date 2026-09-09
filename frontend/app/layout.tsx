@@ -4,9 +4,10 @@ import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { SocketProvider } from '@/context/SocketContext';
 import { I18nProvider } from '@/context/I18nProvider';
-import Footer from "@/components/Footer";
+import Footer from '@/components/Footer';
 import { Toaster } from 'sonner';
-import  { NotificationListener } from "@/components/NotificationListener";
+import { NotificationListener } from '@/components/NotificationListener';
+import { ChatUnreadProvider } from '@/context/ChatUnreadContext';
 
 const gasoekOne = Gasoek_One({
   weight: '400',
@@ -31,17 +32,19 @@ export default function RootLayout({
 }) {
   return (
     <html
-      lang="en"
+      lang='en'
       className={`${gasoekOne.variable} ${manrope.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className='min-h-full flex flex-col'>
         <I18nProvider>
           <AuthProvider>
             <SocketProvider>
-            <NotificationListener />
-              <div className="flex flex-1 flex-col">{children}</div>
-              <Footer />
-              <Toaster position="top-right" richColors />
+              <ChatUnreadProvider>
+                <NotificationListener />
+                <div className='flex flex-1 flex-col'>{children}</div>
+                <Footer />
+                <Toaster position='top-right' richColors />
+              </ChatUnreadProvider>
             </SocketProvider>
           </AuthProvider>
         </I18nProvider>

@@ -1,4 +1,4 @@
-PROJECT_NAME = ft_transcendence
+PROJECT_NAME = ft_transcendance
 BACKEND_PACKS = @nestjs/passport \
                 @nestjs/jwt \
                 passport \
@@ -17,7 +17,7 @@ BACKEND_PACKS = @nestjs/passport \
 
 CERT_DIR = nginx/certs
 
-all: up
+all: host-deps up
 
 up:
 	@bash createCertSSL.sh
@@ -30,15 +30,15 @@ down:
 build:
 	@docker compose build
 
+host-deps:
+	@echo "Installing host node_modules..."
+	@npm install
+
 install-deps:
 	@echo "Installing dependencies... (This might take a while)"
 	@docker compose run --rm backend npm install $(BACKEND_PACKS) || (echo "\n[!] Error: Installation failed. If it's a 'no space' error, run 'make clean-docker' first." && exit 1)
 	@docker compose run --rm backend npx prisma generate
 	@docker compose run --rm backend npx prisma migrate deploy
-
-host-deps:
-	@echo "Installing host node_modules..."
-	@npm install
 
 clean-docker:
 	@echo "Cleaning Docker cache, unused items..."

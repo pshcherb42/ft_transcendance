@@ -53,12 +53,19 @@ export function NotificationListener() {
     };
     const onChatMessage = (data: {
       senderId: string;
+      senderUsername?: string | null;
       receiverId: string;
       text: string;
     }) => {
       if (!user || data.senderId === user.id) return;
-      if (pathname === '/chat') return;
-      toast.info(t('chat.newMessage'));
+      if (pathname === '/chat' || pathname?.startsWith('/game')) return;
+      const name = data.senderUsername ?? t('chat.someone');
+      toast.info(t('chat.newMessageFrom', { name }), {
+        action: {
+          label: t('chat.open'),
+          onClick: () => router.push('/chat'),
+        },
+      });
     };
 
     const onGameInviteReceived = (data: {

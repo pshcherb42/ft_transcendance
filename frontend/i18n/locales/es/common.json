@@ -233,7 +233,10 @@
     "noMessages": "Aún no hay mensajes",
     "messagePlaceholder": "Escribe un mensaje...",
     "send": "Enviar",
-    "newMessage": "Nuevo Mensaje!"
+    "newMessage": "Nuevo Mensaje!",
+    "newMessageFrom": "{{name}} te ha enviado un mensaje",
+    "someone": "Alguien",
+    "open": "Abrir"
   },
   "stats": {
     "title": "Estadísticas",

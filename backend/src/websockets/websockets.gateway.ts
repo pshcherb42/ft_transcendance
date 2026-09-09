@@ -84,11 +84,13 @@ export class WebsocketsGateway
     {
       id: string;
       senderId: string;
+      senderUsername: string | null;
       receiverId: string;
       text: string;
       timestamp: number;
     }[]
   >();
+
   private readonly MAX_HISTORY_PER_CONVO = 200;
   private readonly MAX_OUTGOING_INVITES = 5;
 
@@ -593,6 +595,7 @@ export class WebsocketsGateway
     const message = {
       id: randomUUID(),
       senderId,
+      senderUsername: client.data.user?.username ?? null,
       receiverId: data.receiverId,
       text,
       timestamp: Date.now(),

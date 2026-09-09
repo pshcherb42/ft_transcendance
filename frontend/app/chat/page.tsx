@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useFriends } from '@/hooks/useFriends';
 import { useChat } from '@/hooks/useChat';
 import { useGameInvite } from '@/hooks/useGameInvite';
+import { useChatUnread } from '@/context/ChatUnreadContext';
 import UserAvatar from '@/components/UserAvatar';
 
 export default function ChatPage() {
@@ -26,6 +27,7 @@ export default function ChatPage() {
   } = useChat(user?.id);
 
   const { inviteToPlay } = useGameInvite();
+  const { unread, setActiveConversation } = useChatUnread();
 
   const [activeFriendId, setActiveFriendId] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
@@ -36,6 +38,11 @@ export default function ChatPage() {
       router.push('/login');
     }
   }, [loading, user, router]);
+
+  useEffect(() => {
+    setActiveConversation(activeFriendId);
+    return () => setActiveConversation(null);
+  }, [activeFriendId, setActiveConversation]);
 
   /*
    * Automatically open the first chat after the friends list loads.
@@ -301,6 +308,14 @@ export default function ChatPage() {
                             </span>
                           </div>
                         </div>
+                        {!isActive && unread[friend.id] > 0 && (
+                          <span
+                          className="ml-auto shrink-0 text-base font-bold text-brand-red"
+                          aria-label={t('chat.newMessage')}
+                          >
+                            📩{unread[friend.id] > 1 ? ` ${unread[friend.id]}` : ''}
+                          </span>
+                        )}
                       </button>
                     </li>
                   );

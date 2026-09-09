@@ -239,7 +239,11 @@
     "noMessages": "Ziņojumu vēl nav",
     "messagePlaceholder": "Raksti ziņojumu...",
     "send": "Sūtīt",
-    "newMessage": "Jauns ziņojums!"
+    "newMessage": "Jauns ziņojums!",
+    "newMessageFrom": "{{name}} nosūtīja tev ziņu",
+    "someone": "Kāds",
+    "open": "Atvērt"
+
   },
   "stats": {
     "title": "Statistika",
