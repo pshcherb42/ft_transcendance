@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { Strategy, StrategyOptions, VerifyCallback } from 'passport-google-oauth20';
+import {
+  Strategy,
+  StrategyOptions,
+  VerifyCallback,
+} from 'passport-google-oauth20';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from '../auth.service';
 
@@ -25,9 +29,12 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     profile: any,
     done: VerifyCallback,
   ) {
-    const email = profile.emails[0].value as string;
-    const displayName = profile.displayName as string;
-    const tokens = await this.authService.googleLogin(email, displayName);
+    const email = profile.emails?.[0]?.value as string | undefined;
+    if (!email) {
+      return done(new Error('Google account has no accesible email'), false); // this should never trigger so doesn't need to be translated
+    }
+    const providerId = profile.id as string;
+    const tokens = await this.authService.googleLogin(email, providerId);
     done(null, tokens);
   }
 }

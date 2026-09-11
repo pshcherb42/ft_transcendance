@@ -46,15 +46,47 @@ export class AuthService {
     await this.usersService.updateRefreshToken(userId, null);
   }
 
-  // Find-or-create user from Google OAuth, then issue JWT pair
-  async googleLogin(email: string, displayName: string) {
+  // // Find-or-create user from Google OAuth, then issue JWT pair
+  // async googleLogin(email: string, displayName: string) {
+  //   let user = await this.usersService.findByEmail(email);
+  //   if (!user) {
+  //     // Create with no password — Google users can't log in with local strategy
+  //     user = await this.usersService.create({
+  //       email,
+  //       username: displayName,
+  //       password: null,
+  //     });
+  //   }
+  //   return this.login({ id: user.id, email: user.email });
+  // }
+
+  private async makeUniqueUsername(seed: string): Promise<string> {
+    const base =
+      seed
+        .normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9_]/g, '')
+        .slice(0, 16) || 'ft_user';
+
+    let candidateName = base;
+    let n = 0;
+    while (await this.usersService.findByUsername(candidateName)) {
+      n++;
+      candidateName = `${base}${n}`.slice(0, 20);
+    }
+    return candidateName;
+  }
+
+  async googleLogin(email: string, providerId: string) {
     let user = await this.usersService.findByEmail(email);
     if (!user) {
-      // Create with no password — Google users can't log in with local strategy
+      const username = await this.makeUniqueUsername(email.split('@')[0]);
       user = await this.usersService.create({
         email,
-        username: displayName,
+        username,
         password: null,
+        authProvider: 'GOOGLE',
+        providerId,
       });
     }
     return this.login({ id: user.id, email: user.email });
@@ -62,17 +94,17 @@ export class AuthService {
 
   private async generateTokens(userId: string, email: string) {
     const user = await this.usersService.findById(userId);
-  
+
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
-  
+
     const payload = {
       sub: userId,
       email,
       username: user.username,
     };
-  
+
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
         secret: this.config.get<string>('JWT_SECRET'),
@@ -83,7 +115,7 @@ export class AuthService {
         expiresIn: '7d',
       }),
     ]);
-  
+
     return { accessToken, refreshToken };
   }
 }

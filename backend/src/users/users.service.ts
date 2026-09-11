@@ -30,6 +30,8 @@ export class UsersService {
     email: string;
     username: string;
     password: string | null;
+    authProvider?: 'LOCAL' | 'GOOGLE';
+    providerId?: string;
   }): Promise<User> {
     const existingEmail = await this.findByEmail(data.email);
     if (existingEmail)
@@ -54,6 +56,8 @@ export class UsersService {
         email: data.email,
         username: data.username,
         password: hashedPassword,
+        authProvider: data.authProvider ?? 'LOCAL',
+        providerId: data.providerId,
       },
     });
   }
