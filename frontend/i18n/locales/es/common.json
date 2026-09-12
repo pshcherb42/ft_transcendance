@@ -318,7 +318,8 @@
     "requestDeclined": "Tu solicitud de amistad fue rechazada",
     "wantsToPlay": "¡{{username}} quiere jugar!",
     "accept": "Aceptar",
-    "decline": "Rechazar"
+    "decline": "Rechazar",
+    "friendAdded": "¡{{username}} y tú ahora sois amigos!"
   },
   "legal": {
     "back": "← Volver",

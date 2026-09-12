@@ -7,6 +7,43 @@ import { useTranslation } from 'react-i18next';
 import { useSocket } from '@/context/SocketContext';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { apiFetch } from '@/app/lib/api';
+
+export function ActionToast({
+  message,
+  acceptLabel,
+  declineLabel,
+  onAccept,
+  onDecline,
+}: {
+  message: string;
+  acceptLabel: string;
+  declineLabel: string;
+  onAccept: () => void;
+  onDecline: () => void;
+}) {
+  return (
+    <div className='rounded-[10px] border border-[#D9D5D1] bg-[#F7F5F1] p-4 shadow-[-8px_8px_32px_0_rgba(193,168,163,0.25)]'>
+      <p className='mb-3 text-sm font-medium text-[#615050]'>{message}</p>
+      <div className='flex justify-end gap-2'>
+        <button
+          type='button'
+          onClick={onDecline}
+          className='rounded-full bg-[#E0897A] px-3 py-1 text-xs font-medium uppercase text-white transition-colors hover:bg-brand-red-dark'
+        >
+          {declineLabel}
+        </button>
+        <button
+          type='button'
+          onClick={onAccept}
+          className='rounded-full bg-brand-green px-3 py-1 text-xs font-medium uppercase text-white transition-colors hover:bg-[#808979]'
+        >
+          {acceptLabel}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export function NotificationListener() {
   const { t } = useTranslation();
@@ -34,10 +71,42 @@ export function NotificationListener() {
       );
     };
     const onRequestReceived = (data: {
+      id: string;
       messageKey: string;
       username: string;
     }) => {
-      toast.info(t(data.messageKey, { username: data.username }));
+      const toastId = `friend-request-${data.id}`;
+
+      const respond = async (action: 'accept' | 'decline') => {
+        toast.dismiss(toastId);
+        try {
+          const res = await apiFetch(`/friends/respond/${data.id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action }),
+          });
+          if (!res.ok) throw new Error();
+          if (action === 'accept') {
+            toast.success(
+              t('notification.friendAdded', { username: data.username }),
+            );
+          }
+        } catch {
+          toast.error(t('friends.errors.respondFailed'));
+        }
+      };
+      toast.custom(
+        () => (
+          <ActionToast
+            message={t(data.messageKey, { username: data.username })}
+            acceptLabel={t('notification.accept')}
+            declineLabel={t('notification.decline')}
+            onAccept={() => respond('accept')}
+            onDecline={() => respond('decline')}
+          />
+        ),
+        { id: toastId, duration: 15000 },
+      );
     };
     const onRequestAccepted = (data: {
       messageKey: string;
@@ -76,31 +145,21 @@ export function NotificationListener() {
       receivedInvites.current.add(data.inviteId);
       toast.custom(
         () => (
-          <div className='bg-zinc-800 text-white p-4 rounded-lg shadow-lg border border-zinc-700'>
-            <p className='font-semibold mb-2'>
-              {t('notification.wantsToPlay', { username: data.senderUsername })}
-            </p>
-            <div className='flex gap-2 justify-end'>
-              <button
-                className='text-xs px-2 py-1 rounded bg-zinc-600 text-white'
-                onClick={() => {
-                  socket.emit('declineGameInvite', { inviteId: data.inviteId });
-                  toast.dismiss(`invite-${data.inviteId}`);
-                }}
-              >
-                {t('notification.decline')}
-              </button>
-              <button
-                className='text-xs px-2 py-1 rounded bg-emerald-600 text-white font-bold'
-                onClick={() => {
-                  socket.emit('acceptGameInvite', { inviteId: data.inviteId });
-                  toast.dismiss(`invite-${data.inviteId}`);
-                }}
-              >
-                {t('notification.accept')}
-              </button>
-            </div>
-          </div>
+          <ActionToast
+            message={t('notification.wantsToPlay', {
+              username: data.senderUsername,
+            })}
+            acceptLabel={t('notification.accept')}
+            declineLabel={t('notification.decline')}
+            onAccept={() => {
+              socket.emit('acceptGameInvite', { inviteId: data.inviteId });
+              toast.dismiss(`invite-${data.inviteId}`);
+            }}
+            onDecline={() => {
+              socket.emit('declineGameInvite', { inviteId: data.inviteId });
+              toast.dismiss(`invite-${data.inviteId}`);
+            }}
+          />
         ),
         { id: `invite-${data.inviteId}`, duration: 15000 },
       );
@@ -112,7 +171,7 @@ export function NotificationListener() {
     const onGameInviteExpired = (data: { inviteId: string }) => {
       if (!receivedInvites.current.has(data.inviteId)) return;
       toast.dismiss(`invite-${data.inviteId}`);
-      toast.info(t('friends.inviteNoLongerValid'));
+      toast.error(t('friends.inviteNoLongerValid'));
     };
 
     socket.on('gameInviteReceived', onGameInviteReceived);

@@ -318,7 +318,8 @@
     "requestDeclined": "Your friend request was declined",
     "wantsToPlay": "{{username}} wants to play!",
     "accept": "Accept",
-    "decline": "Decline"
+    "decline": "Decline",
+    "friendAdded": "{{username}} and you are now friends!"
   },
   "legal": {
     "back": "← Back",

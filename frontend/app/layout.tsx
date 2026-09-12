@@ -43,7 +43,16 @@ export default function RootLayout({
                 <NotificationListener />
                 <div className='flex flex-1 flex-col'>{children}</div>
                 <Footer />
-                <Toaster position='top-right' richColors />
+                <Toaster
+                  position='top-right'
+                  richColors
+                  toastOptions={{
+                    classNames: {
+                      actionButton:
+                        '!bg-blue-500 !text-white hover:!bg-blue-600',
+                    },
+                  }}
+                />
               </ChatUnreadProvider>
             </SocketProvider>
           </AuthProvider>

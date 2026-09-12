@@ -243,7 +243,6 @@
     "newMessageFrom": "{{name}} nosūtīja tev ziņu",
     "someone": "Kāds",
     "open": "Atvērt"
-
   },
   "stats": {
     "title": "Statistika",
@@ -328,7 +327,8 @@
     "requestDeclined": "Jūsu draudzības pieprasījums tika noraidīts",
     "wantsToPlay": "{{username}} vēlas spēlēt!",
     "accept": "Pieņemt",
-    "decline": "Noraidīt"
+    "decline": "Noraidīt",
+    "friendAdded": "Tu tagad esi draugos ar {{username}}!"
   },
   "legal": {
     "back": "← Atpakaļ",
