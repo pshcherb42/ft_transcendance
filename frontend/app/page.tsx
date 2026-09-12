@@ -74,7 +74,7 @@ export default function HomePage() {
   if (loading || !user) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-background">
-        <p className="text-sm text-zinc-400">
+        <p className="text-sm text-muted-foreground">
           {t('game.loading')}
         </p>
       </main>
@@ -119,13 +119,13 @@ export default function HomePage() {
               lg:px-8
               rounded-full
               border
-              border-[#D9D5D1]
+              border-border
               text-[14px]
               font-medium
               uppercase
-              text-[#615050]
+              text-muted-foreground
               transition-colors
-              hover:bg-[#D9D9D9]/20
+              hover:bg-border/20
               disabled:cursor-not-allowed
               disabled:opacity-50
             "
@@ -156,7 +156,7 @@ export default function HomePage() {
               uppercase
               text-white
               transition-opacity
-              hover:bg-[#808979]
+              hover:bg-brand-green-dark
             "
           >
             {t('home.profile')}
@@ -189,10 +189,10 @@ export default function HomePage() {
             className="
               w-full
               rounded-[10px]
-              bg-white
+              bg-surface
               px-5
               py-8
-              shadow-[-8px_8px_32px_0_rgba(193,168,163,0.25)]
+              shadow-[-8px_8px_32px_0_var(--card-shadow)]
               sm:px-7
               sm:py-10
               md:px-10
@@ -209,7 +209,7 @@ export default function HomePage() {
               </h1>
 
               <div className="mt-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-sm">
-                <span className="text-[#615050]">
+                <span className="text-muted-foreground">
                   {t('home.selectGameMode')}
                 </span>
 
@@ -237,7 +237,7 @@ export default function HomePage() {
             <div className="grid gap-10 lg:grid-cols-2 lg:gap-14">
               {/* Left side — game modes */}
               <div>
-                <p className="mb-4 text-sm font-bold uppercase tracking-wide text-[#615050]">
+                <p className="mb-4 text-sm font-bold uppercase tracking-wide text-muted-foreground">
                   {t('home.gameMode')}
                 </p>
 
@@ -250,14 +250,14 @@ export default function HomePage() {
                       w-full
                       rounded-full
                       border
-                      border-[#CFC5C1]
+                      border-muted
                       text-[14px]
                       font-medium
                       uppercase
-                      text-[#615050]
+                      text-muted-foreground
                       transition-all
-                      hover:border-[#615050]
-                      hover:bg-[#D9D9D9]/20
+                      hover:border-muted-foreground
+                      hover:bg-border/20
                     "
                   >
                     {t('game.menu.playOnline')}
@@ -271,14 +271,14 @@ export default function HomePage() {
                       w-full
                       rounded-full
                       border
-                      border-[#CFC5C1]
+                      border-muted
                       text-[14px]
                       font-medium
                       uppercase
-                      text-[#615050]
+                      text-muted-foreground
                       transition-all
-                      hover:border-[#615050]
-                      hover:bg-[#D9D9D9]/20
+                      hover:border-muted-foreground
+                      hover:bg-border/20
                     "
                   >
                     {t('game.menu.playLocal')}
@@ -292,14 +292,14 @@ export default function HomePage() {
                       w-full
                       rounded-full
                       border
-                      border-[#CFC5C1]
+                      border-muted
                       text-[14px]
                       font-medium
                       uppercase
-                      text-[#615050]
+                      text-muted-foreground
                       transition-all
-                      hover:border-[#615050]
-                      hover:bg-[#D9D9D9]/20
+                      hover:border-muted-foreground
+                      hover:bg-border/20
                     "
                   >
                     {t('game.menu.playAi')}
@@ -313,14 +313,14 @@ export default function HomePage() {
                       w-full
                       rounded-full
                       border
-                      border-[#CFC5C1]
+                      border-muted
                       text-[14px]
                       font-medium
                       uppercase
-                      text-[#615050]
+                      text-muted-foreground
                       transition-all
-                      hover:border-[#615050]
-                      hover:bg-[#D9D9D9]/20
+                      hover:border-muted-foreground
+                      hover:bg-border/20
                     "
                   >
                     {t('game.menu.tournament')}
@@ -329,14 +329,14 @@ export default function HomePage() {
               </div>
 
               {/* Right side — settings */}
-              <div className="lg:border-l lg:border-[#EEE9E6] lg:pl-14">
-                <p className="mb-5 text-sm font-bold uppercase tracking-wide text-[#615050]">
+              <div className="lg:border-l lg:border-surface lg:pl-14">
+                <p className="mb-5 text-sm font-bold uppercase tracking-wide text-muted-foreground">
                 {t('game.menu.gameSettings')}{' '} <span className="lowercase font-medium">{t('game.menu.gameSettingsNote')}</span>
                 </p>
 
                 {/* Map */}
                 <div>
-                  <p className="mb-3 text-sm text-[#615050]">
+                  <p className="mb-3 text-sm text-muted-foreground">
                   {t('game.menu.map')}
                   </p>
 
@@ -356,7 +356,7 @@ export default function HomePage() {
                         ${
                           mapId === 'classic'
                             ? 'border-brand-green bg-brand-green text-white'
-                            : 'border-[#D9D5D1] text-[#615050] hover:bg-zinc-50'
+                            : 'border-border text-muted-foreground hover:bg-border/20'
                         }
                       `}
                     >
@@ -378,7 +378,7 @@ export default function HomePage() {
                         ${
                           mapId === 'obstacles'
                             ? 'border-brand-green bg-brand-green text-white'
-                            : 'border-[#D9D5D1] text-[#615050] hover:bg-zinc-50'
+                            : 'border-border text-muted-foreground hover:bg-border/20'
                         }
                       `}
                     >
@@ -390,11 +390,11 @@ export default function HomePage() {
                 {/* Power-ups */}
                 <div className="mt-7 flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-[#615050]">
+                    <p className="text-sm text-muted-foreground">
                     {t('game.menu.powerUps')}
                     </p>
 
-                    <p className="mt-1 text-xs text-zinc-400">
+                    <p className="mt-1 text-xs text-muted-foreground">
                     {t('game.menu.powerUpsDescription')}
                     </p>
                   </div>
@@ -417,7 +417,7 @@ export default function HomePage() {
                       ${
                         powerups
                           ? 'bg-brand-green'
-                          : 'bg-[#D9D5D1]'
+                          : 'bg-border'
                       }
                     `}
                   >
@@ -429,7 +429,7 @@ export default function HomePage() {
                         h-[24px]
                         w-[24px]
                         rounded-full
-                        bg-white
+                        bg-surface
                         shadow-sm
                         transition-transform
                         duration-200
@@ -445,7 +445,7 @@ export default function HomePage() {
 
                 {/* AI difficulty */}
                 <div className="mt-7">
-                  <p className="mb-3 text-sm text-[#615050]">
+                  <p className="mb-3 text-sm text-muted-foreground">
                   {t('game.menu.aiDifficulty')}
                   </p>
 
@@ -471,7 +471,7 @@ export default function HomePage() {
                             ${
                               isSelected
                                 ? 'border-brand-green bg-brand-green text-white'
-                                : 'border-[#D9D5D1] text-[#615050] hover:bg-zinc-50'
+                                : 'border-border text-muted-foreground hover:bg-border/20'
                             }
                           `}
                         >
@@ -513,10 +513,10 @@ export default function HomePage() {
         max-w-[640px]
         overflow-y-auto
         rounded-[10px]
-        bg-white
+        bg-surface
         px-5
         py-7
-        shadow-[-8px_8px_32px_rgba(193,168,163,0.25)]
+        shadow-[-8px_8px_32px_var(--card-shadow)]
         sm:px-8
         sm:py-9
         md:px-10
@@ -533,9 +533,9 @@ export default function HomePage() {
           top-5
           text-[28px]
           leading-none
-          text-[#615050]
+          text-muted-foreground
           transition-colors
-          hover:text-[#1A1A1A]
+          hover:text-foreground
         "
       >
         ×
@@ -560,21 +560,21 @@ export default function HomePage() {
 
       <div className="space-y-6">
         <section>
-          <h3 className="mb-2 text-sm font-bold uppercase text-[#1A1A1A]">
+          <h3 className="mb-2 text-sm font-bold uppercase text-foreground">
             {t('home.rules.objectiveTitle')}
           </h3>
 
-          <p className="text-sm leading-6 text-[#615050]">
+          <p className="text-sm leading-6 text-muted-foreground">
             {t('home.rules.objective')}
           </p>
         </section>
 
         <section>
-          <h3 className="mb-2 text-sm font-bold uppercase text-[#1A1A1A]">
+          <h3 className="mb-2 text-sm font-bold uppercase text-foreground">
             {t('home.rules.controlsTitle')}
           </h3>
 
-          <ul className="list-disc space-y-1 pl-5 text-sm leading-6 text-[#615050]">
+          <ul className="list-disc space-y-1 pl-5 text-sm leading-6 text-muted-foreground">
             <li>{t('home.rules.leftControls')}</li>
             <li>{t('home.rules.rightControls')}</li>
             <li>{t('home.rules.onlineControls')}</li>
@@ -582,32 +582,32 @@ export default function HomePage() {
         </section>
 
         <section>
-          <h3 className="mb-2 text-sm font-bold uppercase text-[#1A1A1A]">
+          <h3 className="mb-2 text-sm font-bold uppercase text-foreground">
             {t('home.rules.mapsTitle')}
           </h3>
 
-          <ul className="list-disc space-y-1 pl-5 text-sm leading-6 text-[#615050]">
+          <ul className="list-disc space-y-1 pl-5 text-sm leading-6 text-muted-foreground">
             <li>{t('home.rules.classicMap')}</li>
             <li>{t('home.rules.obstaclesMap')}</li>
           </ul>
         </section>
 
         <section>
-          <h3 className="mb-2 text-sm font-bold uppercase text-[#1A1A1A]">
+          <h3 className="mb-2 text-sm font-bold uppercase text-foreground">
             {t('home.rules.powerupsTitle')}
           </h3>
 
-          <p className="text-sm leading-6 text-[#615050]">
+          <p className="text-sm leading-6 text-muted-foreground">
             {t('home.rules.powerups')}
           </p>
         </section>
 
         <section>
-          <h3 className="mb-2 text-sm font-bold uppercase text-[#1A1A1A]">
+          <h3 className="mb-2 text-sm font-bold uppercase text-foreground">
             {t('home.rules.tournamentTitle')}
           </h3>
 
-          <p className="text-sm leading-6 text-[#615050]">
+          <p className="text-sm leading-6 text-muted-foreground">
             {t('home.rules.tournament')}
           </p>
         </section>

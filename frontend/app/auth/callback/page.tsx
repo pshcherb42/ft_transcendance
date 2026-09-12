@@ -23,7 +23,7 @@ export default function OAuthCallbackPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen">
-      <p className="text-zinc-500">Signing you in…</p>
+      <p className="text-muted-foreground">Signing you in…</p>
     </div>
   );
 }

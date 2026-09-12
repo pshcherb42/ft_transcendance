@@ -33,7 +33,7 @@ export default function ProfileHeader({
             shrink-0
             overflow-hidden
             rounded-full
-            bg-[#D9D5D1]
+            bg-border
           '
         >
           {avatarPath ? (
@@ -43,7 +43,7 @@ export default function ProfileHeader({
               className='h-full w-full object-cover'
             />
           ) : (
-            <span className='flex h-full w-full items-center justify-center font-display text-[56px] uppercase text-white'>
+            <span className='flex h-full w-full items-center justify-center font-display text-[56px] uppercase text-foreground'>
               {username.charAt(0).toUpperCase()}
             </span>
           )}
@@ -54,12 +54,12 @@ export default function ProfileHeader({
             {username}
           </h1>
 
-          <p className='mt-3 break-all text-[15px] text-[#615050]'>{email}</p>
+          <p className='mt-3 break-all text-[15px] text-muted-foreground'>{email}</p>
 
           <div className='mt-4 flex items-center gap-3'>
-            <span className='h-[13px] w-[13px] rounded-full bg-[#98C47C]' />
+            <span className='h-[13px] w-[13px] rounded-full bg-status-online' />
 
-            <span className='text-[14px] font-medium uppercase text-[#615050]'>
+            <span className='text-[14px] font-medium uppercase text-muted-foreground'>
               {t('profile.online', {
                 defaultValue: 'Online',
               })}
@@ -92,11 +92,11 @@ function StatCard({ value, label }: { value: number | string; label: string }) {
         justify-center
         rounded-[10px]
         border
-        border-[#D9D5D1]
-        bg-white
+        border-border
+        bg-surface
         px-4
         text-center
-        text-[#615050]
+        text-muted-foreground
       '
     >
       <span className='text-[24px] font-bold leading-none'>{value}</span>

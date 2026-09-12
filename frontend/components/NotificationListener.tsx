@@ -23,20 +23,20 @@ export function ActionToast({
   onDecline: () => void;
 }) {
   return (
-    <div className='rounded-[10px] border border-[#D9D5D1] bg-[#F7F5F1] p-4 shadow-[-8px_8px_32px_0_rgba(193,168,163,0.25)]'>
-      <p className='mb-3 text-sm font-medium text-[#615050]'>{message}</p>
+    <div className='rounded-[10px] border border-border bg-notice p-4 shadow-[-8px_8px_32px_0_var(--card-shadow)]'>
+      <p className='mb-3 text-sm font-medium text-muted-foreground'>{message}</p>
       <div className='flex justify-end gap-2'>
         <button
           type='button'
           onClick={onDecline}
-          className='rounded-full bg-[#E0897A] px-3 py-1 text-xs font-medium uppercase text-white transition-colors hover:bg-brand-red-dark'
+          className='rounded-full bg-decline px-3 py-1 text-xs font-medium uppercase text-white transition-colors hover:bg-brand-red-dark'
         >
           {declineLabel}
         </button>
         <button
           type='button'
           onClick={onAccept}
-          className='rounded-full bg-brand-green px-3 py-1 text-xs font-medium uppercase text-white transition-colors hover:bg-[#808979]'
+          className='rounded-full bg-brand-green px-3 py-1 text-xs font-medium uppercase text-white transition-colors hover:bg-brand-green-dark'
         >
           {acceptLabel}
         </button>

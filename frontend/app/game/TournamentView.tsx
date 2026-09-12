@@ -107,7 +107,7 @@ export function TournamentView({
   // ------------------------------------------------------------ REGISTER
   if (phase === 'register') {
     return (
-      <div className="flex min-h-[calc(100dvh-48px)] flex-col bg-[#F7F5F1]">
+      <div className="flex min-h-[calc(100dvh-48px)] flex-col bg-surface">
         <main className="flex flex-1">
           <section
             className="
@@ -132,14 +132,14 @@ export function TournamentView({
                   max-w-[240px]
                   rounded-full
                   border
-                  border-[#D9D5D1]
+                  border-border
                   px-4
                   text-[13px]
                   font-medium
                   uppercase
-                  text-[#615050]
+                  text-muted-foreground
                   transition-colors
-                  hover:bg-[#D9D9D9]/20
+                  hover:bg-border/20
                   sm:h-[46px]
                   sm:w-auto
                   sm:min-w-[190px]
@@ -166,7 +166,7 @@ export function TournamentView({
                   {t('tournament.title')}
                 </h1>
 
-                <p className="mt-3 text-[14px] text-[#615050]">
+                <p className="mt-3 text-[14px] text-muted-foreground">
                 {t('tournament.addPlayers')}
                 </p>
               </div>
@@ -180,10 +180,10 @@ export function TournamentView({
                 w-full
                 max-w-[820px]
                 rounded-[14px]
-                bg-white
+                bg-surface
                 px-4
                 py-6
-                shadow-[-8px_8px_32px_0_rgba(193,168,163,0.20)]
+                shadow-[-8px_8px_32px_0_var(--card-shadow)]
                 sm:px-6
                 sm:py-8
                 md:px-10
@@ -197,13 +197,13 @@ export function TournamentView({
                     font-bold
                     uppercase
                     tracking-[0.08em]
-                    text-[#615050]
+                    text-muted-foreground
                   "
                 >
                   {t('tournament.players')}
                 </p>
 
-                <p className="mt-2 text-[13px] text-[#918787]">
+                <p className="mt-2 text-[13px] text-muted-foreground">
                 {t('tournament.uniqueNames')}
                 </p>
               </div>
@@ -224,7 +224,7 @@ export function TournamentView({
                           font-medium
                           uppercase
                           tracking-[0.06em]
-                          text-[#615050]
+                          text-muted-foreground
                         "
                       >
                         {t('tournament.player')} {index + 1}
@@ -256,13 +256,13 @@ export function TournamentView({
                           justify-center
                           rounded-full
                           border
-                          border-[#D9D5D1]
+                          border-border
                           text-[18px]
                           font-light
-                          text-[#615050]
+                          text-muted-foreground
                           transition-colors
-                          hover:border-[#615050]
-                          hover:bg-[#D9D9D9]/20
+                          hover:border-muted-foreground
+                          hover:bg-border/20
                         "
                       >
                         ×
@@ -283,15 +283,15 @@ export function TournamentView({
                     rounded-full
                     border
                     border-dashed
-                    border-[#CFC5C1]
+                    border-muted
                     text-[13px]
                     font-medium
                     uppercase
                     tracking-[0.05em]
-                    text-[#615050]
+                    text-muted-foreground
                     transition-colors
-                    hover:border-[#615050]
-                    hover:bg-[#D9D9D9]/20
+                    hover:border-muted-foreground
+                    hover:bg-border/20
                   "
                 >
                   {t('tournament.addPlayer')}
@@ -332,7 +332,7 @@ export function TournamentView({
                     tracking-[0.08em]
                     text-white
                     transition-colors
-                    hover:bg-[#808979]
+                    hover:bg-brand-green-dark
                     disabled:cursor-not-allowed
                     disabled:opacity-40
                     disabled:hover:bg-brand-green
@@ -357,7 +357,7 @@ export function TournamentView({
   // --------------------------------------------------------------- DONE
   if (phase === 'done') {
     return (
-      <div className="flex min-h-[calc(100dvh-48px)] flex-col bg-[#F7F5F1]">
+      <div className="flex min-h-[calc(100dvh-48px)] flex-col bg-surface">
         <main className="flex flex-1">
           <section
             className="
@@ -381,14 +381,14 @@ export function TournamentView({
                   max-w-[240px]
                   rounded-full
                   border
-                  border-[#D9D5D1]
+                  border-border
                   px-4
                   text-[13px]
                   font-medium
                   uppercase
-                  text-[#615050]
+                  text-muted-foreground
                   transition-colors
-                  hover:bg-[#D9D9D9]/20
+                  hover:bg-border/20
                   sm:h-[46px]
                   sm:w-auto
                   sm:min-w-[190px]
@@ -424,10 +424,10 @@ export function TournamentView({
                 w-full
                 max-w-[1000px]
                 rounded-[14px]
-                bg-white
+                bg-surface
                 px-6
                 py-8
-                shadow-[-8px_8px_32px_0_rgba(193,168,163,0.20)]
+                shadow-[-8px_8px_32px_0_var(--card-shadow)]
                 md:px-10
                 md:py-10
               "
@@ -439,7 +439,7 @@ export function TournamentView({
                     font-medium
                     uppercase
                     tracking-[0.14em]
-                    text-[#615050]
+                    text-muted-foreground
                   "
                 >
                   {t('tournament.champion')}
@@ -460,7 +460,7 @@ export function TournamentView({
                   {tournament.champion}
                 </h2>
 
-                <p className="mt-4 text-[14px] text-[#615050]">
+                <p className="mt-4 text-[14px] text-muted-foreground">
                 {t('tournament.championDescription')}
                 </p>
               </div>
@@ -470,8 +470,8 @@ export function TournamentView({
                   mt-9
                   rounded-[12px]
                   border
-                  border-[#EEE9E6]
-                  bg-[#FAF9F7]
+                  border-surface
+                  bg-surface
                   px-4
                   py-6
                   md:px-6
@@ -510,7 +510,7 @@ export function TournamentView({
                     tracking-[0.08em]
                     text-white
                     transition-colors
-                    hover:bg-[#808979]
+                    hover:bg-brand-green-dark
                   "
                 >
                   {t('tournament.newTournament')}
@@ -526,16 +526,16 @@ export function TournamentView({
                     sm:min-w-[220px]
                     rounded-full
                     border-[1.5px]
-                    border-[#D9D5D1]
+                    border-border
                     px-8
                     text-[13px]
                     font-medium
                     uppercase
                     tracking-[0.08em]
-                    text-[#615050]
+                    text-muted-foreground
                     transition-colors
-                    hover:border-[#615050]
-                    hover:bg-[#D9D9D9]/20
+                    hover:border-muted-foreground
+                    hover:bg-border/20
                   "
                 >
                   {t('tournament.back')}
@@ -599,7 +599,7 @@ setScore(finalScore);
 };
 
   return (
-    <div className="flex min-h-[calc(100dvh-48px)] flex-col bg-[#F7F5F1]">
+    <div className="flex min-h-[calc(100dvh-48px)] flex-col bg-surface">
       <main className="flex flex-1">
         <section
           className="
@@ -624,14 +624,14 @@ setScore(finalScore);
                   max-w-[240px]
                   rounded-full
                   border
-                  border-[#D9D5D1]
+                  border-border
                   px-4
                   text-[13px]
                   font-medium
                   uppercase
-                  text-[#615050]
+                  text-muted-foreground
                   transition-colors
-                  hover:bg-[#D9D9D9]/20
+                  hover:bg-border/20
                   sm:h-[46px]
                   sm:w-auto
                   sm:min-w-[190px]
@@ -665,7 +665,7 @@ setScore(finalScore);
                   font-medium
                   uppercase
                   tracking-[0.12em]
-                  text-[#615050]
+                  text-muted-foreground
                 "
               >
                 {t('tournament.round')} {currentMatch.round + 1}
@@ -682,7 +682,7 @@ setScore(finalScore);
               w-full
               max-w-[1085px]
               rounded-[14px]
-              bg-white
+              bg-surface
               px-5
               pb-5
               pt-4
@@ -709,7 +709,7 @@ setScore(finalScore);
           truncate
           text-[13px]
           font-semibold
-          text-black
+          text-foreground
           sm:text-[16px]
           md:text-[20px]
         "
@@ -728,7 +728,7 @@ setScore(finalScore);
         text-[28px]
         font-semibold
         leading-none
-        text-black
+        text-foreground
         sm:gap-3
         sm:text-[36px]
         md:gap-4
@@ -737,7 +737,7 @@ setScore(finalScore);
     >
       <span>{score.left}</span>
 
-      <span className="text-[20px] text-[#777171] sm:text-[24px] md:text-[30px]">
+      <span className="text-[20px] text-muted-foreground sm:text-[24px] md:text-[30px]">
         :
       </span>
 
@@ -751,7 +751,7 @@ setScore(finalScore);
           truncate
           text-[13px]
           font-semibold
-          text-black
+          text-foreground
           sm:text-[16px]
           md:text-[20px]
         "
@@ -772,7 +772,7 @@ setScore(finalScore);
       justify-center
       overflow-hidden
       rounded-[14px]
-      bg-[#171717]
+      bg-canvas
       ${ready ? '' : 'min-h-[260px] sm:min-h-[300px] md:min-h-[330px]'}
     `}
   >
@@ -810,7 +810,7 @@ setScore(finalScore);
             font-medium
             uppercase
             tracking-[0.14em]
-            text-[#BEB7B2]
+            text-muted
           "
         >
           {t('tournament.winner')}
@@ -839,19 +839,19 @@ setScore(finalScore);
             text-[38px]
             font-semibold
             leading-none
-            text-white
+            text-foreground
           "
         >
           <span>{lastResult.score.left}</span>
 
-          <span className="text-[24px] text-[#777171]">
+          <span className="text-[24px] text-muted-foreground">
             :
           </span>
 
           <span>{lastResult.score.right}</span>
         </div>
 
-        <p className="mt-4 text-[14px] text-[#BEB7B2]">
+        <p className="mt-4 text-[14px] text-muted">
         {t('tournament.winnerText', {
           winner: lastResult.winner,
           loser: lastResult.loser,
@@ -880,7 +880,7 @@ setScore(finalScore);
             tracking-[0.08em]
             text-white
             transition-colors
-            hover:bg-[#808979]
+            hover:bg-brand-green-dark
           "
         >
           {t('tournament.next')}
@@ -909,7 +909,7 @@ setScore(finalScore);
             font-medium
             uppercase
             tracking-[0.14em]
-            text-[#BEB7B2]
+            text-muted
           "
         >
           {t('tournament.next')}
@@ -924,13 +924,13 @@ setScore(finalScore);
             break-words
             uppercase
             leading-none
-            text-white
+            text-foreground
           "
         >
           {currentMatch.p1}
         </h2>
 
-        <p className="my-2 text-[14px] uppercase tracking-[0.14em] text-[#918787]">
+        <p className="my-2 text-[14px] uppercase tracking-[0.14em] text-muted-foreground">
           vs
         </p>
 
@@ -942,7 +942,7 @@ setScore(finalScore);
             break-words
             uppercase
             leading-none
-            text-white
+            text-foreground
           "
         >
           {currentMatch.p2}
@@ -971,7 +971,7 @@ setScore(finalScore);
             tracking-[0.08em]
             text-white
             transition-colors
-            hover:bg-[#D9361F]
+            hover:bg-brand-red-dark
           "
         >
           {t('tournament.play')}
@@ -983,9 +983,9 @@ setScore(finalScore);
 
           {/* Controls */}
           {ready && (
-            <p className="mx-auto mt-5 text-center text-[14px] text-[#615050]">
+            <p className="mx-auto mt-5 text-center text-[14px] text-muted-foreground">
               {currentMatch.p1}: W / S
-              <span className="mx-3 text-[#B4AAAA]">·</span>
+              <span className="mx-3 text-subtle">·</span>
               {currentMatch.p2}: ↑ / ↓
             </p>
           )}
@@ -1000,8 +1000,8 @@ setScore(finalScore);
                 max-w-[1085px]
                 rounded-[14px]
                 border
-                border-[#EEE9E6]
-                bg-white
+                border-surface
+                bg-surface
                 px-5
                 py-6
                 md:px-6
@@ -1015,13 +1015,13 @@ setScore(finalScore);
                       font-bold
                       uppercase
                       tracking-[0.08em]
-                      text-[#615050]
+                      text-muted-foreground
                     "
                   >
                     {t('tournament.bracket')}
                   </p>
 
-                  <p className="mt-1 text-[13px] text-[#918787]">
+                  <p className="mt-1 text-[13px] text-muted-foreground">
                   {t('tournament.bracketDescription')}
                   </p>
                 </div>
@@ -1029,14 +1029,14 @@ setScore(finalScore);
                 <span
                   className="
                     rounded-full
-                    bg-[#F4F2EE]
+                    bg-background
                     px-4
                     py-2
                     text-[12px]
                     font-medium
                     uppercase
                     tracking-[0.06em]
-                    text-[#615050]
+                    text-muted-foreground
                   "
                 >
                   {currentMatch.round + 1} /{' '}
@@ -1097,7 +1097,7 @@ function Bracket({
               font-medium
               uppercase
               tracking-[0.12em]
-              text-[#918787]
+              text-muted-foreground
             "
           >
             {roundIndex === rounds.length - 1
@@ -1118,12 +1118,12 @@ function Bracket({
                     overflow-hidden
                     rounded-[9px]
                     border
-                    bg-white
+                    bg-surface
                     transition-colors
                     ${
                       isCurrent
                         ? 'border-brand-red ring-1 ring-brand-red'
-                        : 'border-[#E3DEDA]'
+                        : 'border-border'
                     }
                   `}
                 >
@@ -1136,7 +1136,7 @@ function Bracket({
                     isCurrent={isCurrent}
                   />
 
-                  <div className="border-t border-[#EEE9E6]" />
+                  <div className="border-t border-surface" />
 
                   <MatchRow
                     name={match.p2}
@@ -1179,12 +1179,12 @@ function MatchRow({
         text-[13px]
         ${
           isWinner
-            ? 'bg-[#EEF1EC] font-semibold text-[#6F7D68]'
+            ? 'bg-surface font-semibold text-brand-green-dark'
             : isCurrent
-              ? 'bg-[#FFF7F5] text-[#1A1A1A]'
+              ? 'bg-surface text-foreground'
               : name
-                ? 'text-[#615050]'
-                : 'text-[#B4AAAA]'
+                ? 'text-muted-foreground'
+                : 'text-subtle'
         }
       `}
     >

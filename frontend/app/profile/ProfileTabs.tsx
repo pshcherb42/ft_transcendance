@@ -76,8 +76,8 @@ function TabButton({
         sm:text-[14px]
         ${
           active
-            ? 'border-brand-green bg-brand-green text-white hover:bg-[#808979]'
-            : 'border-[#D9D5D1] text-[#615050] hover:bg-[#D9D9D9]/20'
+            ? 'border-brand-green bg-brand-green text-white hover:bg-brand-green-dark'
+            : 'border-border text-muted-foreground hover:bg-border/20'
         }
       `}
     >

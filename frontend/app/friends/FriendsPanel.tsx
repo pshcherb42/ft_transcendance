@@ -60,7 +60,7 @@ export default function FriendsPanel() {
   if (loading) {
     return (
       <div className="flex min-h-[280px] items-center justify-center">
-        <p className="text-sm text-zinc-400">
+        <p className="text-sm text-muted-foreground">
           {t('friends.loading')}
         </p>
       </div>
@@ -70,7 +70,7 @@ export default function FriendsPanel() {
   if (error) {
     return (
       <div className="flex min-h-[280px] items-center justify-center">
-        <p className="text-sm text-red-500">
+        <p className="text-sm text-brand-red">
           {t(error)}
         </p>
       </div>
@@ -87,7 +87,7 @@ export default function FriendsPanel() {
           flex-col
           gap-3
           border-b
-          border-[#EEE9E6]
+          border-surface
           pb-8
           sm:flex-row
         "
@@ -108,14 +108,14 @@ export default function FriendsPanel() {
             sm:flex-1
             rounded-full
             border
-            border-[#D9D5D1]
-            bg-white
+            border-border
+            bg-surface
             px-5
             text-sm
-            text-[#615050]
+            text-muted-foreground
             outline-none
             transition-colors
-            placeholder:text-zinc-400
+            placeholder:text-muted-foreground
             hover:border-brand-green
             focus:border-brand-green
           "
@@ -137,7 +137,7 @@ export default function FriendsPanel() {
             uppercase
             text-white
             transition-colors
-            hover:bg-[#808979]
+            hover:bg-brand-green-dark
             disabled:cursor-not-allowed
             disabled:opacity-50
             sm:h-[46px]
@@ -156,14 +156,14 @@ export default function FriendsPanel() {
       </form>
 
       {sendError && (
-        <p className="mt-3 text-sm text-red-500">
+        <p className="mt-3 text-sm text-brand-red">
           {sendError}
         </p>
       )}
 
       <div className="mt-8 grid gap-10 lg:grid-cols-2 lg:gap-0">
         {/* Friends list */}
-        <section className="lg:border-r lg:border-[#EEE9E6] lg:pr-10">
+        <section className="lg:border-r lg:border-surface lg:pr-10">
           <h2 className="mb-5 font-display text-[28px] uppercase leading-none text-brand-red">
             {t('friends.friendsCount', {
               count: friends.length,
@@ -180,7 +180,7 @@ export default function FriendsPanel() {
                     items-center
                     gap-3
                     border-b
-                    border-[#EEE9E6]
+                    border-surface
                     pb-5
                     min-[550px]:grid-cols-[minmax(0,1fr)_110px_110px]
                   "
@@ -192,7 +192,7 @@ export default function FriendsPanel() {
                   />
 
                     <div className="min-w-0">
-                      <p className="truncate text-[16px] font-semibold text-[#615050]">
+                      <p className="truncate text-[16px] font-semibold text-muted-foreground">
                         {friend.username}
                       </p>
 
@@ -204,13 +204,13 @@ export default function FriendsPanel() {
                             rounded-full
                             ${
                               friend.online
-                                ? 'bg-[#98C47C]'
-                                : 'bg-[#CFC5C1]'
+                                ? 'bg-status-online'
+                                : 'bg-muted'
                             }
                           `}
                         />
 
-                        <span className="text-xs text-zinc-400">
+                        <span className="text-xs text-muted-foreground">
                           {friend.online
                             ? t('profile.online')
                             : t('profile.offline')}
@@ -246,7 +246,7 @@ export default function FriendsPanel() {
                         uppercase
                         text-white
                         transition-colors
-                        hover:bg-[#808979]
+                        hover:bg-brand-green-dark
                         disabled:cursor-not-allowed
                         disabled:opacity-40
                         min-[550px]:h-[34px]
@@ -264,14 +264,14 @@ export default function FriendsPanel() {
                         h-[38px]
                         rounded-full
                         border
-                        border-[#D9D5D1]
+                        border-border
                         px-4
                         text-[12px]
                         font-medium
                         uppercase
-                        text-[#615050]
+                        text-muted-foreground
                         transition-colors
-                        hover:bg-[#D9D9D9]/20
+                        hover:bg-border/20
                         min-[550px]:h-[34px]
                       "
                     >
@@ -307,7 +307,7 @@ export default function FriendsPanel() {
                     items-center
                     gap-3
                     border-b
-                    border-[#EEE9E6]
+                    border-surface
                     pb-5
                     min-[550px]:grid-cols-[minmax(0,1fr)_110px_110px]
                   "
@@ -318,7 +318,7 @@ export default function FriendsPanel() {
                     avatarPath={request.sender.avatar}
                   />
 
-                    <p className="truncate text-[16px] font-semibold text-[#615050]">
+                    <p className="truncate text-[16px] font-semibold text-muted-foreground">
                       {request.sender.username}
                     </p>
                   </div>
@@ -349,7 +349,7 @@ export default function FriendsPanel() {
                       uppercase
                       text-white
                       transition-colors
-                      hover:bg-[#808979]
+                      hover:bg-brand-green-dark
                       min-[550px]:h-[34px]
                     "
                   >
@@ -368,14 +368,14 @@ export default function FriendsPanel() {
                       h-[38px]
                       rounded-full
                       border
-                      border-[#D9D5D1]
+                      border-border
                       px-4
                       text-[12px]
                       font-medium
                       uppercase
-                      text-[#615050]
+                      text-muted-foreground
                       transition-colors
-                      hover:bg-[#D9D9D9]/20
+                      hover:bg-border/20
                       min-[550px]:h-[34px]
                     "
                   >
@@ -399,7 +399,7 @@ export default function FriendsPanel() {
 
           {outgoing.length > 0 && (
             <div className="mt-10">
-              <h3 className="mb-5 text-sm font-bold uppercase tracking-wide text-[#615050]">
+              <h3 className="mb-5 text-sm font-bold uppercase tracking-wide text-muted-foreground">
                 {t(
                   'friends.outgoingRequests',
                 )}
@@ -416,7 +416,7 @@ export default function FriendsPanel() {
                       gap-3
                       rounded-[10px]
                       border
-                      border-[#EEE9E6]
+                      border-surface
                       bg-background
                       px-4
                       py-3
@@ -428,7 +428,7 @@ export default function FriendsPanel() {
                       avatarPath={request.receiver.avatar}
                     />
 
-                      <span className="truncate text-sm font-medium text-[#615050]">
+                      <span className="truncate text-sm font-medium text-muted-foreground">
                         {
                           request.receiver
                             .username
@@ -436,7 +436,7 @@ export default function FriendsPanel() {
                       </span>
                     </div>
 
-                    <span className="shrink-0 text-xs uppercase text-zinc-400">
+                    <span className="shrink-0 text-xs uppercase text-muted-foreground">
                       {t('friends.pending')}
                     </span>
                   </li>
@@ -465,7 +465,7 @@ function EmptyBlock({
         px-5
       "
     >
-      <p className="text-center text-sm text-zinc-400">
+      <p className="text-center text-sm text-muted-foreground">
         {text}
       </p>
     </div>

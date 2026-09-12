@@ -177,8 +177,8 @@ export default function StatisticsCharts({
           min-w-0
           rounded-[10px]
           border
-          border-[#D9D5D1]
-          bg-white
+          border-border
+          bg-surface
           p-4
           sm:p-5
           md:p-6
@@ -240,8 +240,8 @@ export default function StatisticsCharts({
           min-w-0
           rounded-[10px]
           border
-          border-[#D9D5D1]
-          bg-white
+          border-border
+          bg-surface
           p-4
           sm:p-5
           md:p-6

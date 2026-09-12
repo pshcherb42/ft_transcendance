@@ -89,7 +89,7 @@ export class PongRenderer {
 
     // Left paddle
     // Left paddle
-    ctx.fillStyle = '#EDECE8';
+    ctx.fillStyle = '#EEE9E6';
 
     ctx.beginPath();
     ctx.roundRect(
@@ -135,7 +135,7 @@ export class PongRenderer {
         );
         ctx.fill();
 
-        ctx.fillStyle = '#EDECE8';
+        ctx.fillStyle = '#EEE9E6';
         ctx.font =
           'bold 20px "Courier New", monospace';
 

@@ -87,7 +87,7 @@ export default function BouncingBall() {
         h-8
         w-8
         rounded-full
-        bg-[#9DA995]
+        bg-brand-green
         opacity-0
       "
     />

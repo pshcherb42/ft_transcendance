@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
   --background: #f4f2ee;
@@ -7,6 +7,39 @@
   --brand-red: #ee4424;
   --brand-red-dark: #d6381c;
   --brand-green: #9da995;
+  --brand-green-dark: #808979;
+
+  --muted-foreground: #615050;
+  --subtle: #b5acac;
+  --border: #d9d5d1;
+  --muted: #cfc5c1;
+  --surface: #eee9e6;
+  --status-online: #8ebe78;
+  --canvas: #171717;
+  --decline: #e0897a;
+  --notice: #f5dcd3;
+  --card-shadow: rgba(193, 168, 163, 0.25);
+}
+/* dark theme */
+:root[data-theme='dark'] {
+  --background: #1a1715;
+  --foreground: #f0ece7;
+
+  --brand-red: #ee4424;
+  --brand-red-dark: #f2725c;
+  --brand-green: #a9b5a0;
+  --brand-green-dark: #b3bfa9;
+
+  --muted-foreground: #b0a8a3;
+  --subtle: #8a817d;
+  --border: #3a332f;
+  --muted: #4a4340;
+  --surface: #26211f;
+  --status-online: #96c682;
+  --canvas: #171717;
+  --decline: #e69686;
+  --notice: #3d2b26;
+  --card-shadow: rgba(0, 0, 0, 0.7);
 }
 
 @theme inline {
@@ -16,6 +49,17 @@
   --color-brand-red: var(--brand-red);
   --color-brand-red-dark: var(--brand-red-dark);
   --color-brand-green: var(--brand-green);
+  --color-brand-green-dark: var(--brand-green-dark);
+
+  --color-muted-foreground: var(--muted-foreground);
+  --color-subtle: var(--subtle);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-surface: var(--surface);
+  --color-status-online: var(--status-online);
+  --color-canvas: var(--canvas);
+  --color-decline: var(--decline);
+  --color-notice: var(--notice);
 
   --font-sans: var(--font-manrope);
   --font-display: var(--font-gasoek);
@@ -35,4 +79,22 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-manrope), Arial, sans-serif;
+}
+
+/* ThemeSwitcher: the sun/moon SVG is a fresh DOM node each time the theme
+   toggles (React swaps between two different <svg>s), so this "on mount"
+   animation naturally replays on every switch without any JS. */
+@keyframes theme-icon-in {
+  from {
+    transform: rotate(-180deg) scale(0.4);
+    opacity: 0;
+  }
+  to {
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+.theme-icon {
+  animation: theme-icon-in 0.35s ease;
 }

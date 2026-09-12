@@ -27,7 +27,7 @@ type UserAvatarProps = {
           shrink-0
           overflow-hidden
           rounded-full
-          bg-[#D9D5D1]
+          bg-border
         `}
       >
         <img

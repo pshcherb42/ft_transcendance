@@ -52,7 +52,7 @@ export default function ProfilePage() {
   if (loading || !user) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-background">
-        <p className="text-sm text-zinc-400">
+        <p className="text-sm text-muted-foreground">
           {t('profile.loading')}
         </p>
       </main>
@@ -100,14 +100,14 @@ export default function ProfilePage() {
               w-full
               rounded-full
               border
-              border-[#D9D5D1]
+              border-border
               px-4
               text-[13px]
               font-medium
               uppercase
-              text-[#615050]
+              text-muted-foreground
               transition-colors
-              hover:bg-[#D9D9D9]/20
+              hover:bg-border/20
               sm:h-[46px]
               sm:w-auto
               sm:min-w-[190px]
@@ -143,7 +143,7 @@ export default function ProfilePage() {
                 uppercase
                 text-white
                 transition-colors
-                hover:bg-[#D9361F]
+                hover:bg-brand-red-dark
                 sm:h-[46px]
                 sm:px-8
                 sm:text-[14px]
@@ -168,7 +168,7 @@ export default function ProfilePage() {
                 uppercase
                 text-white
                 transition-colors
-                hover:bg-[#808979]
+                hover:bg-brand-green-dark
                 sm:h-[46px]
                 sm:px-8
                 sm:text-[14px]
@@ -225,10 +225,10 @@ export default function ProfilePage() {
               min-h-[420px]
               w-full
               rounded-[10px]
-              bg-white
+              bg-surface
               px-4
               py-6
-              shadow-[-8px_8px_32px_0_rgba(193,168,163,0.25)]
+              shadow-[-8px_8px_32px_0_var(--card-shadow)]
               sm:px-6
               sm:py-8
               md:px-8
@@ -303,7 +303,7 @@ function LoadingState({
 }) {
   return (
     <div className="flex min-h-[320px] items-center justify-center">
-      <p className="text-sm text-zinc-400">
+      <p className="text-sm text-muted-foreground">
         {text}
       </p>
     </div>
@@ -317,7 +317,7 @@ function ErrorState({
 }) {
   return (
     <div className="flex min-h-[320px] items-center justify-center">
-      <p className="text-sm text-red-600">
+      <p className="text-sm text-brand-red">
         {text}
       </p>
     </div>

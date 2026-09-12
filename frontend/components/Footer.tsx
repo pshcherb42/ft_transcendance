@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import LanguageSwitcher from './LanguageSwitcher';
+import ThemeSwitcher from './ThemeSwitcher';
 import { useTranslation } from 'react-i18next';
 
 export default function Footer() {
@@ -16,7 +17,7 @@ flex
     items-center
     justify-center
     gap-3
-    bg-[#EDECE8]
+    bg-surface
     px-4
     py-3
 
@@ -48,7 +49,7 @@ flex
             text-xs
             uppercase
             tracking-widest
-            text-[#615050]
+            text-muted-foreground
             underline-offset-4
             hover:underline
           "
@@ -56,7 +57,7 @@ flex
           {t('legal.terms.title')}
         </Link>
 
-        <span className="text-[#B5ACAC]">|</span>
+        <span className="text-subtle">|</span>
 
         <Link
           href="/privacy"
@@ -65,7 +66,7 @@ flex
             text-xs
             uppercase
             tracking-widest
-            text-[#615050]
+            text-muted-foreground
             underline-offset-4
             hover:underline
           "
@@ -74,9 +75,10 @@ flex
         </Link>
       </div>
 
-      {/* Languages */}
-      <div className="flex w-full min-[600px]:w-auto justify-center">
+      {/* Languages + theme */}
+      <div className="flex w-full items-center justify-center gap-6 min-[600px]:w-auto">
         <LanguageSwitcher />
+        <ThemeSwitcher />
       </div>
     </footer>
   );

@@ -51,8 +51,8 @@ export default function ChatPage() {
 
   if (loading || !user) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F4F2EE]">
-        <p className="text-sm text-[#615050]">
+      <main className="flex min-h-screen items-center justify-center bg-background">
+        <p className="text-sm text-muted-foreground">
           {t('home.loading')}
         </p>
       </main>
@@ -124,13 +124,13 @@ export default function ChatPage() {
             sm:text-[14px]
             rounded-full
             border
-            border-[#D9D5D1]
+            border-border
             text-[14px]
             font-medium
             uppercase
-            text-[#615050]
+            text-muted-foreground
             transition-colors
-            hover:bg-[#D9D9D9]/20
+            hover:bg-border/20
           "
         >
           {t('game.button.backToMenu')}
@@ -151,7 +151,7 @@ export default function ChatPage() {
             uppercase
             text-white
             transition-colors
-            hover:bg-[#808979]
+            hover:bg-brand-green-dark
             sm:h-[46px]
             sm:min-w-[190px]
             sm:flex-none
@@ -188,8 +188,8 @@ export default function ChatPage() {
             w-full
             overflow-hidden
             rounded-[10px]
-            bg-white
-            shadow-[-8px_8px_32px_0_rgba(193,168,163,0.25)]
+            bg-surface
+            shadow-[-8px_8px_32px_0_var(--card-shadow)]
             sm:h-[calc(100dvh-190px)]
             md:h-[calc(100dvh-210px)]
           "
@@ -203,11 +203,11 @@ export default function ChatPage() {
               md:w-[310px]
               md:shrink-0
               md:border-r
-              md:border-[#D9D5D1]
+              md:border-border
               ${mobileChatOpen ? 'hidden' : 'flex'}
             `}
           >
-            <div className="flex min-h-[90px] items-center border-b border-[#D9D5D1] px-7">
+            <div className="flex min-h-[90px] items-center border-b border-border px-7">
               <h1
                 className="
                   text-[42px]
@@ -223,13 +223,13 @@ export default function ChatPage() {
 
             <div className="flex-1 overflow-y-auto">
               {friendsLoading && (
-                <p className="px-9 py-5 text-sm text-[#8E8780]">
+                <p className="px-9 py-5 text-sm text-muted-foreground">
                   {t('chat.loading')}
                 </p>
               )}
 
               {!friendsLoading && friends.length === 0 && (
-                <p className="px-9 py-5 text-sm text-[#8E8780]">
+                <p className="px-9 py-5 text-sm text-muted-foreground">
                   {t('chat.noFriends')}
                 </p>
               )}
@@ -249,15 +249,15 @@ export default function ChatPage() {
                           items-center
                           gap-4
                           border-b
-                          border-[#F1EFEC]
+                          border-surface
                           px-7
                           py-4
                           text-left
                           transition-colors
                           ${
                             isActive
-                              ? 'bg-[#F7F5F1]'
-                              : 'bg-white hover:bg-[#FAF9F7]'
+                              ? 'bg-border/20'
+                              : 'hover:bg-border/20'
                           }
                         `}
                       >
@@ -274,7 +274,7 @@ export default function ChatPage() {
                               truncate
                               text-[18px]
                               font-semibold
-                              text-[#615050]
+                              text-muted-foreground
                             "
                           >
                             {friend.username}
@@ -288,8 +288,8 @@ export default function ChatPage() {
                                 rounded-full
                                 ${
                                   friend.online
-                                    ? 'bg-[#8EBE78]'
-                                    : 'bg-[#CFCAC4]'
+                                    ? 'bg-status-online'
+                                    : 'bg-muted'
                                 }
                               `}
                             />
@@ -299,7 +299,7 @@ export default function ChatPage() {
                                 text-xs
                                 font-medium
                                 uppercase
-                                text-[#615050]
+                                text-muted-foreground
                               "
                             >
                               {friend.online
@@ -345,7 +345,7 @@ export default function ChatPage() {
                   justify-center
                   px-8
                   text-sm
-                  text-[#8E8780]
+                  text-muted-foreground
                 "
               >
                 {t('chat.selectFriend')}
@@ -359,7 +359,7 @@ export default function ChatPage() {
                     flex-col
                     gap-3
                     border-b
-                    border-[#D9D5D1]
+                    border-border
                     px-4
                     py-4
                     sm:px-6
@@ -386,10 +386,10 @@ export default function ChatPage() {
                       justify-center
                       rounded-full
                       border
-                      border-[#D9D5D1]
-                      text-[#615050]
+                      border-border
+                      text-muted-foreground
                       transition-colors
-                      hover:bg-[#D9D9D9]/20
+                      hover:bg-border/20
                       md:hidden
                     "
                   >
@@ -416,7 +416,7 @@ export default function ChatPage() {
                   </div>
 
                     <div>
-                      <h2 className="text-xl font-semibold text-[#615050]">
+                      <h2 className="text-xl font-semibold text-muted-foreground">
                         {activeFriend.username}
                       </h2>
 
@@ -428,8 +428,8 @@ export default function ChatPage() {
                             rounded-full
                             ${
                               activeFriend.online
-                                ? 'bg-[#8EBE78]'
-                                : 'bg-[#CFCAC4]'
+                                ? 'bg-status-online'
+                                : 'bg-muted'
                             }
                           `}
                         />
@@ -439,7 +439,7 @@ export default function ChatPage() {
                             text-xs
                             font-medium
                             uppercase
-                            text-[#615050]
+                            text-muted-foreground
                           "
                         >
                           {activeFriend.online
@@ -469,7 +469,7 @@ export default function ChatPage() {
                       uppercase
                       text-white
                       transition-colors
-                      hover:bg-[#D9361F]
+                      hover:bg-brand-red-dark
                     "
                   >
                     {t('chat.invite')}
@@ -501,7 +501,7 @@ export default function ChatPage() {
                         items-center
                         justify-center
                         text-sm
-                        text-[#AAA39C]
+                        text-muted-foreground
                       "
                     >
                       {t('chat.noMessages')}
@@ -534,11 +534,11 @@ export default function ChatPage() {
                             py-3
                             text-sm
                             leading-5
-                            text-[#615050]
+                            text-muted-foreground
                             ${
                               isOwnMessage
-                                ? 'rounded-br-md bg-[#D8D4CE]'
-                                : 'rounded-bl-md bg-[#F0EEEA]'
+                                ? 'rounded-br-md bg-border'
+                                : 'rounded-bl-md bg-surface'
                             }
                           `}
                         >
@@ -557,7 +557,7 @@ export default function ChatPage() {
                     items-center
                     gap-2
                     border-t
-                    border-[#D9D5D1]
+                    border-border
                     px-3
                     py-3
                     sm:gap-3
@@ -578,14 +578,14 @@ export default function ChatPage() {
                       flex-1
                       rounded-full
                       border
-                      border-[#D9D5D1]
-                      bg-white
+                      border-border
+                      bg-surface
                       px-5
                       text-sm
-                      text-[#615050]
+                      text-muted-foreground
                       outline-none
                       transition-colors
-                      placeholder:text-zinc-400
+                      placeholder:text-muted-foreground
                       hover:border-brand-green
                       focus:border-brand-green
                     "
@@ -598,14 +598,14 @@ export default function ChatPage() {
                       h-[42px]
                       min-w-[82px]
                       rounded-full
-                      bg-[#EE4424]
+                      bg-brand-red
                       px-6
                       text-xs
                       font-medium
                       uppercase
                       text-white
                       transition-colors
-                      hover:bg-[#D6381C]
+                      hover:bg-brand-red-dark
                       disabled:cursor-not-allowed
                       disabled:opacity-40
                     "

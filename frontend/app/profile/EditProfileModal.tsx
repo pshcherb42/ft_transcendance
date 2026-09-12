@@ -283,7 +283,7 @@ export default function EditProfileModal({
         items-start
         justify-center
         overflow-y-auto
-        bg-[#615050]/35
+        bg-muted-foreground/35
         px-4
         py-4
         backdrop-blur-[2px]
@@ -328,11 +328,11 @@ export default function EditProfileModal({
             justify-center
             rounded-full
             border
-            border-[#D9D5D1]
+            border-border
             text-[22px]
-            text-[#615050]
+            text-muted-foreground
             transition-colors
-            hover:bg-[#D9D9D9]/20
+            hover:bg-border/20
           '
         >
           ×
@@ -355,7 +355,7 @@ export default function EditProfileModal({
       w-28
       overflow-hidden
       rounded-full
-      bg-[#D9D5D1]
+      bg-border
       outline-none
       transition
       hover:brightness-95
@@ -377,7 +377,7 @@ export default function EditProfileModal({
         '
                 />
               ) : (
-                <span className='flex h-full w-full items-center justify-center font-display text-[44px] uppercase text-white'>
+                <span className='flex h-full w-full items-center justify-center font-display text-[44px] uppercase text-foreground'>
                   {user.username.charAt(0).toUpperCase()}
                 </span>
               )}
@@ -445,7 +445,7 @@ export default function EditProfileModal({
             onChange={handleAvatarChange}
           />
 
-          <p className='mt-3 min-h-4 text-xs text-[#615050]'>
+          <p className='mt-3 min-h-4 text-xs text-muted-foreground'>
             {avatarStatus === 'uploading' && t('profile.avatarUploading')}
 
             {avatarStatus === 'done' && t('profile.avatarSelected')}
@@ -468,8 +468,8 @@ export default function EditProfileModal({
 
           {!isOAuthUser && (
             <>
-              <div className='border-t border-[#EEE9E6] pt-5'>
-                <h3 className='text-sm font-bold uppercase tracking-wide text-[#615050]'>
+              <div className='border-t border-surface pt-5'>
+                <h3 className='text-sm font-bold uppercase tracking-wide text-muted-foreground'>
                   {t('profile.changePassword')}
                 </h3>
               </div>
@@ -522,7 +522,7 @@ export default function EditProfileModal({
           )}
 
           {saveStatus === 'error' && saveError && (
-            <p className='text-center text-sm text-red-600'>{t(saveError)}</p>
+            <p className='text-center text-sm text-brand-red'>{t(saveError)}</p>
           )}
 
           <div className='flex flex-col gap-3 pt-2 sm:flex-row'>
@@ -542,7 +542,7 @@ export default function EditProfileModal({
                 uppercase
                 text-white
                 transition-colors
-                hover:bg-[#D9361F]
+                hover:bg-brand-red-dark
                 disabled:cursor-not-allowed
                 disabled:opacity-50
               '
@@ -564,14 +564,14 @@ export default function EditProfileModal({
                 shrink-0
                 rounded-full
                 border
-                border-[#D9D5D1]
+                border-border
                 px-8
                 text-[14px]
                 font-medium
                 uppercase
-                text-[#615050]
+                text-muted-foreground
                 transition-colors
-                hover:bg-[#D9D9D9]/20
+                hover:bg-border/20
               '
             >
               {t('profile.cancel')}

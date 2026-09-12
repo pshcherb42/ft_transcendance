@@ -45,7 +45,7 @@ export default function Input({
         className="
           text-[14px]
           leading-[20px]
-          text-[#1A1A1A]
+          text-foreground
         "
       >
         {label}
@@ -66,32 +66,32 @@ export default function Input({
           w-full
           rounded-[6px]
           border
-          bg-white
+          bg-surface
           px-[16px]
           text-[14px]
-          text-[#1A1A1A]
+          text-foreground
           outline-none
           transition-colors
-          placeholder:text-[#9A958E]
+          placeholder:text-muted-foreground
 
           ${
             error
               ? `
-                border-[#EE4424]
-                hover:border-[#EE4424]
-                focus:border-[#EE4424]
-                focus:bg-white
+                border-brand-red
+                hover:border-brand-red
+                focus:border-brand-red
+                focus:bg-surface
               `
               : `
-                border-[#D9D4CC]
-                hover:border-[#726B61]
+                border-border
+                hover:border-muted-foreground
                 focus:border-2
-                focus:border-[#726B61]
+                focus:border-muted-foreground
               `
           }
 
           disabled:cursor-not-allowed
-          disabled:bg-[#F4F2EE]
+          disabled:bg-background
           disabled:opacity-60
 
           ${className}
@@ -105,7 +105,7 @@ export default function Input({
           className="
             text-[12px]
             leading-[16px]
-            text-[#EE4424]
+            text-brand-red
           "
         >
           {t(error)}

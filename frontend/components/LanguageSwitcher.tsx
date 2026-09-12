@@ -46,7 +46,7 @@ export default function LanguageSwitcher() {
                 ${
                   isActive
                     ? 'text-brand-red'
-                    : 'text-[#615050] hover:text-brand-red'
+                    : 'text-muted-foreground hover:text-brand-red'
                 }
               `}
             >
@@ -54,7 +54,7 @@ export default function LanguageSwitcher() {
             </button>
   
             {index < LANGS.length - 1 && (
-              <span className="text-[#B5ACAC]">
+              <span className="text-subtle">
                 /
               </span>
             )}

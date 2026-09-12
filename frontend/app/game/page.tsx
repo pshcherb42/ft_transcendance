@@ -422,8 +422,8 @@ export default function GamePage() {
 
   if (loading || !user) {
     return (
-      <div className='flex items-center justify-center min-h-screen bg-gray-900'>
-        <p className='text-zinc-300 text-sm'>{t('game.loading')}</p>
+      <div className='flex items-center justify-center min-h-screen bg-canvas'>
+        <p className='text-white/70 text-sm'>{t('game.loading')}</p>
       </div>
     );
   }
@@ -511,14 +511,14 @@ export default function GamePage() {
         : t('game.canvas.rightPlayer');
 
   return (
-    <div className='flex min-h-[calc(100dvh-48px)] flex-col bg-[#F7F5F1]'>
+    <div className='flex min-h-[calc(100dvh-48px)] flex-col bg-background'>
       <main className='flex flex-1'>
         <section
           className='
           flex
           w-full
           flex-col
-          bg-[#F7F5F1]
+          bg-background
           px-4
           pb-6
           pt-4
@@ -540,14 +540,14 @@ export default function GamePage() {
                   max-w-[240px]
                   rounded-full
                   border
-                  border-[#D9D5D1]
+                  border-border
                   px-4
                   text-[13px]
                   font-medium
                   uppercase
-                  text-[#615050]
+                  text-muted-foreground
                   transition-colors
-                  hover:bg-[#D9D9D9]/20
+                  hover:bg-border/20
                   sm:h-[46px]
                   sm:w-auto
                   sm:min-w-[190px]
@@ -584,7 +584,7 @@ export default function GamePage() {
                   font-medium
                   uppercase
                   tracking-[0.12em]
-                  text-[#615050]
+                  text-muted-foreground
                 '
                   >
                     {onlineStatusText}
@@ -618,10 +618,11 @@ export default function GamePage() {
             w-full
             max-w-[1085px]
             rounded-[14px]
-            bg-white
+            bg-surface
             px-3
             pb-3
             pt-3
+            shadow-[-8px_8px_32px_0_var(--card-shadow)]
             sm:px-4
             sm:pb-4
             sm:pt-4
@@ -647,7 +648,7 @@ export default function GamePage() {
                 truncate
                 text-[13px]
                 font-semibold
-                text-black
+                text-foreground
                 sm:text-[16px]
                 md:text-[20px]
               '
@@ -665,7 +666,7 @@ export default function GamePage() {
               text-[28px]
               font-semibold
               leading-none
-              text-black
+              text-foreground
               sm:gap-3
               sm:text-[36px]
               md:gap-4
@@ -674,7 +675,7 @@ export default function GamePage() {
               >
                 <span>{score.left}</span>
 
-                <span className='text-[20px] text-[#777171] sm:text-[24px] md:text-[30px]'>
+                <span className='text-[20px] text-muted-foreground sm:text-[24px] md:text-[30px]'>
                   :
                 </span>
 
@@ -687,7 +688,7 @@ export default function GamePage() {
                 truncate
                 text-[13px]
                 font-semibold
-                text-black
+                text-foreground
                 sm:text-[16px]
                 md:text-[20px]
               '
@@ -702,7 +703,7 @@ export default function GamePage() {
             relative
             overflow-hidden
             rounded-[10px]
-            bg-[#171717]
+            bg-canvas
             sm:rounded-[14px]
             ${isGameFinished ? 'hidden min-[950px]:block' : 'block'}
           `}
@@ -712,7 +713,7 @@ export default function GamePage() {
                   ref={canvasRef}
                   width={WIDTH}
                   height={HEIGHT}
-                  className='block h-auto w-full bg-[#171717]'
+                  className='block h-auto w-full bg-canvas'
                 />
               ) : (
                 <PongMatch
@@ -747,7 +748,7 @@ export default function GamePage() {
                   flex-col
                   items-center
                   rounded-[20px]
-                  bg-[#F7F5F1]
+                  bg-surface
                   px-8
                   py-9
                   text-center
@@ -760,7 +761,7 @@ export default function GamePage() {
                     font-medium
                     uppercase
                     tracking-[0.14em]
-                    text-[#615050]
+                    text-muted-foreground
                   '
                     >
                       {t('game.result.finalScore')}
@@ -788,15 +789,15 @@ export default function GamePage() {
                     text-[48px]
                     font-semibold
                     leading-none
-                    text-black
+                    text-foreground
                   '
                     >
                       <span>{score.left}</span>
-                      <span className='text-[30px] text-[#918787]'>:</span>
+                      <span className='text-[30px] text-muted-foreground'>:</span>
                       <span>{score.right}</span>
                     </div>
 
-                    <p className='mt-4 max-w-full truncate text-[14px] text-[#615050]'>
+                    <p className='mt-4 max-w-full truncate text-[14px] text-muted-foreground'>
                       {leftPlayerName} · {rightPlayerName}
                     </p>
 
@@ -817,7 +818,7 @@ export default function GamePage() {
                       tracking-[0.08em]
                       text-white
                       transition-colors
-                      hover:bg-[#808979]
+                      hover:bg-brand-green-dark
                     '
                       >
                         {t('game.button.findMatch')}
@@ -846,7 +847,7 @@ export default function GamePage() {
                       tracking-[0.08em]
                       text-white
                       transition-colors
-                      hover:bg-[#808979]
+                      hover:bg-brand-green-dark
                     '
                       >
                         {t('game.button.rematch')}
@@ -862,16 +863,16 @@ export default function GamePage() {
                     w-full
                     rounded-full
                     border-[1.5px]
-                    border-[#D9D5D1]
+                    border-border
                     px-8
                     text-[13px]
                     font-medium
                     uppercase
                     tracking-[0.08em]
-                    text-[#615050]
+                    text-muted-foreground
                     transition-colors
-                    hover:border-[#615050]
-                    hover:bg-[#D9D9D9]/30
+                    hover:border-muted-foreground
+                    hover:bg-border/30
                   '
                     >
                       {t('game.button.backToMenu')}
@@ -890,7 +891,7 @@ export default function GamePage() {
               flex-col
               items-center
               rounded-[14px]
-              bg-[#F7F5F1]
+              bg-surface
               px-5
               py-6
               text-center
@@ -904,7 +905,7 @@ export default function GamePage() {
                 font-medium
                 uppercase
                 tracking-[0.14em]
-                text-[#615050]
+                text-muted-foreground
               '
                 >
                   {t('game.result.finalScore')}
@@ -932,18 +933,18 @@ export default function GamePage() {
                 text-[34px]
                 font-semibold
                 leading-none
-                text-black
+                text-foreground
                 sm:text-[40px]
               '
                 >
                   <span>{score.left}</span>
 
-                  <span className='text-[24px] text-[#918787]'>:</span>
+                  <span className='text-[24px] text-muted-foreground'>:</span>
 
                   <span>{score.right}</span>
                 </div>
 
-                <p className='mt-3 max-w-full truncate text-[13px] text-[#615050]'>
+                <p className='mt-3 max-w-full truncate text-[13px] text-muted-foreground'>
                   {leftPlayerName} · {rightPlayerName}
                 </p>
 
@@ -964,7 +965,7 @@ export default function GamePage() {
                   tracking-[0.08em]
                   text-white
                   transition-colors
-                  hover:bg-[#808979]
+                  hover:bg-brand-green-dark
                 '
                   >
                     {t('game.button.findMatch')}
@@ -993,7 +994,7 @@ export default function GamePage() {
                   tracking-[0.08em]
                   text-white
                   transition-colors
-                  hover:bg-[#808979]
+                  hover:bg-brand-green-dark
                 '
                   >
                     {t('game.button.rematch')}
@@ -1009,16 +1010,16 @@ export default function GamePage() {
                 w-full
                 rounded-full
                 border-[1.5px]
-                border-[#D9D5D1]
+                border-border
                 px-8
                 text-[13px]
                 font-medium
                 uppercase
                 tracking-[0.08em]
-                text-[#615050]
+                text-muted-foreground
                 transition-colors
-                hover:border-[#615050]
-                hover:bg-[#D9D9D9]/30
+                hover:border-muted-foreground
+                hover:bg-border/30
               '
                 >
                   {t('game.button.backToMenu')}
@@ -1029,7 +1030,7 @@ export default function GamePage() {
             {/* Info below the game field */}
             {mode !== 'online' && !isGameFinished && (
               <div className='mx-auto mt-5 min-h-[28px] text-center'>
-                <p className='text-[12px] leading-5 text-[#615050] sm:text-[14px]'>
+                <p className='text-[12px] leading-5 text-muted-foreground sm:text-[14px]'>
                   {mode === 'ai'
                     ? `${t('game.controls.difficulty')} ${DIFF_LABEL[difficulty]}`
                     : t('game.controls.local')}

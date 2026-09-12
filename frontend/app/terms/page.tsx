@@ -21,7 +21,7 @@ export default function TermsOfServicePage() {
   }) as string[];
 
   return (
-    <div className="relative flex min-h-[calc(100dvh-48px)] flex-col bg-[#F4F2EE]">
+    <div className="relative flex min-h-[calc(100dvh-48px)] flex-col bg-background">
       <main className="flex flex-1 flex-col">
         <header className="px-8 pt-8 md:px-16">
         <button
@@ -32,14 +32,14 @@ export default function TermsOfServicePage() {
             min-w-[190px]
             rounded-full
             border
-            border-[#D9D5D1]
+            border-border
             px-8
             text-[14px]
             font-medium
             uppercase
-            text-[#615050]
+            text-muted-foreground
             transition-colors
-            hover:bg-[#D9D9D9]/20
+            hover:bg-border/20
           "
         >
           {t('game.button.backToMenu')}
@@ -52,10 +52,10 @@ export default function TermsOfServicePage() {
         mx-auto
         max-w-5xl
         rounded-[10px]
-        bg-white
+        bg-surface
         px-8
         py-10
-        shadow-[-8px_8px_32px_rgba(193,168,163,0.25)]
+        shadow-[-8px_8px_32px_var(--card-shadow)]
       "
     >
       <section className="pb-8">
@@ -71,7 +71,7 @@ export default function TermsOfServicePage() {
             {t('legal.terms.title')}
           </h1>
 
-          <p className="mt-3 text-[14px] text-[#8A817D]">
+          <p className="mt-3 text-[14px] text-muted-foreground">
             {t('legal.lastUpdated', { date: '14.07.2026' })}
           </p>
         </section>
@@ -79,7 +79,7 @@ export default function TermsOfServicePage() {
           className="
 
             [&_section]:border-b
-            [&_section]:border-[#EDECE8]
+            [&_section]:border-surface
             [&_section]:pb-8
 
             [&_section:last-child]:border-b-0
@@ -90,17 +90,17 @@ export default function TermsOfServicePage() {
             [&_h2]:text-[18px]
             [&_h2]:font-semibold
             [&_h2]:leading-7
-            [&_h2]:text-[#1A1A1A]
+            [&_h2]:text-foreground
 
             [&_p]:text-[15px]
             [&_p]:leading-7
-            [&_p]:text-[#615050]
+            [&_p]:text-muted-foreground
 
             [&_ul]:mt-4
             [&_ul]:space-y-2
             [&_ul]:pl-5
             [&_ul]:text-[15px]
-            [&_ul]:text-[#615050]
+            [&_ul]:text-muted-foreground
 
             [&_li]:relative
             [&_li]:list-none
@@ -112,17 +112,17 @@ export default function TermsOfServicePage() {
             [&_li]:before:h-1.5
             [&_li]:before:w-1.5
             [&_li]:before:rounded-full
-            [&_li]:before:bg-[#EE4424]
+            [&_li]:before:bg-brand-red
 
             [&_a]:font-medium
-            [&_a]:text-[#EE4424]
+            [&_a]:text-brand-red
             [&_a]:underline
-            [&_a]:decoration-[#EE4424]/30
+            [&_a]:decoration-brand-red/30
             [&_a]:underline-offset-4
             [&_a]:transition-colors
 
-            hover:[&_a]:text-[#D9361F]
-            hover:[&_a]:decoration-[#D9361F]
+            hover:[&_a]:text-brand-red-dark
+            hover:[&_a]:decoration-brand-red-dark
           "
         >
           <p className="mb-8">{t('legal.terms.intro')}</p>

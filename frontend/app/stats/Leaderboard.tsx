@@ -24,13 +24,13 @@ export default function Leaderboard({
   } = useLeaderboard(scope);
 
   return (
-    <div className="overflow-hidden rounded-[10px] border border-[#D9D5D1] bg-white">
+    <div className="overflow-hidden rounded-[10px] border border-border bg-surface">
       <div className="flex flex-wrap items-center justify-between gap-4 px-6 pt-6">
         <h2 className="font-display text-[24px] uppercase leading-none text-brand-red">
           {t('stats.leaderboard.title')}
         </h2>
 
-        <div className="flex rounded-full border border-[#D9D5D1] p-1 text-xs font-medium">
+        <div className="flex rounded-full border border-border p-1 text-xs font-medium">
           <button
             type="button"
             onClick={() =>
@@ -39,7 +39,7 @@ export default function Leaderboard({
             className={
               scope === 'friends'
                 ? 'rounded-full bg-brand-green px-4 py-2 text-white'
-                : 'rounded-full px-4 py-2 text-[#615050] hover:bg-[#D9D9D9]/20'
+                : 'rounded-full px-4 py-2 text-muted-foreground hover:bg-border/20'
             }
           >
             {t(
@@ -55,7 +55,7 @@ export default function Leaderboard({
             className={
               scope === 'global'
                 ? 'rounded-full bg-brand-green px-4 py-2 text-white'
-                : 'rounded-full px-4 py-2 text-[#615050] hover:bg-[#D9D9D9]/20'
+                : 'rounded-full px-4 py-2 text-muted-foreground hover:bg-border/20'
             }
           >
             {t(
@@ -66,17 +66,17 @@ export default function Leaderboard({
       </div>
 
       {loading ? (
-        <p className="px-6 py-12 text-center text-sm text-zinc-400">
+        <p className="px-6 py-12 text-center text-sm text-muted-foreground">
           {t(
             'stats.leaderboard.loading',
           )}
         </p>
       ) : error ? (
-        <p className="px-6 py-12 text-center text-sm text-red-600">
+        <p className="px-6 py-12 text-center text-sm text-brand-red">
           {error}
         </p>
       ) : entries.length === 0 ? (
-        <p className="px-6 py-12 text-center text-sm text-zinc-400">
+        <p className="px-6 py-12 text-center text-sm text-muted-foreground">
           {scope === 'friends'
             ? t(
                 'stats.leaderboard.noFriendsMatches',
@@ -89,7 +89,7 @@ export default function Leaderboard({
         <div className="mt-5 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[#EEE9E6] text-left text-xs text-zinc-400">
+              <tr className="border-b border-surface text-left text-xs text-muted-foreground">
                 <th className="px-6 py-3 font-medium">
                   {t(
                     'stats.leaderboard.rank',
@@ -123,11 +123,11 @@ export default function Leaderboard({
                   className={
                     entry.userId ===
                     currentUserId
-                      ? 'border-b border-[#EEE9E6] bg-background last:border-0'
-                      : 'border-b border-[#EEE9E6] last:border-0'
+                      ? 'border-b border-surface bg-background last:border-0'
+                      : 'border-b border-surface last:border-0'
                   }
                 >
-                  <td className="px-6 py-4 tabular-nums text-zinc-400">
+                  <td className="px-6 py-4 tabular-nums text-muted-foreground">
                     {entry.rank}
                   </td>
 
@@ -139,18 +139,18 @@ export default function Leaderboard({
                       size="sm"
                     />
 
-                      <span className="font-medium text-[#615050]">
+                      <span className="font-medium text-muted-foreground">
                         {entry.username}
                       </span>
                     </div>
                   </td>
 
-                  <td className="px-6 py-4 tabular-nums text-[#615050]">
+                  <td className="px-6 py-4 tabular-nums text-muted-foreground">
                     {entry.wins}-
                     {entry.losses}
                   </td>
 
-                  <td className="px-6 py-4 tabular-nums font-medium text-[#615050]">
+                  <td className="px-6 py-4 tabular-nums font-medium text-muted-foreground">
                     {Math.round(
                       entry.winRate * 100,
                     )}

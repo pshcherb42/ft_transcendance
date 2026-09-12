@@ -195,7 +195,7 @@ export default function RegisterPage() {
                   uppercase
                   text-white
                   transition-colors
-                  hover:bg-[#D6381C]
+                  hover:bg-brand-red-dark
                 '
               >
                 {t('auth.login')}
@@ -209,14 +209,14 @@ export default function RegisterPage() {
                   w-full
                   rounded-full
                   border
-                  border-[#D9D5D1]
+                  border-border
                   px-8
                   text-[14px]
                   font-medium
                   uppercase
-                  text-[#615050]
+                  text-muted-foreground
                   transition-colors
-                  hover:bg-[#D9D9D9]/20
+                  hover:bg-border/20
                 '
               >
                 {t('auth.createAccount')}
@@ -248,10 +248,10 @@ export default function RegisterPage() {
                 justify-center
                 rounded-full
                 border
-                border-[#D9D5D1]
-                text-[#615050]
+                border-border
+                text-muted-foreground
                 transition-colors
-                hover:bg-[#D9D9D9]/20
+                hover:bg-border/20
               '
             >
               <svg
@@ -274,10 +274,10 @@ export default function RegisterPage() {
               className='
                 w-full
                 rounded-[10px]
-                bg-white
+                bg-surface
                 px-5
                 py-7
-                shadow-[-8px_8px_32px_0_rgba(193,168,163,0.20)]
+                shadow-[-8px_8px_32px_0_var(--card-shadow)]
                 sm:px-8
                 sm:py-9
               '
@@ -343,7 +343,7 @@ export default function RegisterPage() {
                 />
 
                 {error && (
-                  <p className='text-[12px] leading-[16px] text-[#EE4424]'>
+                  <p className='text-[12px] leading-[16px] text-brand-red'>
                     {t(error)}
                   </p>
                 )}
@@ -355,12 +355,12 @@ export default function RegisterPage() {
                     h-[46px]
                     w-full
                     rounded-full
-                    bg-[#EE4424]
+                    bg-brand-red
                     text-[14px]
                     font-medium
                     text-white
                     transition-colors
-                    hover:bg-[#D6381C]
+                    hover:bg-brand-red-dark
                     disabled:cursor-not-allowed
                     disabled:opacity-60
                   '
@@ -369,12 +369,12 @@ export default function RegisterPage() {
                 </button>
               </form>
 
-              <p className='mt-5 text-center text-sm text-zinc-400'>
+              <p className='mt-5 text-center text-sm text-muted-foreground'>
                 {t('auth.haveAccount')}{' '}
                 <button
                   type='button'
                   onClick={() => router.push('/login?form=open')}
-                  className='font-bold text-zinc-900 hover:underline'
+                  className='font-bold text-foreground hover:underline'
                 >
                   {t('auth.login')}
                 </button>
@@ -471,10 +471,10 @@ export default function RegisterPage() {
             max-w-[380px]
             shrink-0
             rounded-[10px]
-            bg-white
+            bg-surface
             px-6
             py-8
-            shadow-[-8px_8px_32px_0_rgba(193,168,163,0.25)]
+            shadow-[-8px_8px_32px_0_var(--card-shadow)]
             min-[900px]:max-w-[420px]
             min-[900px]:px-7
             lg:max-w-[480px]
@@ -546,7 +546,7 @@ export default function RegisterPage() {
             />
 
             {error && (
-              <p className='text-[12px] leading-[16px] text-[#EE4424]'>
+              <p className='text-[12px] leading-[16px] text-brand-red'>
                 {t(error)}
               </p>
             )}
@@ -554,17 +554,17 @@ export default function RegisterPage() {
             <button
               type='submit'
               disabled={loading}
-              className='h-[46px] w-full rounded-[24px] bg-[#EE4424] text-[14px] font-medium text-white transition-colors hover:bg-[#D6381C] disabled:cursor-not-allowed disabled:opacity-60'
+              className='h-[46px] w-full rounded-[24px] bg-brand-red text-[14px] font-medium text-white transition-colors hover:bg-brand-red-dark disabled:cursor-not-allowed disabled:opacity-60'
             >
               {loading ? t('auth.creating') : t('auth.register')}
             </button>
           </form>
 
-          <p className='mt-[20px] text-sm text-zinc-400'>
+          <p className='mt-[20px] text-sm text-muted-foreground'>
             {t('auth.haveAccount')}{' '}
             <a
               href='/login'
-              className='font-bold text-zinc-900 hover:underline'
+              className='font-bold text-foreground hover:underline'
             >
               {t('auth.login')}
             </a>

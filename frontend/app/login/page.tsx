@@ -188,7 +188,7 @@ export default function LoginPage() {
                     uppercase
                     text-white
                     transition-colors
-                    hover:bg-[#D6381C]
+                    hover:bg-brand-red-dark
                   '
               >
                 {t('auth.login')}
@@ -202,14 +202,14 @@ export default function LoginPage() {
                     w-full
                     rounded-full
                     border
-                    border-[#D9D5D1]
+                    border-border
                     px-8
                     text-[14px]
                     font-medium
                     uppercase
-                    text-[#615050]
+                    text-muted-foreground
                     transition-colors
-                    hover:bg-[#D9D9D9]/20
+                    hover:bg-border/20
                   '
               >
                 {t('auth.createAccount')}
@@ -241,10 +241,10 @@ export default function LoginPage() {
                   justify-center
                   rounded-full
                   border
-                  border-[#D9D5D1]
-                  text-[#615050]
+                  border-border
+                  text-muted-foreground
                   transition-colors
-                  hover:bg-[#D9D9D9]/20
+                  hover:bg-border/20
                 '
             >
               <svg
@@ -267,10 +267,10 @@ export default function LoginPage() {
               className='
                   w-full
                   rounded-[10px]
-                  bg-white
+                  bg-surface
                   px-5
                   py-7
-                  shadow-[-8px_8px_32px_0_rgba(193,168,163,0.20)]
+                  shadow-[-8px_8px_32px_0_var(--card-shadow)]
                   sm:px-8
                   sm:py-9
                 '
@@ -319,7 +319,7 @@ export default function LoginPage() {
                 />
 
                 {error && (
-                  <p className='text-[12px] leading-[16px] text-[#EE4424]'>
+                  <p className='text-[12px] leading-[16px] text-brand-red'>
                     {t(error)}
                   </p>
                 )}
@@ -331,12 +331,12 @@ export default function LoginPage() {
                       h-[46px]
                       w-full
                       rounded-full
-                      bg-[#EE4424]
+                      bg-brand-red
                       text-[14px]
                       font-medium
                       text-white
                       transition-colors
-                      hover:bg-[#D6381C]
+                      hover:bg-brand-red-dark
                       disabled:cursor-not-allowed
                       disabled:opacity-60
                     '
@@ -346,13 +346,13 @@ export default function LoginPage() {
               </form>
 
               <div className='relative my-[20px] flex items-center'>
-                <div className='flex-1 border-t border-zinc-200' />
+                <div className='flex-1 border-t border-border' />
 
-                <span className='mx-3 text-xs text-zinc-400'>
+                <span className='mx-3 text-xs text-muted-foreground'>
                   {t('auth.or')}
                 </span>
 
-                <div className='flex-1 border-t border-zinc-200' />
+                <div className='flex-1 border-t border-border' />
               </div>
 
               <a
@@ -366,24 +366,24 @@ export default function LoginPage() {
                     gap-3
                     rounded-full
                     border
-                    border-zinc-200
+                    border-border
                     text-sm
                     font-medium
-                    text-zinc-700
+                    text-muted-foreground
                     transition-colors
-                    hover:bg-zinc-50
+                    hover:bg-border/20
                   '
               >
                 <GoogleIcon />
                 {t('auth.continueWithGoogle')}
               </a>
 
-              <p className='mt-5 text-center text-sm text-zinc-400'>
+              <p className='mt-5 text-center text-sm text-muted-foreground'>
                 {t('auth.noAccount')}{' '}
                 <button
                   type='button'
                   onClick={() => router.push('/register?form=open')}
-                  className='font-bold text-zinc-900 hover:underline'
+                  className='font-bold text-foreground hover:underline'
                 >
                   {t('auth.createAccount')}
                 </button>
@@ -467,10 +467,10 @@ export default function LoginPage() {
             max-w-[380px]
             shrink-0
             rounded-[10px]
-            bg-white
+            bg-surface
             px-6
             py-8
-            shadow-[-8px_8px_32px_0_rgba(193,168,163,0.25)]
+            shadow-[-8px_8px_32px_0_var(--card-shadow)]
             min-[900px]:max-w-[420px]
             min-[900px]:px-7
             lg:max-w-[480px]
@@ -534,7 +534,7 @@ export default function LoginPage() {
             />
 
             {error && (
-              <p className='text-[12px] leading-[16px] text-[#EE4424]'>
+              <p className='text-[12px] leading-[16px] text-brand-red'>
                 {t(error)}
               </p>
             )}
@@ -546,12 +546,12 @@ export default function LoginPage() {
               h-[46px]
               w-full
               rounded-[24px]
-              bg-[#EE4424]
+              bg-brand-red
               text-[14px]
               font-medium
               text-white
               transition-colors
-              hover:bg-[#D6381C]
+              hover:bg-brand-red-dark
               disabled:cursor-not-allowed
               disabled:opacity-60
             '
@@ -562,25 +562,25 @@ export default function LoginPage() {
 
           {/* divider */}
           <div className='relative flex items-center my-[20px]'>
-            <div className='flex-1 border-t border-zinc-200' />
-            <span className='mx-3 text-xs text-zinc-400'>{t('auth.or')}</span>
-            <div className='flex-1 border-t border-zinc-200' />
+            <div className='flex-1 border-t border-border' />
+            <span className='mx-3 text-xs text-muted-foreground'>{t('auth.or')}</span>
+            <div className='flex-1 border-t border-border' />
           </div>
 
           {/* Google */}
           <a
             href='/api/auth/google'
-            className='flex items-center justify-center gap-3 w-full h-11 rounded-full border border-zinc-200 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors'
+            className='flex items-center justify-center gap-3 w-full h-11 rounded-full border border-border text-sm font-medium text-muted-foreground hover:bg-border/20 transition-colors'
           >
             <GoogleIcon />
             {t('auth.continueWithGoogle')}
           </a>
 
-          <p className='mt-[20px] text-sm text-zinc-400'>
+          <p className='mt-[20px] text-sm text-muted-foreground'>
             {t('auth.noAccount')}{' '}
             <a
               href='/register'
-              className='font-bold text-zinc-900 hover:underline'
+              className='font-bold text-foreground hover:underline'
             >
               {t('auth.createAccount')}
             </a>

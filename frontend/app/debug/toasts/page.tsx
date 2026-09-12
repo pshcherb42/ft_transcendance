@@ -88,7 +88,7 @@ export default function DebugToastsPage() {
         <button
           key={b.label}
           onClick={b.fire}
-          className='w-fit rounded-full border border-[#D9D5D1] px-4 py-2 text-sm text-[#615050] hover:bg-[#F1EFEC]'
+          className='w-fit rounded-full border border-border px-4 py-2 text-sm text-muted-foreground hover:bg-surface'
         >
           {b.label}
         </button>
