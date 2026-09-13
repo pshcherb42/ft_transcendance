@@ -10,8 +10,7 @@ function applyTheme(choice: ThemeChoice) {
   document.documentElement.setAttribute('data-theme', choice);
 }
 
-// Read whatever was chosen last, synchronously, as the initial state — so
-// there's no separate mount effect calling setState
+// Only safe to call on the client — reads whatever theme was chosen last.
 function readInitialTheme(): ThemeChoice {
   if (typeof window === 'undefined') return 'light';
   try {
@@ -25,11 +24,25 @@ function readInitialTheme(): ThemeChoice {
 
 // Small sun/moon toggle, sitting inline in the Footer next to LanguageSwitcher.
 export default function ThemeSwitcher() {
-  const [theme, setTheme] = useState<ThemeChoice>(readInitialTheme);
+  const [mounted, setMounted] = useState(false);
+  const [theme, setTheme] = useState<ThemeChoice>('light');
 
   useEffect(() => {
-    applyTheme(theme);
-  }, [theme]);
+    queueMicrotask(() => {
+      setTheme(readInitialTheme());
+      setMounted(true);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (mounted) applyTheme(theme);
+  }, [theme, mounted]);
+
+  if (!mounted) {
+    return (
+      <div className='h-7 w-7 shrink-0 rounded-full border border-border' />
+    );
+  }
 
   function toggle() {
     const next: ThemeChoice = theme === 'light' ? 'dark' : 'light';

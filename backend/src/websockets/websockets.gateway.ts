@@ -35,6 +35,7 @@ import { send } from 'process';
       // 2. Comprehensive validation rule checks
       const allowed =
         /^https?:\/\/localhost(:\d+)?$/.test(origin) ||
+        /^https:\/\/transcendance\.rmanzanas\.com$/.test(origin) ||
         /^https?:\/\/127\.0\.0\.1(:\d+)?$/.test(origin) ||
         /^https?:\/\/[a-zA-Z0-9_-]+(:\d+)?$/.test(origin) || // Matches raw hostname mappings
         /^https?:\/\/192\.168\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(origin) ||

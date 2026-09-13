@@ -2,12 +2,17 @@ import path from 'path';
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ['10.*.*.*', '172.*.*.*', '192.168.*.*'],
+  allowedDevOrigins: [
+    '10.*.*.*',
+    '172.*.*.*',
+    '192.168.*.*',
+    'transcendance.rmanzanas.com',
+  ],
   experimental: {
     externalDir: true,
   },
   turbopack: {
-    root: path.resolve(__dirname, '..'),  // points to /app
+    root: path.resolve(__dirname, '..'), // points to /app
   },
   images: {
     remotePatterns: [

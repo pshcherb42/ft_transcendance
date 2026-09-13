@@ -438,6 +438,8 @@ export default function EditProfileModal({
           </div>
 
           <input
+            id='avatar-upload'
+            name='avatar'
             ref={fileRef}
             type='file'
             accept='image/*'

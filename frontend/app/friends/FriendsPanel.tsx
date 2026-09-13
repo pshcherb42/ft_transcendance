@@ -24,14 +24,11 @@ export default function FriendsPanel() {
   const { inviteToPlay } = useGameInvite();
 
   const [username, setUsername] = useState('');
-  const [sendError, setSendError] =
-    useState<string | null>(null);
+  const [sendError, setSendError] = useState<string | null>(null);
 
   const [sending, setSending] = useState(false);
 
-  async function handleSend(
-    event: FormEvent<HTMLFormElement>,
-  ) {
+  async function handleSend(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const trimmedUsername = username.trim();
@@ -48,9 +45,7 @@ export default function FriendsPanel() {
       setUsername('');
     } catch (err) {
       setSendError(
-        err instanceof Error
-          ? t(err.message)
-          : t('friends.sendFailed'),
+        err instanceof Error ? t(err.message) : t('friends.sendFailed'),
       );
     } finally {
       setSending(false);
@@ -59,30 +54,26 @@ export default function FriendsPanel() {
 
   if (loading) {
     return (
-      <div className="flex min-h-[280px] items-center justify-center">
-        <p className="text-sm text-muted-foreground">
-          {t('friends.loading')}
-        </p>
+      <div className='flex min-h-[280px] items-center justify-center'>
+        <p className='text-sm text-muted-foreground'>{t('friends.loading')}</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex min-h-[280px] items-center justify-center">
-        <p className="text-sm text-brand-red">
-          {t(error)}
-        </p>
+      <div className='flex min-h-[280px] items-center justify-center'>
+        <p className='text-sm text-brand-red'>{t(error)}</p>
       </div>
     );
   }
 
   return (
-    <div className="w-full">
+    <div className='w-full'>
       {/* Add a friend */}
       <form
         onSubmit={handleSend}
-        className="
+        className='
           flex
           flex-col
           gap-3
@@ -90,17 +81,15 @@ export default function FriendsPanel() {
           border-surface
           pb-8
           sm:flex-row
-        "
+        '
       >
         <input
+          id='friend-username'
+          name='friendUsername'
           value={username}
-          onChange={(event) =>
-            setUsername(event.target.value)
-          }
-          placeholder={t(
-            'friends.usernamePlaceholder',
-          )}
-          className="
+          onChange={(event) => setUsername(event.target.value)}
+          placeholder={t('friends.usernamePlaceholder')}
+          className='
             h-[46px]
             w-full
             shrink-0
@@ -118,15 +107,13 @@ export default function FriendsPanel() {
             placeholder:text-muted-foreground
             hover:border-brand-green
             focus:border-brand-green
-          "
+          '
         />
 
         <button
-          type="submit"
-          disabled={
-            sending || !username.trim()
-          }
-          className="
+          type='submit'
+          disabled={sending || !username.trim()}
+          className='
             h-[42px]
             w-full
             rounded-full
@@ -145,7 +132,7 @@ export default function FriendsPanel() {
             sm:min-w-[160px]
             sm:px-7
             sm:text-[14px]
-          "
+          '
         >
           {sending
             ? t('friends.sending', {
@@ -155,27 +142,23 @@ export default function FriendsPanel() {
         </button>
       </form>
 
-      {sendError && (
-        <p className="mt-3 text-sm text-brand-red">
-          {sendError}
-        </p>
-      )}
+      {sendError && <p className='mt-3 text-sm text-brand-red'>{sendError}</p>}
 
-      <div className="mt-8 grid gap-10 lg:grid-cols-2 lg:gap-0">
+      <div className='mt-8 grid gap-10 lg:grid-cols-2 lg:gap-0'>
         {/* Friends list */}
-        <section className="lg:border-r lg:border-surface lg:pr-10">
-          <h2 className="mb-5 font-display text-[28px] uppercase leading-none text-brand-red">
+        <section className='lg:border-r lg:border-surface lg:pr-10'>
+          <h2 className='mb-5 font-display text-[28px] uppercase leading-none text-brand-red'>
             {t('friends.friendsCount', {
               count: friends.length,
             })}
           </h2>
 
           {friends.length > 0 ? (
-            <ul className="flex flex-col gap-5">
+            <ul className='flex flex-col gap-5'>
               {friends.map((friend) => (
                 <li
                   key={friend.friendshipId}
-                  className="
+                  className='
                     grid
                     items-center
                     gap-3
@@ -183,34 +166,30 @@ export default function FriendsPanel() {
                     border-surface
                     pb-5
                     min-[550px]:grid-cols-[minmax(0,1fr)_110px_110px]
-                  "
+                  '
                 >
-                  <div className="flex min-w-0 items-center gap-3">
-                  <UserAvatar
-                    username={friend.username}
-                    avatarPath={friend.avatar}
-                  />
+                  <div className='flex min-w-0 items-center gap-3'>
+                    <UserAvatar
+                      username={friend.username}
+                      avatarPath={friend.avatar}
+                    />
 
-                    <div className="min-w-0">
-                      <p className="truncate text-[16px] font-semibold text-muted-foreground">
+                    <div className='min-w-0'>
+                      <p className='truncate text-[16px] font-semibold text-muted-foreground'>
                         {friend.username}
                       </p>
 
-                      <div className="mt-1 flex items-center gap-2">
+                      <div className='mt-1 flex items-center gap-2'>
                         <span
                           className={`
                             h-2
                             w-2
                             rounded-full
-                            ${
-                              friend.online
-                                ? 'bg-status-online'
-                                : 'bg-muted'
-                            }
+                            ${friend.online ? 'bg-status-online' : 'bg-muted'}
                           `}
                         />
 
-                        <span className="text-xs text-muted-foreground">
+                        <span className='text-xs text-muted-foreground'>
                           {friend.online
                             ? t('profile.online')
                             : t('profile.offline')}
@@ -220,23 +199,18 @@ export default function FriendsPanel() {
                   </div>
 
                   <div
-                    className="
+                    className='
                       grid
                       grid-cols-2
                       gap-2
                       min-[550px]:contents
-                    "
+                    '
                   >
                     <button
-                      type="button"
+                      type='button'
                       disabled={!friend.online}
-                      onClick={() =>
-                        inviteToPlay(
-                          friend.id,
-                          friend.username,
-                        )
-                      }
-                      className="
+                      onClick={() => inviteToPlay(friend.id, friend.username)}
+                      className='
                         h-[38px]
                         rounded-full
                         bg-brand-green
@@ -250,17 +224,15 @@ export default function FriendsPanel() {
                         disabled:cursor-not-allowed
                         disabled:opacity-40
                         min-[550px]:h-[34px]
-                      "
+                      '
                     >
                       {t('friends.play')}
                     </button>
 
                     <button
-                      type="button"
-                      onClick={() =>
-                        removeFriend(friend.friendshipId)
-                      }
-                      className="
+                      type='button'
+                      onClick={() => removeFriend(friend.friendshipId)}
+                      className='
                         h-[38px]
                         rounded-full
                         border
@@ -273,7 +245,7 @@ export default function FriendsPanel() {
                         transition-colors
                         hover:bg-border/20
                         min-[550px]:h-[34px]
-                      "
+                      '
                     >
                       {t('friends.remove')}
                     </button>
@@ -284,25 +256,24 @@ export default function FriendsPanel() {
           ) : (
             <EmptyBlock
               text={t('friends.noFriends', {
-                defaultValue:
-                  t('friends.noFriendsYet'),
+                defaultValue: t('friends.noFriendsYet'),
               })}
             />
           )}
         </section>
 
         {/* Requests */}
-        <section className="lg:pl-10">
-          <h2 className="mb-5 font-display text-[28px] uppercase leading-none text-brand-red">
+        <section className='lg:pl-10'>
+          <h2 className='mb-5 font-display text-[28px] uppercase leading-none text-brand-red'>
             {t('friends.incomingRequests')}
           </h2>
 
           {incoming.length > 0 ? (
-            <ul className="flex flex-col gap-5">
+            <ul className='flex flex-col gap-5'>
               {incoming.map((request) => (
                 <li
                   key={request.id}
-                  className="
+                  className='
                     grid
                     items-center
                     gap-3
@@ -310,36 +281,31 @@ export default function FriendsPanel() {
                     border-surface
                     pb-5
                     min-[550px]:grid-cols-[minmax(0,1fr)_110px_110px]
-                  "
+                  '
                 >
-                  <div className="flex min-w-0 items-center gap-3">
-                  <UserAvatar
-                    username={request.sender.username}
-                    avatarPath={request.sender.avatar}
-                  />
+                  <div className='flex min-w-0 items-center gap-3'>
+                    <UserAvatar
+                      username={request.sender.username}
+                      avatarPath={request.sender.avatar}
+                    />
 
-                    <p className="truncate text-[16px] font-semibold text-muted-foreground">
+                    <p className='truncate text-[16px] font-semibold text-muted-foreground'>
                       {request.sender.username}
                     </p>
                   </div>
 
                   <div
-                  className="
+                    className='
                     grid
                     grid-cols-2
                     gap-2
                     min-[550px]:contents
-                  "
-                >
-                  <button
-                    type="button"
-                    onClick={() =>
-                      respondToRequest(
-                        request.id,
-                        'accept',
-                      )
-                    }
-                    className="
+                  '
+                  >
+                    <button
+                      type='button'
+                      onClick={() => respondToRequest(request.id, 'accept')}
+                      className='
                       h-[38px]
                       rounded-full
                       bg-brand-green
@@ -351,20 +317,15 @@ export default function FriendsPanel() {
                       transition-colors
                       hover:bg-brand-green-dark
                       min-[550px]:h-[34px]
-                    "
-                  >
-                    {t('friends.accept')}
-                  </button>
+                    '
+                    >
+                      {t('friends.accept')}
+                    </button>
 
-                  <button
-                    type="button"
-                    onClick={() =>
-                      respondToRequest(
-                        request.id,
-                        'decline',
-                      )
-                    }
-                    className="
+                    <button
+                      type='button'
+                      onClick={() => respondToRequest(request.id, 'decline')}
+                      className='
                       h-[38px]
                       rounded-full
                       border
@@ -377,39 +338,33 @@ export default function FriendsPanel() {
                       transition-colors
                       hover:bg-border/20
                       min-[550px]:h-[34px]
-                    "
-                  >
-                    {t('friends.decline')}
-                  </button>
-                </div>
+                    '
+                    >
+                      {t('friends.decline')}
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
           ) : (
             <EmptyBlock
-              text={t(
-                'friends.noIncomingRequests',
-                {
-                  defaultValue:
-                  t('friends.noIncomingRequests'),
-                },
-              )}
+              text={t('friends.noIncomingRequests', {
+                defaultValue: t('friends.noIncomingRequests'),
+              })}
             />
           )}
 
           {outgoing.length > 0 && (
-            <div className="mt-10">
-              <h3 className="mb-5 text-sm font-bold uppercase tracking-wide text-muted-foreground">
-                {t(
-                  'friends.outgoingRequests',
-                )}
+            <div className='mt-10'>
+              <h3 className='mb-5 text-sm font-bold uppercase tracking-wide text-muted-foreground'>
+                {t('friends.outgoingRequests')}
               </h3>
 
-              <ul className="flex flex-col gap-3">
+              <ul className='flex flex-col gap-3'>
                 {outgoing.map((request) => (
                   <li
                     key={request.id}
-                    className="
+                    className='
                       flex
                       items-center
                       justify-between
@@ -420,23 +375,20 @@ export default function FriendsPanel() {
                       bg-background
                       px-4
                       py-3
-                    "
+                    '
                   >
-                    <div className="flex min-w-0 items-center gap-3">
-                    <UserAvatar
-                      username={request.receiver.username}
-                      avatarPath={request.receiver.avatar}
-                    />
+                    <div className='flex min-w-0 items-center gap-3'>
+                      <UserAvatar
+                        username={request.receiver.username}
+                        avatarPath={request.receiver.avatar}
+                      />
 
-                      <span className="truncate text-sm font-medium text-muted-foreground">
-                        {
-                          request.receiver
-                            .username
-                        }
+                      <span className='truncate text-sm font-medium text-muted-foreground'>
+                        {request.receiver.username}
                       </span>
                     </div>
 
-                    <span className="shrink-0 text-xs uppercase text-muted-foreground">
+                    <span className='shrink-0 text-xs uppercase text-muted-foreground'>
                       {t('friends.pending')}
                     </span>
                   </li>
@@ -450,24 +402,18 @@ export default function FriendsPanel() {
   );
 }
 
-function EmptyBlock({
-  text,
-}: {
-  text: string;
-}) {
+function EmptyBlock({ text }: { text: string }) {
   return (
     <div
-      className="
+      className='
         flex
         min-h-[150px]
         items-center
         justify-center
         px-5
-      "
+      '
     >
-      <p className="text-center text-sm text-muted-foreground">
-        {text}
-      </p>
+      <p className='text-center text-sm text-muted-foreground'>{text}</p>
     </div>
   );
 }

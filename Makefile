@@ -16,11 +16,13 @@ BACKEND_PACKS = @nestjs/passport \
 				browser-image-compression
 
 CERT_DIR = nginx/certs
+CLOUDFLARED = ./cloudflared
+TUNNEL_NAME = transcendance
 
 all: host-deps up
 
-up:
-	@bash createCertSSL.sh
+up: cloudflared
+	@bash scripts/createCertSSL.sh
 	@echo "Starting project..."
 	@docker compose up || (echo "\n[!] Error: Failed to start. Try running 'make install-deps' to ensure all packages are installed." && exit 1)
 
@@ -50,9 +52,15 @@ fclean: down
 	@find . -name "node_modules" -type d -prune -exec rm -rf '{}' +
 	@rm -f $(CERT_DIR)/fullchain.crt $(CERT_DIR)/privkey.key
 
-defclean: 
+defclean:
 	@docker compose down -v --remove-orphans
 	@$(MAKE) fclean
+
+cloudflared:
+	@bash scripts/cloudflared.sh || (echo "\n[!] Error: Failed to set up cloudflared. Check your internet connection." && exit 1)
+
+tunnel: cloudflared
+	@$(CLOUDFLARED) tunnel run $(TUNNEL_NAME)
 
 re: fclean install-deps host-deps up 
 
@@ -64,5 +72,6 @@ help:
 	@echo "  make clean-docker - Clean cache and unused Docker items if running out of space"
 	@echo "  make fclean       - Deep clean (Docker + local node_modules)"
 	@echo "  make re           - Reset completely"
+	@echo "  make tunnel       - Run the Cloudflare tunnel (needs ~/.cloudflared/config.yml set up)"
 
-.PHONY: all up down build install-deps host-deps clean-docker fclean defclean re help
+.PHONY: all up down build install-deps host-deps clean-docker fclean defclean re help cloudflared tunnel

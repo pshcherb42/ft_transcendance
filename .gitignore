@@ -23,6 +23,9 @@ docker-compose.override.yml
 # SSL certs (you'll generate these locally)
 nginx/certs/
 
+# cloudflared binary (fetched by `make cloudflared`)
+/cloudflared
+
 # OS files
 .DS_Store
 Thumbs.db

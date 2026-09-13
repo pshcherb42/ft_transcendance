@@ -15,16 +15,9 @@ export default function ChatPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
-  const {
-    friends,
-    loading: friendsLoading,
-  } = useFriends();
+  const { friends, loading: friendsLoading } = useFriends();
 
-  const {
-    conversations,
-    loadHistory,
-    sendMessage,
-  } = useChat(user?.id);
+  const { conversations, loadHistory, sendMessage } = useChat(user?.id);
 
   const { inviteToPlay } = useGameInvite();
   const { unread, setActiveConversation } = useChatUnread();
@@ -48,33 +41,26 @@ export default function ChatPage() {
    * Automatically open the first chat after the friends list loads.
    */
 
-
   if (loading || !user) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-background">
-        <p className="text-sm text-muted-foreground">
-          {t('home.loading')}
-        </p>
+      <main className='flex min-h-screen items-center justify-center bg-background'>
+        <p className='text-sm text-muted-foreground'>{t('home.loading')}</p>
       </main>
     );
   }
 
-  const activeFriend = friends.find(
-    (friend) => friend.id === activeFriendId,
-  );
+  const activeFriend = friends.find((friend) => friend.id === activeFriendId);
 
-  const messages = activeFriendId
-    ? conversations[activeFriendId] ?? []
-    : [];
+  const messages = activeFriendId ? (conversations[activeFriendId] ?? []) : [];
 
-    const selectFriend = (friendId: string) => {
-      setActiveFriendId(friendId);
-      setMobileChatOpen(true);
-    
-      if (!conversations[friendId]) {
-        loadHistory(friendId);
-      }
-    };
+  const selectFriend = (friendId: string) => {
+    setActiveFriendId(friendId);
+    setMobileChatOpen(true);
+
+    if (!conversations[friendId]) {
+      loadHistory(friendId);
+    }
+  };
 
   const handleSend = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -90,11 +76,11 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="relative flex min-h-[calc(100dvh-48px)] flex-col bg-background">
-    <main className="relative z-10 flex flex-1 flex-col">
-      {/* Top navigation */}
-      <header
-        className="
+    <div className='relative flex min-h-[calc(100dvh-48px)] flex-col bg-background'>
+      <main className='relative z-10 flex flex-1 flex-col'>
+        {/* Top navigation */}
+        <header
+          className='
           flex
           items-center
           justify-between
@@ -106,12 +92,12 @@ export default function ChatPage() {
           md:px-10
           md:pt-8
           lg:px-16
-        "
-      >
-        <button
-          type="button"
-          onClick={() => router.push('/')}
-          className="
+        '
+        >
+          <button
+            type='button'
+            onClick={() => router.push('/')}
+            className='
             h-[42px]
             min-w-0
             flex-1
@@ -131,15 +117,15 @@ export default function ChatPage() {
             text-muted-foreground
             transition-colors
             hover:bg-border/20
-          "
-        >
-          {t('game.button.backToMenu')}
-        </button>
+          '
+          >
+            {t('game.button.backToMenu')}
+          </button>
 
-        <button
-          type="button"
-          onClick={() => router.push('/profile')}
-          className="
+          <button
+            type='button'
+            onClick={() => router.push('/profile')}
+            className='
             h-[42px]
             min-w-0
             flex-1
@@ -157,15 +143,15 @@ export default function ChatPage() {
             sm:flex-none
             sm:px-8
             sm:text-[14px]
-          "
-        >
-          {t('home.profile')}
-        </button>
-      </header>
+          '
+          >
+            {t('home.profile')}
+          </button>
+        </header>
 
-      {/* Chat area */}
-      <section
-        className="
+        {/* Chat area */}
+        <section
+          className='
           flex
           min-h-0
           flex-1
@@ -178,10 +164,10 @@ export default function ChatPage() {
           md:pb-8
           md:pt-10
           lg:px-16
-        "
-      >
-        <div
-          className="
+        '
+        >
+          <div
+            className='
             flex
             h-[calc(100dvh-170px)]
             min-h-[500px]
@@ -192,11 +178,11 @@ export default function ChatPage() {
             shadow-[-8px_8px_32px_0_var(--card-shadow)]
             sm:h-[calc(100dvh-190px)]
             md:h-[calc(100dvh-210px)]
-          "
-        >
-          {/* Left column */}
-          <aside
-            className={`
+          '
+          >
+            {/* Left column */}
+            <aside
+              className={`
               w-full
               flex-col
               md:flex
@@ -206,44 +192,44 @@ export default function ChatPage() {
               md:border-border
               ${mobileChatOpen ? 'hidden' : 'flex'}
             `}
-          >
-            <div className="flex min-h-[90px] items-center border-b border-border px-7">
-              <h1
-                className="
+            >
+              <div className='flex min-h-[90px] items-center border-b border-border px-7'>
+                <h1
+                  className='
                   text-[42px]
                   font-display
                   uppercase
                   leading-none
                   text-brand-red
-                "
-              >
-                {t('chat.title')}
-              </h1>
-            </div>
+                '
+                >
+                  {t('chat.title')}
+                </h1>
+              </div>
 
-            <div className="flex-1 overflow-y-auto">
-              {friendsLoading && (
-                <p className="px-9 py-5 text-sm text-muted-foreground">
-                  {t('chat.loading')}
-                </p>
-              )}
+              <div className='flex-1 overflow-y-auto'>
+                {friendsLoading && (
+                  <p className='px-9 py-5 text-sm text-muted-foreground'>
+                    {t('chat.loading')}
+                  </p>
+                )}
 
-              {!friendsLoading && friends.length === 0 && (
-                <p className="px-9 py-5 text-sm text-muted-foreground">
-                  {t('chat.noFriends')}
-                </p>
-              )}
+                {!friendsLoading && friends.length === 0 && (
+                  <p className='px-9 py-5 text-sm text-muted-foreground'>
+                    {t('chat.noFriends')}
+                  </p>
+                )}
 
-              <ul>
-                {friends.map((friend) => {
-                  const isActive = activeFriendId === friend.id;
+                <ul>
+                  {friends.map((friend) => {
+                    const isActive = activeFriendId === friend.id;
 
-                  return (
-                    <li key={friend.id}>
-                      <button
-                        type="button"
-                        onClick={() => selectFriend(friend.id)}
-                        className={`
+                    return (
+                      <li key={friend.id}>
+                        <button
+                          type='button'
+                          onClick={() => selectFriend(friend.id)}
+                          className={`
                           flex
                           w-full
                           items-center
@@ -254,35 +240,31 @@ export default function ChatPage() {
                           py-4
                           text-left
                           transition-colors
-                          ${
-                            isActive
-                              ? 'bg-border/20'
-                              : 'hover:bg-border/20'
-                          }
+                          ${isActive ? 'bg-border/20' : 'hover:bg-border/20'}
                         `}
-                      >
-                        <div className="h-[52px] w-[52px] shrink-0">
-                          <UserAvatar
-                            username={friend.username}
-                            avatarPath={friend.avatar}
-                          />
-                        </div>
+                        >
+                          <div className='h-[52px] w-[52px] shrink-0'>
+                            <UserAvatar
+                              username={friend.username}
+                              avatarPath={friend.avatar}
+                            />
+                          </div>
 
-                        <div className="min-w-0 flex-1">
-                          <p
-                            className="
+                          <div className='min-w-0 flex-1'>
+                            <p
+                              className='
                               truncate
                               text-[18px]
                               font-semibold
                               text-muted-foreground
-                            "
-                          >
-                            {friend.username}
-                          </p>
+                            '
+                            >
+                              {friend.username}
+                            </p>
 
-                          <div className="mt-1 flex items-center gap-2">
-                            <span
-                              className={`
+                            <div className='mt-1 flex items-center gap-2'>
+                              <span
+                                className={`
                                 h-[10px]
                                 w-[10px]
                                 rounded-full
@@ -292,41 +274,44 @@ export default function ChatPage() {
                                     : 'bg-muted'
                                 }
                               `}
-                            />
+                              />
 
-                            <span
-                              className="
+                              <span
+                                className='
                                 text-xs
                                 font-medium
                                 uppercase
                                 text-muted-foreground
-                              "
-                            >
-                              {friend.online
-                                ? t('chat.online')
-                                : t('chat.offline')}
-                            </span>
+                              '
+                              >
+                                {friend.online
+                                  ? t('chat.online')
+                                  : t('chat.offline')}
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                        {!isActive && unread[friend.id] > 0 && (
-                          <span
-                          className="ml-auto shrink-0 text-base font-bold text-brand-red"
-                          aria-label={t('chat.newMessage')}
-                          >
-                            📩{unread[friend.id] > 1 ? ` ${unread[friend.id]}` : ''}
-                          </span>
-                        )}
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          </aside>
+                          {!isActive && unread[friend.id] > 0 && (
+                            <span
+                              className='ml-auto shrink-0 text-base font-bold text-brand-red'
+                              aria-label={t('chat.newMessage')}
+                            >
+                              📩
+                              {unread[friend.id] > 1
+                                ? ` ${unread[friend.id]}`
+                                : ''}
+                            </span>
+                          )}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </aside>
 
-          {/* Right column */}
-          <section
-            className={`
+            {/* Right column */}
+            <section
+              className={`
               min-w-0
               flex-1
               flex-col
@@ -335,10 +320,10 @@ export default function ChatPage() {
               overflow-hidden
               ${mobileChatOpen ? 'flex' : 'hidden'}
             `}
-          >
-            {!activeFriend ? (
-              <div
-                className="
+            >
+              {!activeFriend ? (
+                <div
+                  className='
                   flex
                   flex-1
                   items-center
@@ -346,15 +331,15 @@ export default function ChatPage() {
                   px-8
                   text-sm
                   text-muted-foreground
-                "
-              >
-                {t('chat.selectFriend')}
-              </div>
-            ) : (
-              <>
-                {/* Active chat header */}
-                <header
-                  className="
+                '
+                >
+                  {t('chat.selectFriend')}
+                </div>
+              ) : (
+                <>
+                  {/* Active chat header */}
+                  <header
+                    className='
                     flex
                     flex-col
                     gap-3
@@ -370,14 +355,14 @@ export default function ChatPage() {
                     min-[510px]:gap-4
                     min-[510px]:px-8
                     min-[510px]:py-4
-                    "
-                >
-                  <div className="flex w-full min-w-0 items-center gap-3 md:w-auto">
-                  <button
-                    type="button"
-                    onClick={() => setMobileChatOpen(false)}
-                    aria-label={t('chat.backToFriends')}
-                    className="
+                    '
+                  >
+                    <div className='flex w-full min-w-0 items-center gap-3 md:w-auto'>
+                      <button
+                        type='button'
+                        onClick={() => setMobileChatOpen(false)}
+                        aria-label={t('chat.backToFriends')}
+                        className='
                       flex
                       h-10
                       w-10
@@ -391,38 +376,38 @@ export default function ChatPage() {
                       transition-colors
                       hover:bg-border/20
                       md:hidden
-                    "
-                  >
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      aria-hidden="true"
-                      className="h-5 w-5"
-                    >
-                      <path
-                        d="M15 18l-6-6 6-6"
-                        stroke="currentColor"
-                        strokeWidth="1.8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </button>
-                  <div className="h-[44px] w-[44px] shrink-0 sm:h-[52px] sm:w-[52px]">
-                    <UserAvatar
-                      username={activeFriend.username}
-                      avatarPath={activeFriend.avatar}
-                    />
-                  </div>
+                    '
+                      >
+                        <svg
+                          viewBox='0 0 24 24'
+                          fill='none'
+                          aria-hidden='true'
+                          className='h-5 w-5'
+                        >
+                          <path
+                            d='M15 18l-6-6 6-6'
+                            stroke='currentColor'
+                            strokeWidth='1.8'
+                            strokeLinecap='round'
+                            strokeLinejoin='round'
+                          />
+                        </svg>
+                      </button>
+                      <div className='h-[44px] w-[44px] shrink-0 sm:h-[52px] sm:w-[52px]'>
+                        <UserAvatar
+                          username={activeFriend.username}
+                          avatarPath={activeFriend.avatar}
+                        />
+                      </div>
 
-                    <div>
-                      <h2 className="text-xl font-semibold text-muted-foreground">
-                        {activeFriend.username}
-                      </h2>
+                      <div>
+                        <h2 className='text-xl font-semibold text-muted-foreground'>
+                          {activeFriend.username}
+                        </h2>
 
-                      <div className="mt-1 flex items-center gap-2">
-                        <span
-                          className={`
+                        <div className='mt-1 flex items-center gap-2'>
+                          <span
+                            className={`
                             h-[10px]
                             w-[10px]
                             rounded-full
@@ -432,33 +417,30 @@ export default function ChatPage() {
                                 : 'bg-muted'
                             }
                           `}
-                        />
+                          />
 
-                        <span
-                          className="
+                          <span
+                            className='
                             text-xs
                             font-medium
                             uppercase
                             text-muted-foreground
-                          "
-                        >
-                          {activeFriend.online
-                            ? t('chat.online')
-                            : t('chat.offline')}
-                        </span>
+                          '
+                          >
+                            {activeFriend.online
+                              ? t('chat.online')
+                              : t('chat.offline')}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <button
-                    type="button"
-                    onClick={() =>
-                      inviteToPlay(
-                        activeFriend.id,
-                        activeFriend.username,
-                      )
-                    }
-                    className="
+                    <button
+                      type='button'
+                      onClick={() =>
+                        inviteToPlay(activeFriend.id, activeFriend.username)
+                      }
+                      className='
                       h-[46px]
                       min-w-[190px]
                       rounded-full
@@ -470,15 +452,15 @@ export default function ChatPage() {
                       text-white
                       transition-colors
                       hover:bg-brand-red-dark
-                    "
-                  >
-                    {t('chat.invite')}
-                  </button>
-                </header>
+                    '
+                    >
+                      {t('chat.invite')}
+                    </button>
+                  </header>
 
-                {/* Messages */}
-                <div
-                  className="
+                  {/* Messages */}
+                  <div
+                    className='
                     flex
                     min-h-0
                     flex-1
@@ -491,44 +473,39 @@ export default function ChatPage() {
                     sm:py-6
                     md:px-8
                     md:py-8
-                  "
-                >
-                  {messages.length === 0 && (
-                    <div
-                      className="
+                  '
+                  >
+                    {messages.length === 0 && (
+                      <div
+                        className='
                         flex
                         flex-1
                         items-center
                         justify-center
                         text-sm
                         text-muted-foreground
-                      "
-                    >
-                      {t('chat.noMessages')}
-                    </div>
-                  )}
+                      '
+                      >
+                        {t('chat.noMessages')}
+                      </div>
+                    )}
 
-                  {messages.map((message) => {
-                    const isOwnMessage =
-                      message.senderId === user.id;
+                    {messages.map((message) => {
+                      const isOwnMessage = message.senderId === user.id;
 
-                    return (
-                      <div
-                        key={message.id}
-                        className={`
+                      return (
+                        <div
+                          key={message.id}
+                          className={`
                           flex
                           max-w-[75%]
                           items-end
                           gap-3
-                          ${
-                            isOwnMessage
-                              ? 'self-end'
-                              : 'self-start'
-                          }
+                          ${isOwnMessage ? 'self-end' : 'self-start'}
                         `}
-                      >
-                        <div
-                          className={`
+                        >
+                          <div
+                            className={`
                             rounded-[22px]
                             px-5
                             py-3
@@ -541,18 +518,18 @@ export default function ChatPage() {
                                 : 'rounded-bl-md bg-surface'
                             }
                           `}
-                        >
-                          {message.text}
+                          >
+                            {message.text}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
 
-                {/* Message input */}
-                <form
-                  onSubmit={handleSend}
-                  className="
+                  {/* Message input */}
+                  <form
+                    onSubmit={handleSend}
+                    className='
                     flex
                     items-center
                     gap-2
@@ -565,14 +542,16 @@ export default function ChatPage() {
                     sm:py-4
                     md:gap-5
                     md:px-8
-                  "
-                >
-                  <input
-                    type="text"
-                    value={draft}
-                    onChange={(event) => setDraft(event.target.value)}
-                    placeholder={t('chat.messagePlaceholder')}
-                    className="
+                  '
+                  >
+                    <input
+                      id='chat-message'
+                      name='message'
+                      type='text'
+                      value={draft}
+                      onChange={(event) => setDraft(event.target.value)}
+                      placeholder={t('chat.messagePlaceholder')}
+                      className='
                       h-[46px]
                       min-w-0
                       flex-1
@@ -588,13 +567,13 @@ export default function ChatPage() {
                       placeholder:text-muted-foreground
                       hover:border-brand-green
                       focus:border-brand-green
-                    "
-                  />
+                    '
+                    />
 
-                  <button
-                    type="submit"
-                    disabled={!draft.trim()}
-                    className="
+                    <button
+                      type='submit'
+                      disabled={!draft.trim()}
+                      className='
                       h-[42px]
                       min-w-[82px]
                       rounded-full
@@ -608,15 +587,15 @@ export default function ChatPage() {
                       hover:bg-brand-red-dark
                       disabled:cursor-not-allowed
                       disabled:opacity-40
-                    "
-                  >
-                    {t('chat.send')}
-                  </button>
-                </form>
-              </>
-            )}
-          </section>
-        </div>
+                    '
+                    >
+                      {t('chat.send')}
+                    </button>
+                  </form>
+                </>
+              )}
+            </section>
+          </div>
         </section>
       </main>
     </div>
