@@ -63,9 +63,9 @@
     "play": "Jugar",
     "remove": "Eliminar",
     "inviteSent": "Invitación enviada a {{username}}...",
-    "inviteAccepted": "¡{{username}} aceptó!",
-    "inviteExpired": "{{username}} no respondió a tiempo",
-    "inviteDeclined": "{{username}} rechazó la invitación",
+    "inviteAccepted": "¡{{username}} ha aceptado!",
+    "inviteExpired": "{{username}} no ha respondido a tiempo",
+    "inviteDeclined": "{{username}} ha rechazado la invitación",
     "inviteFailed": "{{username}} parece estar desconectado",
     "inviteCancelled": "Invitación a {{username}} cancelada",
     "inviteFailedOffline": "{{username}} parece estar desconectado",
@@ -75,15 +75,15 @@
     "inviteFailedTooMany": "Tienes demasiadas invitaciones pendientes",
     "inviteNoLongerValid": "Esa invitación ya no está disponible",
     "errors": {
-      "loadFailed": "No se pudieron cargar los amigos",
-      "requestFailed": "No se pudo enviar la solicitud",
-      "respondFailed": "No se pudo responder a la solicitud",
-      "removeFailed": "No se pudo eliminar al amigo",
-      "blockFailed": "No se pudo bloquear al usuario"
+      "loadFailed": "No se han podido cargar los amigos",
+      "requestFailed": "No se ha podido enviar la solicitud",
+      "respondFailed": "No se ha podido responder a la solicitud",
+      "removeFailed": "No se ha podido eliminar al amigo",
+      "blockFailed": "No se ha podido bloquear al usuario"
     },
     "notify": {
-      "requestReceived": "{{username}} te envió una solicitud de amistad",
-      "requestAccepted": "{{username}} aceptó tu solicitud de amistad",
+      "requestReceived": "{{username}} te ha enviado una solicitud de amistad",
+      "requestAccepted": "{{username}} ha aceptado tu solicitud de amistad",
       "removed": "Un amigo te ha eliminado de su lista"
     }
   },
@@ -91,9 +91,9 @@
     "loading": "Cargando…",
     "menu": {
       "title": "Pong",
-      "playOnline": "Jugar Online",
-      "playLocal": "Jugar Local",
-      "playAi": "Jugar vs IA",
+      "playOnline": "Jugar en línea",
+      "playLocal": "Jugar local",
+      "playAi": "Jugar contra IA",
       "tournament": "Torneo",
       "gameSettings": "Configuración del juego",
       "gameSettingsNote": "(para IA y local)",
@@ -103,30 +103,30 @@
       "powerUps": "Potenciadores",
       "powerUpsDescription": "Activa bonificaciones durante la partida",
       "aiDifficulty": "Dificultad de la IA",
-      "description": "Online: te emparejamos con otro jugador. Local: dos jugadores en el mismo teclado."
+      "description": "En línea: te emparejamos con otro jugador. Local: dos jugadores en el mismo teclado."
     },
     "difficulty": { "easy": "Fácil", "medium": "Normal", "hard": "Difícil" },
     "status": {
       "connecting": "Conectando…",
       "waiting": "Buscando rival…",
-      "playingLeft": "Eres el jugador IZQUIERDA",
-      "playingRight": "Eres el jugador DERECHA",
+      "playingLeft": "Eres el jugador IZQUIERDO",
+      "playingRight": "Eres el jugador DERECHO",
       "won": "¡Has ganado! 🎉",
       "lost": "Has perdido 😢",
-      "opponentLeft": "El rival abandonó — ganas por abandono"
+      "opponentLeft": "El rival se ha ido — ganas por abandono"
     },
     "reconnect": "Rival desconectado — ganas en {{seconds}}s si no vuelve",
     "title": {
       "online": "Pong Online",
-      "ai": "Pong vs IA",
+      "ai": "Pong contra IA",
       "local": "Pong Local"
     },
     "result": {
       "finalScore": "Puntuación final",
       "youWin": "¡Has ganado! 🎉",
       "aiWins": "¡Gana la IA! 🤖",
-      "leftWins": "¡Gana el jugador IZQUIERDA! 🎉",
-      "rightWins": "¡Gana el jugador DERECHA! 🎉"
+      "leftWins": "¡Gana el jugador de la IZQUIERDA! 🎉",
+      "rightWins": "¡Gana el jugador de la DERECHA! 🎉"
     },
     "subtitle": {
       "ai": "Tú (izquierda) vs IA · {{difficulty}} — primero a 5 gana",
@@ -241,7 +241,7 @@
   "stats": {
     "title": "Estadísticas",
     "loading": "Cargando…",
-    "loadError": "No se pudieron cargar las estadísticas",
+    "loadError": "No se ha podido cargar las estadísticas",
     "tiles": {
       "matches": "Partidas",
       "wins": "Victorias",
@@ -250,7 +250,7 @@
     },
     "noMatches": "Todavía no has jugado ninguna partida. ¡Juega tu primer Pong para ver tus estadísticas aquí!",
     "playNow": "Jugar ahora",
-    "winLossChart": "Victorias vs derrotas",
+    "winLossChart": "Victorias y derrotas",
     "scoreChart": "Puntuación — últimas {{count}} partidas",
     "matchHistory": "Historial de partidas",
     "chartWinsLabel": "victorias",
@@ -268,13 +268,13 @@
       "friends": "Amigos",
       "global": "General",
       "loading": "Cargando…",
-      "noFriendsMatches": "Todavía nadie de tu lista de amigos jugó una partida.",
-      "noMatches": "Todavía no hay partidas registradas.",
+      "noFriendsMatches": "Ninguno de tus amigos ha jugado todavía.",
+      "noMatches": "Aún no hay partidas registradas.",
       "rank": "#",
       "player": "Jugador",
       "wl": "V-D",
       "winRate": "% Victorias",
-      "loadFailed": "No se pudo cargar el leaderboard"
+      "loadFailed": "No se ha podido cargar la tabla"
     }
   },
   "home": {
@@ -307,19 +307,19 @@
     "profile": "Perfil",
     "friends": "Amigos",
     "chat": "Chat",
-    "stats": "Stats",
+    "stats": "Estadísticas",
     "logout": "Cerrar sesión",
     "loggingOut": "Cerrando sesión..."
   },
   "notification": {
-    "friendOnline": "{{username}} está en línea",
+    "friendOnline": "{{username}} se ha conectado",
     "friendOfflineDefault": "Un amigo",
-    "friendOffline": "{{username}} se desconectó",
-    "requestDeclined": "Tu solicitud de amistad fue rechazada",
+    "friendOffline": "{{username}} se ha desconectado",
+    "requestDeclined": "Tu solicitud de amistad ha sido rechazada",
     "wantsToPlay": "¡{{username}} quiere jugar!",
     "accept": "Aceptar",
     "decline": "Rechazar",
-    "friendAdded": "¡{{username}} y tú ahora sois amigos!"
+    "friendAdded": "¡{{username}} ahora es tu amigo!"
   },
   "legal": {
     "back": "← Volver",
@@ -328,7 +328,7 @@
       "title": "Política de Privacidad",
       "intro": "Esta Política de Privacidad describe cómo ft_transcendence (\"el Servicio\", \"nosotros\") recopila, utiliza y protege tus datos personales cuando usas nuestra aplicación web de Pong.",
       "s1": {
-        "heading": "1. Quiénes Somos",
+        "heading": "1. ¿Quiénes Somos?",
         "body": "ft_transcendence es un proyecto estudiantil desarrollado como parte del plan de estudios de 42 School. No es un producto comercial. Contacto:"
       },
       "s2": {
@@ -338,7 +338,7 @@
           "rows": [
             [
               "Nombre de usuario",
-              "Identidad pública (leaderboards, historial de partidas, amigos)",
+              "Identidad pública (tablas de clasificación, historial de partidas, amigos)",
               "Tú, al registrarte"
             ],
             [
