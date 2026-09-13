@@ -1,6 +1,13 @@
 import {
-  Controller, Post, Get, Body, UseGuards,
-  Request, HttpCode, HttpStatus, Redirect,
+  Controller,
+  Post,
+  Get,
+  Body,
+  UseGuards,
+  Request,
+  HttpCode,
+  HttpStatus,
+  Redirect,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
@@ -55,7 +62,8 @@ export class AuthController {
   @Redirect()
   googleCallback(@Request() req) {
     const { accessToken, refreshToken } = req.user;
-    const frontend = process.env.FRONTEND_URL ?? 'http://localhost:8080';
+    const frontend =
+      process.env.FRONTEND_URL ?? 'https://transcendance.rmanzanas.com';
     return {
       url: `${frontend}/auth/callback?accessToken=${accessToken}&refreshToken=${refreshToken}`,
     };

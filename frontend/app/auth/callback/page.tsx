@@ -2,12 +2,14 @@
 
 import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/AuthContext';
 
 export default function OAuthCallbackPage() {
   const router       = useRouter();
   const searchParams = useSearchParams();
   const { login }    = useAuth();
+  const { t }         = useTranslation();
 
   useEffect(() => {
     const accessToken  = searchParams.get('accessToken');
@@ -23,7 +25,7 @@ export default function OAuthCallbackPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen">
-      <p className="text-muted-foreground">Signing you in…</p>
+      <p className="text-muted-foreground">{t('auth.signingIn')}</p>
     </div>
   );
 }
