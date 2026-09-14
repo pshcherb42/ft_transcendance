@@ -370,6 +370,11 @@ export default function GamePage() {
     };
 
     const zone = touchZoneRef.current;
+    let stopTimeout: ReturnType<typeof setTimeout> | null = null;
+    const scheduleAutoStop = () => {
+      if (stopTimeout) clearTimeout(stopTimeout);
+      stopTimeout = setTimeout(() => touchControlsRef.current?.setDir('stop'), 100);
+    };
     const onTouchStart = (e: TouchEvent) => {
       e.preventDefault();
       touchStartYRef.current = e.touches[0].clientY;
@@ -380,8 +385,12 @@ export default function GamePage() {
       const DEADZONE = 12;
       const dir = delta < -DEADZONE ? 'up' : delta > DEADZONE ? 'down' : 'stop';
       touchControlsRef.current?.setDir(dir);
+      scheduleAutoStop();
     };
-    const onTouchEnd = () => touchControlsRef.current?.setDir('stop');
+    const onTouchEnd = () => {
+      if (stopTimeout) clearTimeout(stopTimeout);
+      touchControlsRef.current?.setDir('stop');
+    };
 
     zone?.addEventListener('touchstart', onTouchStart, { passive: false });
     zone?.addEventListener('touchmove', onTouchMove, { passive: false });
@@ -430,6 +439,7 @@ export default function GamePage() {
       zone?.removeEventListener('touchmove', onTouchMove);
       zone?.removeEventListener('touchend', onTouchEnd);
       zone?.removeEventListener('touchcancel', onTouchEnd);
+      if (stopTimeout) clearTimeout(stopTimeout);
       touchControlsRef.current = null;
       if (disconnectTimerRef.current) {
         clearInterval(disconnectTimerRef.current);

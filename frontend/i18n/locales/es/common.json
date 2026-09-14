@@ -117,9 +117,9 @@
     },
     "reconnect": "Rival desconectado — ganas en {{seconds}}s si no vuelve",
     "title": {
-      "online": "Pong En línea",
+      "online": "Pong en línea",
       "ai": "Pong contra IA",
-      "local": "Pong Local"
+      "local": "Pong local"
     },
     "result": {
       "finalScore": "Puntuación final",
