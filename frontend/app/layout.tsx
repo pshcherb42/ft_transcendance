@@ -8,6 +8,7 @@ import Footer from '@/components/Footer';
 import { Toaster } from 'sonner';
 import { NotificationListener } from '@/components/NotificationListener';
 import { ChatUnreadProvider } from '@/context/ChatUnreadContext';
+import { WIDTH } from './game/constants';
 
 const gasoekOne = Gasoek_One({
   weight: '400',
@@ -23,6 +24,11 @@ const manrope = Manrope({
 export const metadata: Metadata = {
   title: 'ft_transcendance',
   description: 'Pong web app',
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default function RootLayout({

@@ -20,6 +20,7 @@
   --notice: #f5dcd3;
   --card-shadow: rgba(193, 168, 163, 0.25);
 }
+
 /* dark theme */
 :root[data-theme='dark'] {
   --background: #1a1715;

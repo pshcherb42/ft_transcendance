@@ -24,12 +24,24 @@ interface Props {
   onScoreChange?: (score: { left: number; right: number }) => void;
 }
 
-export function PongMatch({ config, vsAi, difficulty = 'medium', onFinish, onScoreChange, }: Props) {
+export function PongMatch({
+  config,
+  vsAi,
+  difficulty = 'medium',
+  onFinish,
+  onScoreChange,
+}: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const onFinishRef = useRef(onFinish);
   onFinishRef.current = onFinish;
   const onScoreChangeRef = useRef(onScoreChange);
   onScoreChangeRef.current = onScoreChange;
+  const touchControlsRef = useRef<{
+    setDir: (side: 'left' | 'right', d: 'up' | 'down' | 'stop') => void;
+  } | null>(null);
+  const touchStateRef = useRef<
+    Map<number, { side: 'left' | 'right'; startY: number }>
+  >(new Map());
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -40,6 +52,9 @@ export function PongMatch({ config, vsAi, difficulty = 'medium', onFinish, onSco
     const renderer = new PongRenderer();
     const engine = new PongEngine(config);
     const ai = vsAi ? new PongAi(difficulty) : null;
+    touchControlsRef.current = {
+      setDir: (side, d) => engine.setInput(side, d),
+    };
     let finished = false;
     let previousScoreLeft = 0;
     let previousScoreRight = 0;
@@ -55,14 +70,23 @@ export function PongMatch({ config, vsAi, difficulty = 'medium', onFinish, onSco
       if (vsAi) {
         const up = pressed.has('w') || pressed.has('ArrowUp');
         const down = pressed.has('s') || pressed.has('ArrowDown');
-        engine.setInput('left', up && !down ? 'up' : down && !up ? 'down' : 'stop');
+        engine.setInput(
+          'left',
+          up && !down ? 'up' : down && !up ? 'down' : 'stop',
+        );
       } else {
         const lUp = pressed.has('w');
         const lDown = pressed.has('s');
-        engine.setInput('left', lUp && !lDown ? 'up' : lDown && !lUp ? 'down' : 'stop');
+        engine.setInput(
+          'left',
+          lUp && !lDown ? 'up' : lDown && !lUp ? 'down' : 'stop',
+        );
         const rUp = pressed.has('ArrowUp');
         const rDown = pressed.has('ArrowDown');
-        engine.setInput('right', rUp && !rDown ? 'up' : rDown && !rUp ? 'down' : 'stop');
+        engine.setInput(
+          'right',
+          rUp && !rDown ? 'up' : rDown && !rUp ? 'down' : 'stop',
+        );
       }
     };
     const norm = (k: string): string | null => {
@@ -92,24 +116,24 @@ export function PongMatch({ config, vsAi, difficulty = 'medium', onFinish, onSco
       if (ai) {
         ai.update(engine);
       }
-    
+
       engine.step();
-    
+
       const snapshot = engine.getSnapshot();
-    
+
       if (
         snapshot.scoreLeft !== previousScoreLeft ||
         snapshot.scoreRight !== previousScoreRight
       ) {
         previousScoreLeft = snapshot.scoreLeft;
         previousScoreRight = snapshot.scoreRight;
-    
+
         onScoreChangeRef.current?.({
           left: snapshot.scoreLeft,
           right: snapshot.scoreRight,
         });
       }
-    
+
       if (!finished && engine.status === 'finished' && engine.winner) {
         finished = true;
         onFinishRef.current?.(engine.winner);
@@ -129,6 +153,8 @@ export function PongMatch({ config, vsAi, difficulty = 'medium', onFinish, onSco
       cancelAnimationFrame(raf);
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
+      touchControlsRef.current = null;
+      touchStateRef.current.clear();
     };
     // Primitive deps: the parent remounts with `key` to restart the match.
   }, [config.map, config.powerups, vsAi, difficulty]);
@@ -138,7 +164,42 @@ export function PongMatch({ config, vsAi, difficulty = 'medium', onFinish, onSco
       ref={canvasRef}
       width={WIDTH}
       height={HEIGHT}
-      className="block h-auto w-full max-w-full bg-canvas"
+      className='block h-auto w-full max-w-full bg-canvas touch-none'
+      onTouchStart={(e) => {
+        e.preventDefault();
+        const rect = canvasRef.current!.getBoundingClientRect();
+        for (const t of Array.from(e.changedTouches)) {
+          const side: 'left' | 'right' =
+            !vsAi && t.clientX - rect.left > rect.width / 2 ? 'right' : 'left';
+          touchStateRef.current.set(t.identifier, { side, startY: t.clientY });
+        }
+      }}
+      onTouchMove={(e) => {
+        e.preventDefault();
+        for (const t of Array.from(e.changedTouches)) {
+          const state = touchStateRef.current.get(t.identifier);
+          if (!state) continue;
+          const delta = t.clientY - state.startY;
+          const DEADZONE = 12;
+          const dir =
+            delta < -DEADZONE ? 'up' : delta > DEADZONE ? 'down' : 'stop';
+          touchControlsRef.current?.setDir(state.side, dir);
+        }
+      }}
+      onTouchEnd={(e) => {
+        for (const t of Array.from(e.changedTouches)) {
+          const state = touchStateRef.current.get(t.identifier);
+          if (state) touchControlsRef.current?.setDir(state.side, 'stop');
+          touchStateRef.current.delete(t.identifier);
+        }
+      }}
+      onTouchCancel={(e) => {
+        for (const t of Array.from(e.changedTouches)) {
+          const state = touchStateRef.current.get(t.identifier);
+          if (state) touchControlsRef.current?.setDir(state.side, 'stop');
+          touchStateRef.current.delete(t.identifier);
+        }
+      }}
     />
   );
 }

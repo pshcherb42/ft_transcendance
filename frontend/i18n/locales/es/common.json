@@ -117,7 +117,7 @@
     },
     "reconnect": "Rival desconectado — ganas en {{seconds}}s si no vuelve",
     "title": {
-      "online": "Pong Online",
+      "online": "Pong En línea",
       "ai": "Pong contra IA",
       "local": "Pong Local"
     },
@@ -286,7 +286,7 @@
       "controlsTitle": "Controles",
       "leftControls": "Jugador izquierdo: usa W y S para mover la pala.",
       "rightControls": "Jugador derecho: usa las flechas arriba y abajo para mover la pala.",
-      "onlineControls": "En las partidas online, cada jugador controla su propia pala.",
+      "onlineControls": "En las partidas en línea, cada jugador controla su propia pala.",
       "mapsTitle": "Mapas",
       "classicMap": "Clásico: una pista estándar de Pong.",
       "obstaclesMap": "Obstáculos: las paredes adicionales cambian la trayectoria de la pelota.",

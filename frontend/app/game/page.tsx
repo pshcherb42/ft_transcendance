@@ -30,13 +30,19 @@ export default function GamePage() {
 
   const canvasRef = useRef<HTMLCanvasElement>(null); // online mode only
   const rendererRef = useRef(new PongRenderer());
+  const disconnectTimerRef = useRef<ReturnType<typeof setInterval> | null>(
+    null,
+  );
+  const touchStartYRef = useRef(0);
+  const touchControlsRef = useRef<{
+    setDir: (d: 'up' | 'down' | 'stop') => void;
+  } | null>(null);
+  const touchZoneRef = useRef<HTMLDivElement>(null);
 
   const [reconnectSecondsLeft, setReconnectSecondsLeft] = useState<
     number | null
   >(null);
-  const disconnectTimerRef = useRef<ReturnType<typeof setInterval> | null>(
-    null,
-  );
+  const [footerHeight, setFooterHeight] = useState(48);
 
   const mode: Mode =
     modeParam === 'online' ||
@@ -106,6 +112,16 @@ export default function GamePage() {
       router.replace('/');
     }
   }, [modeParam, router]);
+
+  useEffect(() => {
+    const footer = document.querySelector('footer');
+    if (!footer) return;
+    const update = () => setFooterHeight(footer.getBoundingClientRect().height);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(footer);
+    return () => ro.disconnect();
+  }, []);
 
   // ----------------------------------------------------------------- ONLINE
   useEffect(() => {
@@ -345,6 +361,33 @@ export default function GamePage() {
       pressed.delete(a);
       refresh();
     };
+    touchControlsRef.current = {
+      setDir: (d) => {
+        pressed.clear();
+        if (d !== 'stop') pressed.add(d);
+        refresh();
+      },
+    };
+
+    const zone = touchZoneRef.current;
+    const onTouchStart = (e: TouchEvent) => {
+      e.preventDefault();
+      touchStartYRef.current = e.touches[0].clientY;
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+      const delta = e.touches[0].clientY - touchStartYRef.current;
+      const DEADZONE = 12;
+      const dir = delta < -DEADZONE ? 'up' : delta > DEADZONE ? 'down' : 'stop';
+      touchControlsRef.current?.setDir(dir);
+    };
+    const onTouchEnd = () => touchControlsRef.current?.setDir('stop');
+
+    zone?.addEventListener('touchstart', onTouchStart, { passive: false });
+    zone?.addEventListener('touchmove', onTouchMove, { passive: false });
+    zone?.addEventListener('touchend', onTouchEnd);
+    zone?.addEventListener('touchcancel', onTouchEnd);
+
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
 
@@ -383,6 +426,11 @@ export default function GamePage() {
       socket.emit('leaveQueue'); // frees a tale queued slot
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
+      zone?.removeEventListener('touchstart', onTouchStart);
+      zone?.removeEventListener('touchmove', onTouchMove);
+      zone?.removeEventListener('touchend', onTouchEnd);
+      zone?.removeEventListener('touchcancel', onTouchEnd);
+      touchControlsRef.current = null;
       if (disconnectTimerRef.current) {
         clearInterval(disconnectTimerRef.current);
         disconnectTimerRef.current = null;
@@ -511,7 +559,10 @@ export default function GamePage() {
         : t('game.canvas.rightPlayer');
 
   return (
-    <div className='flex min-h-[calc(100dvh-48px)] flex-col bg-background'>
+    <div
+      className='flex flex-col bg-background'
+      style={{ minHeight: `calc(100dvh - ${footerHeight}px)` }}
+    >
       <main className='flex flex-1'>
         <section
           className='
@@ -709,12 +760,17 @@ export default function GamePage() {
           `}
             >
               {mode === 'online' ? (
-                <canvas
-                  ref={canvasRef}
-                  width={WIDTH}
-                  height={HEIGHT}
-                  className='block h-auto w-full bg-canvas'
-                />
+                <div
+                  ref={touchZoneRef}
+                  className='flex flex-1 items-center justify-center touch-none'
+                >
+                  <canvas
+                    ref={canvasRef}
+                    width={WIDTH}
+                    height={HEIGHT}
+                    className='block h-auto w-full bg-canvas'
+                  />
+                </div>
               ) : (
                 <PongMatch
                   key={localRound}
@@ -793,7 +849,9 @@ export default function GamePage() {
                   '
                     >
                       <span>{score.left}</span>
-                      <span className='text-[30px] text-muted-foreground'>:</span>
+                      <span className='text-[30px] text-muted-foreground'>
+                        :
+                      </span>
                       <span>{score.right}</span>
                     </div>
 
