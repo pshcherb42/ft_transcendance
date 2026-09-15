@@ -1,5 +1,14 @@
 // friends/friends.controller.ts
-import { Controller, Get, Post, Delete, Param, Body, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Param,
+  Body,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'; // adjust to your actual guard name/path
 import { FriendsService } from './friends.service';
 import { RespondRequestDto } from './dto/respond-request.dto';
@@ -16,8 +25,16 @@ export class FriendsController {
   }
 
   @Post('respond/:friendshipId')
-  respond(@Req() req, @Param('friendshipId') friendshipId: string, @Body() dto: RespondRequestDto) {
-    return this.friendsService.respondToRequest(req.user.id, friendshipId, dto.action);
+  respond(
+    @Req() req,
+    @Param('friendshipId') friendshipId: string,
+    @Body() dto: RespondRequestDto,
+  ) {
+    return this.friendsService.respondToRequest(
+      req.user.id,
+      friendshipId,
+      dto.action,
+    );
   }
 
   @Delete(':friendshipId')

@@ -1,5 +1,10 @@
 // friends/friends.service.ts
-import { Injectable, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { PresenceService } from '../presence/presence.service';
 import { Server } from 'socket.io';
@@ -13,9 +18,12 @@ export class FriendsService {
   ) {}
 
   async sendRequest(senderId: string, receiverUsername: string) {
-    const receiver = await this.prisma.user.findUnique({ where: { username: receiverUsername } });
+    const receiver = await this.prisma.user.findUnique({
+      where: { username: receiverUsername },
+    });
     if (!receiver) throw new NotFoundException('User not found');
-    if (receiver.id === senderId) throw new BadRequestException("Can't friend yourself");
+    if (receiver.id === senderId)
+      throw new BadRequestException("Can't friend yourself");
 
     // Check both directions — A->B and B->A both count as "already related".
     const existing = await this.prisma.friendship.findFirst({
@@ -27,15 +35,17 @@ export class FriendsService {
       },
     });
     if (existing) {
-      if (existing.status === 'BLOCKED') throw new ForbiddenException('Cannot send request');
+      if (existing.status === 'BLOCKED')
+        throw new ForbiddenException('Cannot send request');
       throw new BadRequestException('Friendship already exists or is pending');
     }
 
     const friendship = await this.prisma.friendship.create({
       data: { senderId, receiverId: receiver.id, status: 'PENDING' },
-      include: { sender: { select: { id: true, username: true, avatar: true } } },
+      include: {
+        sender: { select: { id: true, username: true, avatar: true } },
+      },
     });
-
 
     this.presence.emitToUser(receiver.id, 'friendRequestReceived', {
       id: friendship.id,
@@ -46,18 +56,27 @@ export class FriendsService {
     });
 
     return friendship;
-
   }
 
-  async respondToRequest(userId: string, friendshipId: string, action: 'accept' | 'decline') {
-    const friendship = await this.prisma.friendship.findUnique({ where: { id: friendshipId } });
+  async respondToRequest(
+    userId: string,
+    friendshipId: string,
+    action: 'accept' | 'decline',
+  ) {
+    const friendship = await this.prisma.friendship.findUnique({
+      where: { id: friendshipId },
+    });
     if (!friendship) throw new NotFoundException('Request not found');
-    if (friendship.receiverId !== userId) throw new ForbiddenException('Not your request to respond to');
-    if (friendship.status !== 'PENDING') throw new BadRequestException('Request already resolved');
+    if (friendship.receiverId !== userId)
+      throw new ForbiddenException('Not your request to respond to');
+    if (friendship.status !== 'PENDING')
+      throw new BadRequestException('Request already resolved');
 
     if (action === 'decline') {
       await this.prisma.friendship.delete({ where: { id: friendshipId } });
-      this.presence.emitToUser(friendship.senderId, 'friendRequestDeclined', { friendshipId });
+      this.presence.emitToUser(friendship.senderId, 'friendRequestDeclined', {
+        friendshipId,
+      });
       return { status: 'declined' };
     }
 
@@ -74,7 +93,10 @@ export class FriendsService {
     // include the receiver's info since that's the "friend" from sender's POV
     this.presence.emitToUser(friendship.senderId, 'friendRequestAccepted', {
       friendshipId: updated.id,
-      friend: { ...updated.receiver, online: this.presence.isOnline(updated.receiver.id) },
+      friend: {
+        ...updated.receiver,
+        online: this.presence.isOnline(updated.receiver.id),
+      },
       messageKey: 'friends.notify.requestAccepted',
       username: updated.receiver.username,
     });
@@ -83,13 +105,18 @@ export class FriendsService {
   }
 
   async removeFriend(userId: string, friendshipId: string) {
-    const friendship = await this.prisma.friendship.findUnique({ where: { id: friendshipId } });
+    const friendship = await this.prisma.friendship.findUnique({
+      where: { id: friendshipId },
+    });
     if (!friendship) throw new NotFoundException('Friendship not found');
     if (friendship.senderId !== userId && friendship.receiverId !== userId) {
       throw new ForbiddenException('Not your friendship');
     }
     await this.prisma.friendship.delete({ where: { id: friendshipId } });
-    const otherUserId = friendship.senderId === userId ? friendship.receiverId : friendship.senderId;
+    const otherUserId =
+      friendship.senderId === userId
+        ? friendship.receiverId
+        : friendship.senderId;
     this.presence.emitToUser(otherUserId, 'friendRemoved', {
       friendshipId,
       messageKey: 'friends.notify.removed',
@@ -99,7 +126,9 @@ export class FriendsService {
   }
 
   async blockUser(userId: string, targetUsername: string) {
-    const target = await this.prisma.user.findUnique({ where: { username: targetUsername } });
+    const target = await this.prisma.user.findUnique({
+      where: { username: targetUsername },
+    });
     if (!target) throw new NotFoundException('User not found');
 
     const existing = await this.prisma.friendship.findFirst({
@@ -148,36 +177,51 @@ export class FriendsService {
   async listPendingIncoming(userId: string) {
     return this.prisma.friendship.findMany({
       where: { receiverId: userId, status: 'PENDING' },
-      include: { sender: { select: { id: true, username: true, avatar: true } } },
+      include: {
+        sender: { select: { id: true, username: true, avatar: true } },
+      },
     });
   }
 
   async listPendingOutgoing(userId: string) {
     return this.prisma.friendship.findMany({
       where: { senderId: userId, status: 'PENDING' },
-      include: { receiver: { select: { id: true, username: true, avatar: true } } },
+      include: {
+        receiver: { select: { id: true, username: true, avatar: true } },
+      },
     });
   }
 
   // Called by the gateway on connect/disconnect to push presence updates
   // only to this user's accepted friends (not a global broadcast).
-  async notifyFriendsOfPresence(userId: string, online: boolean, server: Server, presence: PresenceService) {
+  async notifyFriendsOfPresence(
+    userId: string,
+    online: boolean,
+    server: Server,
+    presence: PresenceService,
+  ) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: { username: true },
     });
-  
+
     const rows = await this.prisma.friendship.findMany({
-      where: { status: 'ACCEPTED', OR: [{ senderId: userId }, { receiverId: userId }] },
+      where: {
+        status: 'ACCEPTED',
+        OR: [{ senderId: userId }, { receiverId: userId }],
+      },
       select: { senderId: true, receiverId: true },
     });
-  
-    const friendIds = rows.map((f) => (f.senderId === userId ? f.receiverId : f.senderId));
+
+    const friendIds = rows.map((f) =>
+      f.senderId === userId ? f.receiverId : f.senderId,
+    );
     const event = online ? 'friendOnline' : 'friendOffline';
-  
+
     for (const friendId of friendIds) {
       const socketId = presence.getSocketId(friendId);
-      if (socketId) server.to(socketId).emit(event, { userId, username: user?.username });
+      if (socketId)
+        server.to(socketId).emit(event, { userId, username: user?.username });
     }
   }
 }

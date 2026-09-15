@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../users/users.service';
+import { MailService } from './mail.service';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -10,6 +11,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private config: ConfigService,
+    private mailService: MailService,
   ) {}
 
   // Called by LocalStrategy — validates email+password
@@ -46,20 +48,47 @@ export class AuthService {
     await this.usersService.updateRefreshToken(userId, null);
   }
 
-  // // Find-or-create user from Google OAuth, then issue JWT pair
-  // async googleLogin(email: string, displayName: string) {
-  //   let user = await this.usersService.findByEmail(email);
-  //   if (!user) {
-  //     // Create with no password — Google users can't log in with local strategy
-  //     user = await this.usersService.create({
-  //       email,
-  //       username: displayName,
-  //       password: null,
-  //     });
-  //   }
-  //   return this.login({ id: user.id, email: user.email });
-  // }
+  async forgotPassword(email: string, lang?: string) {
+    const user = await this.usersService.findByEmail(email);
+    //for security reasons, always return the same response!
+    if (!user || !user.password) return null;
+    const token = await this.jwtService.signAsync(
+      { sub: user.id, purpose: 'password-reset' },
+      { secret: this.config.get<string>('JWT_RESET_SECRET'), expiresIn: '30m' },
+    );
 
+    const frontend =
+      process.env.FRONTEND_URL ?? 'https://transcendance.rmanzanas.com';
+    await this.mailService.sendPasswordReset(
+      user.email,
+      `${frontend}/reset-password?token=${token}`,
+      lang,
+    );
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    let payload: { sub: string; purpose: string };
+    try {
+      payload = await this.jwtService.verifyAsync(token, {
+        secret: this.config.get<string>('JWT_RESET_SECRET'),
+      });
+    } catch {
+      throw new UnauthorizedException({
+        code: 'RESET_TOKEN_INVALID',
+        message: 'This reset link is invalid or has expired',
+      });
+    }
+    if (payload.purpose !== 'password-reset') {
+      throw new UnauthorizedException({
+        code: 'RESET_TOKEN_INVALID',
+        message: 'This reset link is invalid or has expired',
+      });
+    }
+    await this.usersService.setPassword(payload.sub, newPassword);
+  }
+
+  // Google gives no username, so derive one from the email and append a
+  // numeric suffix if it's already taken (username is a unique column).
   private async makeUniqueUsername(seed: string): Promise<string> {
     const base =
       seed

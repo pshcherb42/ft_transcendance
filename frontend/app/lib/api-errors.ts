@@ -5,6 +5,7 @@ const API_ERROR_KEYS: Record<string, string> = {
   CURRENT_PASSWORD_REQUIRED: 'profile.currentPasswordRequired',
   OAUTH_PASSWORD_CHANGE_FORBIDDEN: 'profile.oauthPasswordChangeForbidden',
   CURRENT_PASSWORD_INCORRECT: 'profile.currentPasswordIncorrect',
+  RESET_TOKEN_INVALID: 'auth.resetTokenInvalid',
 };
 
 export function apiErrorKey(data: unknown): string | null {

@@ -13,7 +13,8 @@ BACKEND_PACKS = @nestjs/passport \
                 @nestjs/platform-socket.io \
                 socket.io \
 				@types/passport-google-oauth20 \
-				browser-image-compression
+				browser-image-compression \
+				resend
 
 CERT_DIR = nginx/certs
 CLOUDFLARED = ./cloudflared

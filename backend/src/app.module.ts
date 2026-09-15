@@ -8,7 +8,13 @@ import { WebsocketsModule } from './websockets/websockets.module';
 import { PublicApiModule } from './public-api/public-api.module';
 
 @Module({
-  imports: [UsersModule, AuthModule, PrismaModule, WebsocketsModule, PublicApiModule],
+  imports: [
+    UsersModule,
+    AuthModule,
+    PrismaModule,
+    WebsocketsModule,
+    PublicApiModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

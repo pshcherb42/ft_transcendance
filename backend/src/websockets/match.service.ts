@@ -39,9 +39,7 @@ export class MatchService {
       // Avoid counting a win and a loss for the same user (e.g. two tabs).
       if (loserId !== result.winnerId) await this.bumpStats(loserId, 'loss');
     } catch (err) {
-      this.logger.error(
-        `Could not save the match: ${err?.message ?? err}`,
-      );
+      this.logger.error(`Could not save the match: ${err?.message ?? err}`);
     }
   }
 

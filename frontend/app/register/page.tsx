@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, FormEvent, useEffect } from 'react';
+import { useState, FormEvent, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Input from '@/components/input';
@@ -8,7 +8,7 @@ import BouncingBall from '@/components/bouncingBall';
 import { Trans, useTranslation } from 'react-i18next';
 import { apiErrorKey } from '@/app/lib/api-errors';
 
-export default function RegisterPage() {
+function RegisterPage() {
   const { login, user, loading: authLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -574,3 +574,12 @@ export default function RegisterPage() {
     </div>
   );
 }
+
+export default function RegisterPageRoute() {
+  return (
+    <Suspense fallback={null}>
+      <RegisterPage />
+    </Suspense>
+  );
+}
+

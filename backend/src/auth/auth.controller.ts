@@ -15,6 +15,8 @@ import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 import { RegisterDto } from './dto/register.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -49,6 +51,22 @@ export class AuthController {
   async logout(@Request() req) {
     await this.authService.logout(req.user.id);
     return { message: 'Logged out' };
+  }
+
+  // POST /auth/forgot-password
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  async forgotPassword(@Body() body: ForgotPasswordDto) {
+    await this.authService.forgotPassword(body.email, body.lang);
+    return { message: 'If that email exists, a reset link has been sent' };
+  }
+
+  // POST /auth/reset-password
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(@Body() body: ResetPasswordDto) {
+    await this.authService.resetPassword(body.token, body.newPassword);
+    return { message: 'Password updated' };
   }
 
   // GET /auth/google — redirect to Google consent screen

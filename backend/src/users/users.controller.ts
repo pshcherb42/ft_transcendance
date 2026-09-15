@@ -1,6 +1,15 @@
 import {
-  Controller, Get, Put, Post, Param, Body, Query,
-  UseGuards, Request, NotFoundException, BadRequestException,
+  Controller,
+  Get,
+  Put,
+  Post,
+  Param,
+  Body,
+  Query,
+  UseGuards,
+  Request,
+  NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { FriendsService } from '../friends/friends.service';
@@ -38,7 +47,10 @@ export class UsersController {
     if (body.avatar.length > 1_100_000) {
       throw new BadRequestException('Image too large');
     }
-    const updated = await this.usersService.updateAvatar(req.user.id, body.avatar);
+    const updated = await this.usersService.updateAvatar(
+      req.user.id,
+      body.avatar,
+    );
     return this.usersService.sanitize(updated);
   }
 

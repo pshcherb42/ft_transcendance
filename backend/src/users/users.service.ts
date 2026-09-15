@@ -73,6 +73,14 @@ export class UsersService {
     });
   }
 
+  async setPassword(userId: string, newPassword: string): Promise<void> {
+    const hashed = await bcrypt.hash(newPassword, 12);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { password: hashed },
+    });
+  }
+
   async updateAvatar(userId: string, avatarPath: string): Promise<User> {
     return this.prisma.user.update({
       where: { id: userId },

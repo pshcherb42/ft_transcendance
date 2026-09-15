@@ -8,6 +8,7 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
+import { MailService } from './mail.service';
 import { UsersModule } from '../users/users.module';
 import type { JwtSignOptions } from '@nestjs/jwt';
 
@@ -34,6 +35,7 @@ import type { JwtSignOptions } from '@nestjs/jwt';
     JwtStrategy,
     JwtRefreshStrategy,
     GoogleStrategy,
+    MailService,
   ],
   controllers: [AuthController],
 })

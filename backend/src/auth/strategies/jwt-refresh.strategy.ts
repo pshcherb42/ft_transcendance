@@ -7,7 +7,10 @@ import { UsersService } from '../../users/users.service';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
-export class JwtRefreshStrategy extends PassportStrategy<typeof Strategy>(Strategy, 'jwt-refresh') { 
+export class JwtRefreshStrategy extends PassportStrategy<typeof Strategy>(
+  Strategy,
+  'jwt-refresh',
+) {
   constructor(
     private config: ConfigService,
     private usersService: UsersService,

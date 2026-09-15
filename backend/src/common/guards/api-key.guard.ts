@@ -1,21 +1,21 @@
 import {
-    Injectable,
-    CanActivate,
-    ExecutionContext,
-    UnauthorizedException,
-  } from '@nestjs/common';
-  
-  @Injectable()
-  export class ApiKeyGuard implements CanActivate {
-    canActivate(context: ExecutionContext): boolean {
-      const request = context.switchToHttp().getRequest();
-      const apiKey = request.headers['x-api-key'];
-  
-      if (!apiKey || apiKey !== process.env.PUBLIC_API_KEY) {
-        throw new UnauthorizedException('Invalid or missing API key');
-      }
-      return true;
-    }
-  }
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
 
-  // verification with api key
+@Injectable()
+export class ApiKeyGuard implements CanActivate {
+  canActivate(context: ExecutionContext): boolean {
+    const request = context.switchToHttp().getRequest();
+    const apiKey = request.headers['x-api-key'];
+
+    if (!apiKey || apiKey !== process.env.PUBLIC_API_KEY) {
+      throw new UnauthorizedException('Invalid or missing API key');
+    }
+    return true;
+  }
+}
+
+// verification with api key

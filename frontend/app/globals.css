@@ -99,3 +99,16 @@ body {
 .theme-icon {
   animation: theme-icon-in 0.35s ease;
 }
+
+/* Chrome/Safari/Edge force their own background+text color onto autofilled
+   inputs, ignoring normal background-color/color. This paints over it with
+   an inset shadow the size of the field and forces the text color back. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--surface) inset;
+  -webkit-text-fill-color: var(--foreground);
+  caret-color: var(--foreground);
+  transition: background-color 999999s ease-in-out 0s;
+}
+

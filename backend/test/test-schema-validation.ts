@@ -1,6 +1,6 @@
 // backend/test-db.ts
-import 'dotenv/config'; 
-import { PrismaClient } from '../src/generated/prisma/client'; 
+import 'dotenv/config';
+import { PrismaClient } from '../src/generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import pg from 'pg';
 
@@ -19,92 +19,112 @@ async function createFriendshipRequest(senderId: string, receiverId: string) {
     where: {
       OR: [
         { senderId: firstId, receiverId: secondId },
-        { senderId: secondId, receiverId: firstId }
-      ]
-    }
+        { senderId: secondId, receiverId: firstId },
+      ],
+    },
   });
 
   if (existingFriendship) {
-    throw new Error("Friendship relationship or pending request already exists between these users.");
+    throw new Error(
+      'Friendship relationship or pending request already exists between these users.',
+    );
   }
 
   // 3. Create the record if safe
   return await prisma.friendship.create({
-    data: { senderId, receiverId, status: "PENDING" }
+    data: { senderId, receiverId, status: 'PENDING' },
   });
 }
 
 async function testDatabase() {
-  console.log("\n🚀 === STARTING DATABASE VALIDATION ===");
+  console.log('\n🚀 === STARTING DATABASE VALIDATION ===');
 
   try {
     // ----------------------------------------------------
     // SETUP TEST USERS
     // ----------------------------------------------------
-    const userA = await prisma.user.create({ data: { email: "alpha@test.com", username: "UserAlpha" } });
-    const userB = await prisma.user.create({ data: { email: "beta@test.com", username: "UserBeta" } });
-    console.log("✅ Test users generated successfully");
+    const userA = await prisma.user.create({
+      data: { email: 'alpha@test.com', username: 'UserAlpha' },
+    });
+    const userB = await prisma.user.create({
+      data: { email: 'beta@test.com', username: 'UserBeta' },
+    });
+    console.log('✅ Test users generated successfully');
 
     // ----------------------------------------------------
     // TEST 1: REVERSE FRIENDSHIP DUPLICATION BLOCK
     // ----------------------------------------------------
-    console.log("\n--- Testing Reverse Friendship Logic ---");
-    
+    console.log('\n--- Testing Reverse Friendship Logic ---');
+
     // Step A: User Alpha sends a request to User Beta (Valid)
     await createFriendshipRequest(userA.id, userB.id);
-    console.log("✅ Step A: Alpha successfully sent a pending request to Beta.");
+    console.log(
+      '✅ Step A: Alpha successfully sent a pending request to Beta.',
+    );
 
     // Step B: User Beta tries to send a request back to User Alpha (Should fail)
     try {
       await createFriendshipRequest(userB.id, userA.id);
-      console.log("❌ TEST FAILED: The system allowed a duplicate reverse friendship row!");
+      console.log(
+        '❌ TEST FAILED: The system allowed a duplicate reverse friendship row!',
+      );
     } catch (err: any) {
-      console.log(`🏆 REVERSE FRIENDSHIP TEST PASSED: Backend correctly blocked the duplicate edge! Reason: "${err.message}"`);
+      console.log(
+        `🏆 REVERSE FRIENDSHIP TEST PASSED: Backend correctly blocked the duplicate edge! Reason: "${err.message}"`,
+      );
     }
 
     // ----------------------------------------------------
     // TEST 2: AI MATCH VERIFICATION
     // ----------------------------------------------------
-    console.log("\n--- Testing Game System Configuration ---");
+    console.log('\n--- Testing Game System Configuration ---');
     const aiMatch = await prisma.match.create({
-      data: { homeId: userA.id, homeScore: 10, awayScore: 5, isAIGame: true }
+      data: { homeId: userA.id, homeScore: 10, awayScore: 5, isAIGame: true },
     });
-    console.log("✅ AI Match verification passed (awayPlayer left as null)");
+    console.log('✅ AI Match verification passed (awayPlayer left as null)');
 
     // ----------------------------------------------------
     // TEST 3: PvP MATCH VERIFICATION
     // ----------------------------------------------------
     const pvpMatch = await prisma.match.create({
-      data: { homeId: userA.id, awayId: userB.id, homeScore: 11, awayScore: 9 }
+      data: { homeId: userA.id, awayId: userB.id, homeScore: 11, awayScore: 9 },
     });
-    console.log("✅ PvP Match verification passed");
+    console.log('✅ PvP Match verification passed');
 
     // ----------------------------------------------------
     // TEST 4: GDPR CLEAN ACCOUNT DELETION LOGIC
     // ----------------------------------------------------
-    console.log("\n--- Testing Data Retention & Deletion Rules ---");
+    console.log('\n--- Testing Data Retention & Deletion Rules ---');
     // Delete User Alpha. The PvP match log details should update homeId to null instead of disappearing.
     await prisma.user.delete({ where: { id: userA.id } });
-    
-    const savedMatch = await prisma.match.findUnique({ where: { id: pvpMatch.id } });
-    
-    if (savedMatch && savedMatch.homeId === null && savedMatch.awayId === userB.id) {
-      console.log("🏆 CRITICAL GDPR DELETION TEST PASSED: User deleted, match logs safely preserved!");
+
+    const savedMatch = await prisma.match.findUnique({
+      where: { id: pvpMatch.id },
+    });
+
+    if (
+      savedMatch &&
+      savedMatch.homeId === null &&
+      savedMatch.awayId === userB.id
+    ) {
+      console.log(
+        '🏆 CRITICAL GDPR DELETION TEST PASSED: User deleted, match logs safely preserved!',
+      );
     } else {
-      console.log("❌ TEST FAILED: Cascade rules accidentally purged game history.");
+      console.log(
+        '❌ TEST FAILED: Cascade rules accidentally purged game history.',
+      );
     }
 
     // Clean up remaining records
     await prisma.user.delete({ where: { id: userB.id } });
-
   } catch (error) {
-    console.error("❌ Test script crashed unexpectedly:", error);
+    console.error('❌ Test script crashed unexpectedly:', error);
   } finally {
     await prisma.$disconnect();
     await pool.end();
-    console.log("\n=== DATABASE TESTS EXECUTED COMPLETELY ===\n");
+    console.log('\n=== DATABASE TESTS EXECUTED COMPLETELY ===\n');
   }
 }
 
 testDatabase();
-

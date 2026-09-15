@@ -266,9 +266,7 @@ export class GameService {
             forfeitedBy: userId,
           });
 
-          this.logger.log(
-            `💾 Saving match after forfeit. Winner: ${winnerId}`,
-          );
+          this.logger.log(`💾 Saving match after forfeit. Winner: ${winnerId}`);
           // write match result to the database
           void this.matchService.record({
             homeId: room.leftUserId || '',

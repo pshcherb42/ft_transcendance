@@ -1,27 +1,22 @@
 'use client';
 
-import { useState, FormEvent, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, FormEvent, useEffect, Suspense } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Input from '@/components/input';
 import BouncingBall from '@/components/bouncingBall';
 import { Trans, useTranslation } from 'react-i18next';
 import { apiErrorKey } from '@/app/lib/api-errors';
 
-export default function LoginPage() {
+function LoginPage() {
   const { login, user, loading: authLoading } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { t } = useTranslation();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
-  const [mobileFormOpen, setMobileFormOpen] = useState(
-    searchParams.get('form') === 'open',
-  );
 
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
@@ -108,289 +103,150 @@ export default function LoginPage() {
             min-[800px]:hidden
           '
       >
-        {!mobileFormOpen ? (
+        <div
+          className='
+              mx-auto
+              flex
+              w-full
+              max-w-[520px]
+              flex-1
+              flex-col
+              justify-center
+            '
+        >
           <div
             className='
-                flex
                 w-full
-                max-w-[720px]
-                flex-1
-                flex-col
-                justify-start
-                pt-8
-                sm:pt-12
-                md:pt-16
+                rounded-[10px]
+                bg-surface
+                px-5
+                py-7
+                shadow-[-8px_8px_32px_0_var(--card-shadow)]
+                sm:px-8
+                sm:py-9
               '
           >
-            <span className='text-xs font-bold uppercase tracking-widest text-brand-green'>
-              42 Transcendence
-            </span>
+            <h2 className='mb-6 font-display text-[36px] uppercase leading-none text-brand-red sm:text-[42px]'>
+              {t('auth.login')}
+            </h2>
 
-            <h1
-              className='
-                  mt-4
-                  font-display
-                  text-[72px]
-                  uppercase
-                  leading-[1.1]
-                  max-[600px]:text-[64px]
-                  max-[480px]:text-[56px]
-                  max-[400px]:text-[48px]
-                  max-[350px]:text-[42px]
-                '
-            >
-              {/* Old title (4 spans) — temporarily commented out
-                <span className="block text-foreground">
-                  {t('auth.welcome')}
-                </span>
+            <form onSubmit={handleSubmit} noValidate className='space-y-[20px]'>
+              <Input
+                id='mobile-email'
+                name='email'
+                label={t('auth.email')}
+                type='email'
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
 
-                <span className="block text-foreground">
-                  {t('auth.to')}
-                </span>
+                  if (emailError) {
+                    setEmailError('');
+                  }
+                }}
+                placeholder='example@gmail.com'
+                error={emailError}
+              />
 
-                <span className="block text-brand-red">
-                  {t('auth.ourPong')}
-                </span>
+              <Input
+                id='mobile-password'
+                name='password'
+                label={t('auth.password')}
+                type='password'
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
 
-                <span className="block text-foreground">
-                  {t('auth.game')}
-                </span>
-                */}
-              <Trans i18nKey='auth.title'>
-                <span className='text-brand-red'>nuestro Pong</span>
-              </Trans>
-            </h1>
+                  if (passwordError) {
+                    setPasswordError('');
+                  }
+                }}
+                placeholder={t('auth.passwordPlaceholder')}
+                error={passwordError}
+              />
 
-            <p
-              className='
-                  mt-5
-                  max-w-[720px]
-                  font-light
-                  leading-snug
-                  text-foreground
-                  text-[clamp(1rem,2.4vw,1.75rem)]
-                '
-            >
-              {t('auth.subtitle')}
-            </p>
-            <div className='mt-10 flex flex-col gap-3'>
+              <p className='-mt-4 text-right text-sm'>
+                <button
+                  type='button'
+                  onClick={() => router.push('/forgot-password')}
+                  className='underline text-muted-foreground'
+                >
+                  {t('auth.forgotPassword')}
+                </button>
+              </p>
+
+              {error && (
+                <p className='text-[12px] leading-[16px] text-brand-red'>
+                  {t(error)}
+                </p>
+              )}
+
               <button
-                type='button'
-                onClick={() => setMobileFormOpen(true)}
+                type='submit'
+                disabled={loading}
                 className='
-                    h-[48px]
+                    h-[46px]
                     w-full
                     rounded-full
                     bg-brand-red
-                    px-8
                     text-[14px]
                     font-medium
-                    uppercase
                     text-white
                     transition-colors
                     hover:bg-brand-red-dark
+                    disabled:cursor-not-allowed
+                    disabled:opacity-60
                   '
               >
-                {t('auth.login')}
+                {loading ? t('auth.signingIn') : t('auth.login')}
               </button>
+            </form>
 
-              <button
-                type='button'
-                onClick={() => router.push('/register')}
-                className='
-                    h-[48px]
-                    w-full
-                    rounded-full
-                    border
-                    border-border
-                    px-8
-                    text-[14px]
-                    font-medium
-                    uppercase
-                    text-muted-foreground
-                    transition-colors
-                    hover:bg-border/20
-                  '
-              >
-                {t('auth.createAccount')}
-              </button>
+            <div className='relative my-[20px] flex items-center'>
+              <div className='flex-1 border-t border-border' />
+
+              <span className='mx-3 text-xs text-muted-foreground'>
+                {t('auth.or')}
+              </span>
+
+              <div className='flex-1 border-t border-border' />
             </div>
-          </div>
-        ) : (
-          <div
-            className='
-                mx-auto
-                flex
-                w-full
-                max-w-[520px]
-                flex-1
-                flex-col
-                justify-center
-              '
-          >
-            <button
-              type='button'
-              onClick={() => setMobileFormOpen(false)}
-              aria-label='Back'
+
+            <a
+              href='/api/auth/google'
               className='
-                  mb-6
                   flex
-                  h-10
-                  w-10
+                  h-[46px]
+                  w-full
                   items-center
                   justify-center
+                  gap-3
                   rounded-full
                   border
                   border-border
+                  text-sm
+                  font-medium
                   text-muted-foreground
                   transition-colors
                   hover:bg-border/20
                 '
             >
-              <svg
-                viewBox='0 0 24 24'
-                fill='none'
-                aria-hidden='true'
-                className='h-5 w-5'
+              <GoogleIcon />
+              {t('auth.continueWithGoogle')}
+            </a>
+
+            <p className='mt-5 text-center text-sm text-muted-foreground'>
+              {t('auth.noAccount')}{' '}
+              <button
+                type='button'
+                onClick={() => router.push('/register?form=open')}
+                className='font-bold text-foreground hover:underline'
               >
-                <path
-                  d='M15 18l-6-6 6-6'
-                  stroke='currentColor'
-                  strokeWidth='1.8'
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                />
-              </svg>
-            </button>
-
-            <div
-              className='
-                  w-full
-                  rounded-[10px]
-                  bg-surface
-                  px-5
-                  py-7
-                  shadow-[-8px_8px_32px_0_var(--card-shadow)]
-                  sm:px-8
-                  sm:py-9
-                '
-            >
-              <h2 className='mb-6 font-display text-[36px] uppercase leading-none text-brand-red sm:text-[42px]'>
-                {t('auth.login')}
-              </h2>
-
-              <form
-                onSubmit={handleSubmit}
-                noValidate
-                className='space-y-[20px]'
-              >
-                <Input
-                  id='mobile-email'
-                  name='email'
-                  label={t('auth.email')}
-                  type='email'
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-
-                    if (emailError) {
-                      setEmailError('');
-                    }
-                  }}
-                  placeholder='example@gmail.com'
-                  error={emailError}
-                />
-
-                <Input
-                  id='mobile-password'
-                  name='password'
-                  label={t('auth.password')}
-                  type='password'
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-
-                    if (passwordError) {
-                      setPasswordError('');
-                    }
-                  }}
-                  placeholder={t('auth.passwordPlaceholder')}
-                  error={passwordError}
-                />
-
-                {error && (
-                  <p className='text-[12px] leading-[16px] text-brand-red'>
-                    {t(error)}
-                  </p>
-                )}
-
-                <button
-                  type='submit'
-                  disabled={loading}
-                  className='
-                      h-[46px]
-                      w-full
-                      rounded-full
-                      bg-brand-red
-                      text-[14px]
-                      font-medium
-                      text-white
-                      transition-colors
-                      hover:bg-brand-red-dark
-                      disabled:cursor-not-allowed
-                      disabled:opacity-60
-                    '
-                >
-                  {loading ? t('auth.signingIn') : t('auth.login')}
-                </button>
-              </form>
-
-              <div className='relative my-[20px] flex items-center'>
-                <div className='flex-1 border-t border-border' />
-
-                <span className='mx-3 text-xs text-muted-foreground'>
-                  {t('auth.or')}
-                </span>
-
-                <div className='flex-1 border-t border-border' />
-              </div>
-
-              <a
-                href='/api/auth/google'
-                className='
-                    flex
-                    h-[46px]
-                    w-full
-                    items-center
-                    justify-center
-                    gap-3
-                    rounded-full
-                    border
-                    border-border
-                    text-sm
-                    font-medium
-                    text-muted-foreground
-                    transition-colors
-                    hover:bg-border/20
-                  '
-              >
-                <GoogleIcon />
-                {t('auth.continueWithGoogle')}
-              </a>
-
-              <p className='mt-5 text-center text-sm text-muted-foreground'>
-                {t('auth.noAccount')}{' '}
-                <button
-                  type='button'
-                  onClick={() => router.push('/register?form=open')}
-                  className='font-bold text-foreground hover:underline'
-                >
-                  {t('auth.createAccount')}
-                </button>
-              </p>
-            </div>
+                {t('auth.createAccount')}
+              </button>
+            </p>
           </div>
-        )}
+        </div>
       </div>
 
       {/* main content */}
@@ -532,6 +388,15 @@ export default function LoginPage() {
               placeholder={t('auth.passwordPlaceholder')}
               error={passwordError}
             />
+            <p className='-mt-4 text-right text-sm'>
+              <button
+                type='button'
+                onClick={() => router.push('/forgot-password')}
+                className='underline text-muted-foreground hover:underline'
+              >
+                {t('auth.forgotPassword')}
+              </button>
+            </p>
 
             {error && (
               <p className='text-[12px] leading-[16px] text-brand-red'>
@@ -563,7 +428,9 @@ export default function LoginPage() {
           {/* divider */}
           <div className='relative flex items-center my-[20px]'>
             <div className='flex-1 border-t border-border' />
-            <span className='mx-3 text-xs text-muted-foreground'>{t('auth.or')}</span>
+            <span className='mx-3 text-xs text-muted-foreground'>
+              {t('auth.or')}
+            </span>
             <div className='flex-1 border-t border-border' />
           </div>
 
@@ -616,5 +483,13 @@ function GoogleIcon() {
         fill='#EA4335'
       />
     </svg>
+  );
+}
+
+export default function LoginPageRoute() {
+  return (
+    <Suspense fallback={null}>
+      <LoginPage />
+    </Suspense>
   );
 }
