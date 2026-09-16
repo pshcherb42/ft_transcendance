@@ -49,9 +49,9 @@ clean-docker:
 	@echo "\n[+] Cleanup finished. You should have more disk space now."
 
 fclean: down
-	@docker system prune -a --volumes -f
-	@find . -name "node_modules" -type d -prune -exec rm -rf '{}' +
-	@rm -f $(CERT_DIR)/fullchain.crt $(CERT_DIR)/privkey.key
+	-@docker system prune -a --volumes -f
+	-@find . -name "node_modules" -type d -prune -exec rm -rf '{}' +
+	-@rm -f $(CERT_DIR)/fullchain.crt $(CERT_DIR)/privkey.key
 
 defclean:
 	@docker compose down -v --remove-orphans
@@ -63,7 +63,13 @@ cloudflared:
 tunnel: cloudflared
 	@$(CLOUDFLARED) tunnel run $(TUNNEL_NAME)
 
-re: fclean install-deps host-deps up 
+jwt-secrets:
+	@bash scripts/generateJwtSecrets.sh
+
+jwt-secrets-force:
+	@bash scripts/generateJwtSecrets.sh -f
+
+re: fclean install-deps host-deps up
 
 help:
 	@echo "Available commands:"
@@ -74,5 +80,7 @@ help:
 	@echo "  make fclean       - Deep clean (Docker + local node_modules)"
 	@echo "  make re           - Reset completely"
 	@echo "  make tunnel       - Run the Cloudflare tunnel (needs ~/.cloudflared/config.yml set up)"
+	@echo "  make jwt-secrets       - Generate .env (from .env.example if missing) and fill in JWT secrets"
+	@echo "  make jwt-secrets-force - Force-regenerate your own JWT secrets (logs you out of your own instance)"
 
-.PHONY: all up down build install-deps host-deps clean-docker fclean defclean re help cloudflared tunnel
+.PHONY: all up down build install-deps host-deps clean-docker fclean defclean re help cloudflared tunnel jwt-secrets jwt-secrets-force
