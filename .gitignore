@@ -23,8 +23,11 @@ docker-compose.override.yml
 # SSL certs (you'll generate these locally)
 nginx/certs/
 
-# cloudflared binary (fetched by `make cloudflared`)
+# cloudflared needed, files don't share!!
 /cloudflared
+
+# secrets bundle for sharing .env + cloudflared — never commit
+*secrets*.zip
 
 # OS files
 .DS_Store

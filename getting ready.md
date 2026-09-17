@@ -51,8 +51,10 @@ make                  # starts everything
 ```
 
 Open **`https://localhost:8443`**. Done — `make` already handles the local
-SSL cert and the `cloudflared` binary download on its own; you just never
-run `make tunnel`, since you don't need it.
+SSL cert on its own. The public tunnel is a Docker service that only starts
+if this machine has a `cloudflared/config.yml` (see the full install
+below) — without it, `make` just runs the app locally and skips the tunnel
+entirely. Nothing to configure or disable.
 
 ---
 
@@ -101,77 +103,95 @@ make host-deps
 
 ---
 
-## 3. `make cloudflared`
+## 3. Configure — SSL, the tunnel, Google OAuth
 
-Downloads the `cloudflared` binary into the project root (gitignored) if
-it's not already there — no root/sudo needed. On macOS it just tells you to
-`brew install cloudflared` instead.
-
-```bash
-make cloudflared
-```
-
-This step only gets you the _binary_. The tunnel itself still needs a
-one-time setup per Cloudflare account (see step 4).
-
----
-
-## 4. Configure — SSL, the tunnel, Google OAuth
-
-### 4.1 Local HTTPS cert
+### 3.1 Local HTTPS cert
 
 Handled automatically by `make up` (calls `scripts/createCertSSL.sh`) —
 nothing to do here manually.
 
-### 4.2 One-time Cloudflare Tunnel setup
+### 3.2 One-time Cloudflare Tunnel setup
 
 _(Skip this whole section if the tunnel was already created before — see
-step 4.2b to just bring an existing one to a new machine.)_
+step 3.2b to bring an existing one to a new machine instead.)_
+
+The tunnel itself runs as a Docker service (the official `cloudflare/cloudflared`
+image, wired up in [docker-compose.yml](docker-compose.yml)) — no binary to
+download or install, on any OS. All it needs is a config folder. Creating
+the tunnel in the first place, though, is a one-off interactive step (it
+opens a browser to log in), so it's easiest done with the CLI directly:
+`brew install cloudflared` on macOS, or `apt install cloudflared` /
+the [official package](https://pkg.cloudflare.com/) on Ubuntu.
 
 ```bash
-./cloudflared tunnel login
-./cloudflared tunnel create transcendance
-./cloudflared tunnel route dns transcendance transcendance.rmanzanas.com
+cloudflared tunnel login
+cloudflared tunnel create transcendance
+cloudflared tunnel route dns transcendance transcendance.rmanzanas.com
 ```
 
 - `login` opens a browser to pick the `rmanzanas.com` domain.
 - `create` prints a **tunnel ID** and writes credentials to
-  `~/.cloudflared/<tunnel-id>.json` — **never commit this file**, it's the
-  tunnel's private key.
+  `~/.cloudflared/<tunnel-id>.json` on your machine.
 - `route dns` creates the CNAME for you automatically.
 
-Then write `~/.cloudflared/config.yml`:
+These commands write into `~/.cloudflared/` by default, but the Docker
+service reads from a **project-local** folder instead, so move the two
+files it just created into the repo:
+
+```bash
+mkdir -p cloudflared
+cp ~/.cloudflared/config.yml cloudflared/
+cp ~/.cloudflared/<tunnel-id>.json cloudflared/
+```
+
+`cloudflared/` is gitignored — **never commit anything in it**, the `.json`
+file is the tunnel's private key. Then edit `cloudflared/config.yml` so it
+matches the paths and hostnames as seen *from inside the container* rather
+than from your host:
 
 ```yaml
 tunnel: <the-tunnel-id-from-above>
-credentials-file: /home/you/.cloudflared/<tunnel-id>.json
+credentials-file: /etc/cloudflared/<tunnel-id>.json  # container path, not host path
 
 ingress:
   - hostname: transcendance.rmanzanas.com
-    service: https://localhost:8443
+    service: https://nginx:443     # nginx's own container, not localhost
     originRequest:
-      noTLSVerify: true # local cert is self-signed, this hop is local anyway
+      noTLSVerify: true            # local cert is self-signed, this hop never leaves the compose network
   - service: http_status:404
 ```
 
-### 4.2b Bringing an already-created tunnel to a new machine
+From here on, `make` starts the tunnel automatically (see step 4) — there's
+no separate `make tunnel` step or terminal to keep open.
 
-Just copy two files into `~/.cloudflared/` on the new machine:
+### 3.2b Bringing an already-created tunnel to a new machine
 
-- `<tunnel-id>.json` (the credentials file)
-- `config.yml`
+Whoever already has the tunnel set up can hand you `cloudflared/` and
+`.env` together as a password-protected zip instead of you redoing any of
+the above:
 
-Don't run `tunnel create`/`route dns` again — that would create a second,
-different tunnel instead of reusing this one.
+```bash
+# they run, on their machine:
+make pack-secrets                 # -> ~/Desktop/ft_transcendance_secrets.zip
 
-### 4.3 `.env` — point the app at the public domain
+# you run, after git clone, on yours:
+make unpack-secrets ZIP=~/Downloads/ft_transcendance_secrets.zip
+```
+
+Share the zip and its password through **different channels** (e.g. the
+zip over chat, the password read out loud) — that's what makes the
+password protection actually worth something. Don't run
+`tunnel create`/`route dns` yourself in this case — that would create a
+second, different tunnel instead of reusing this one.
+
+### 3.3 `.env` — point the app at the public domain
 
 ```
 FRONTEND_URL=https://transcendance.rmanzanas.com
 GOOGLE_CALLBACK_URL=https://transcendance.rmanzanas.com/api/auth/google/callback
 ```
 
-### 4.4 Google Cloud Console
+### 3.4 Google Cloud Console
 
 - **Clients** → your OAuth client → **Authorized redirect URIs**: add
   `https://transcendance.rmanzanas.com/api/auth/google/callback`
@@ -179,7 +199,7 @@ GOOGLE_CALLBACK_URL=https://transcendance.rmanzanas.com/api/auth/google/callback
   `https://transcendance.rmanzanas.com`
 - **Branding** → **Authorized domains**: add `rmanzanas.com`
 
-### 4.5 Backend CORS — ✅ done
+### 3.5 Backend CORS — ✅ done
 
 [backend/src/websockets/websockets.gateway.ts](backend/src/websockets/websockets.gateway.ts#L36-L45)'s
 `allowed` origin check now includes a line for
@@ -187,7 +207,7 @@ GOOGLE_CALLBACK_URL=https://transcendance.rmanzanas.com/api/auth/google/callback
 the tunnel. Nothing left to do here; kept as a note in case this domain
 ever changes.
 
-### 4.6 Password recovery — needs `RESEND_API_KEY` + `JWT_RESET_SECRET`
+### 3.6 Password recovery — needs `RESEND_API_KEY` + `JWT_RESET_SECRET`
 
 The feature itself is fully built (`/forgot-password` → email → `/reset-password`),
 this is just the account/DNS setup, same category of one-time task as the
@@ -203,54 +223,46 @@ tunnel:
 
 ---
 
-## 5. `make tunnel`
+## 4. `make`
 
-Run in its own terminal — starts (or re-downloads if missing) `cloudflared`
-and connects the tunnel:
-
-```bash
-make tunnel
-```
-
-Leave this running the whole time you want the app reachable from outside.
-
----
-
-## 6. `make`
-
-In another terminal — builds/starts everything (`docker compose up`),
-generating the local SSL cert on the way if it's missing:
+Builds/starts everything (`docker compose up`), generating the local SSL
+cert on the way if it's missing:
 
 ```bash
 make
 ```
+
+If `cloudflared/config.yml` exists in the project (step 3.2 or 3.2b), the
+tunnel container starts right along with it, in the same terminal — no
+second terminal, no separate `make tunnel` step. If that file doesn't
+exist, the tunnel is skipped entirely and the app just runs locally.
 
 ---
 
 ## Done — where to check it worked
 
 - `https://localhost:8443` → works from the machine actually running Docker.
-- `https://transcendance.rmanzanas.com` → works from **any** computer, once
-  `make tunnel` is running on the machine hosting the app.
-- Google login works from either URL, as long as step 4.4 was done.
+- `https://transcendance.rmanzanas.com` → works from **any** computer, as
+  long as `make` is running on the machine that has `cloudflared/config.yml`
+  set up — the tunnel starts automatically as part of the stack.
+- Google login works from either URL, as long as step 3.4 was done.
 - Password recovery (`/forgot-password` → email → `/reset-password`) works
-  once step 4.6 is done — test with the Resend account's own email first,
+  once step 3.6 is done — test with the Resend account's own email first,
   since sending to other addresses needs the domain verified.
 
 ## Quick reference
 
-| Step                           | Command                                     | One-time or every session?                   |
-| ------------------------------ | ------------------------------------------- | -------------------------------------------- |
-| Install deps                   | `make install-deps`                         | Once (or after dependency changes)           |
-| Editor types                   | `make host-deps`                            | Once (or after dependency changes)           |
-| Create `.env` + JWT secrets    | `make jwt-secrets`                          | Once per machine                             |
-| Rotate your own JWT secrets    | `make jwt-secrets-force`                    | Only when you deliberately want to           |
-| Get cloudflared                | `make cloudflared`                          | Once per machine (also auto-runs via `make`) |
-| Cloudflare tunnel setup        | `cloudflared tunnel login/create/route dns` | Once ever, per tunnel                        |
-| `.env` + Google Console + CORS | manual                                      | Once ever, per domain                        |
-| Resend + `JWT_RESET_SECRET`    | see step 4.6                                | Once ever                                    |
-| Run the tunnel                 | `make tunnel`                               | Every session                                |
-| Run the app                    | `make`                                      | Every session                                |
+| Step                             | Command                                     | One-time or every session?                   |
+| -------------------------------- | -------------------------------------------- | --------------------------------------------- |
+| Install deps                     | `make install-deps`                         | Once (or after dependency changes)            |
+| Editor types                     | `make host-deps`                            | Once (or after dependency changes)            |
+| Create `.env` + JWT secrets      | `make jwt-secrets`                          | Once per machine                              |
+| Rotate your own JWT secrets      | `make jwt-secrets-force`                    | Only when you deliberately want to            |
+| Cloudflare tunnel setup          | `cloudflared tunnel login/create/route dns` | Once ever, per tunnel                         |
+| Share the tunnel + `.env`        | `make pack-secrets` / `make unpack-secrets` | Once per new teammate/machine                 |
+| `.env` + Google Console + CORS   | manual                                      | Once ever, per domain                         |
+| Resend + `JWT_RESET_SECRET`      | see step 3.6                                | Once ever                                     |
+| Run the app (+ tunnel if set up) | `make`                                      | Every session                                 |
 
 ---
 
@@ -261,14 +273,13 @@ make
 3. Fill in the rest of `.env` (DB password, Google OAuth, `RESEND_API_KEY`)
 4. `make install-deps`
 5. `make host-deps`
-6. `make cloudflared`
-7. `./cloudflared tunnel login`
-8. `./cloudflared tunnel create transcendance`
-9. `./cloudflared tunnel route dns transcendance transcendance.rmanzanas.com`
-10. Write `~/.cloudflared/config.yml` (tunnel id + credentials path + ingress)
-11. Set `.env`: `FRONTEND_URL` and `GOOGLE_CALLBACK_URL` to the tunnel domain
-12. Google Console: add redirect URI + JS origin + authorized domain
-13. Resend: verify `mail.rmanzanas.com`, set `RESEND_API_KEY`, update the
-    `from` address in `mail.service.ts` if it changed
-14. `make tunnel` (separate terminal, leave running)
-15. `make`
+6. One-time tunnel setup:
+   - New tunnel: `cloudflared tunnel login/create/route dns`, then copy the
+     resulting `config.yml` + `<tunnel-id>.json` into `./cloudflared/` and
+     adjust `service:`/`credentials-file:` for the container (see 3.2).
+   - Existing tunnel: `make unpack-secrets ZIP=...` instead, skip to step 9.
+7. Set `.env`: `FRONTEND_URL` and `GOOGLE_CALLBACK_URL` to the tunnel domain
+8. Google Console: add redirect URI + JS origin + authorized domain
+9. Resend: verify `mail.rmanzanas.com`, set `RESEND_API_KEY`, update the
+   `from` address in `mail.service.ts` if it changed
+10. `make` (tunnel starts automatically since `cloudflared/config.yml` exists)
