@@ -480,7 +480,7 @@ export default function GamePage() {
 
   if (loading || !user) {
     return (
-      <div className='flex items-center justify-center min-h-screen bg-canvas'>
+      <div className='flex items-center justify-center min-h-screen bg-canvas  text-canvas-text'>
         <p className='text-white/70 text-sm'>{t('game.loading')}</p>
       </div>
     );
@@ -778,7 +778,7 @@ export default function GamePage() {
                     ref={canvasRef}
                     width={WIDTH}
                     height={HEIGHT}
-                    className='block h-auto w-full bg-canvas'
+                    className='block h-auto w-full bg-canvas text-canvas-text'
                   />
                 </div>
               ) : (

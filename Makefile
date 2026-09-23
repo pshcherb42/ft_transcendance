@@ -18,7 +18,7 @@ BACKEND_PACKS = @nestjs/passport \
 
 CERT_DIR = nginx/certs
 
-all: host-deps up
+all: up
 
 up:
 	@bash scripts/startProject.sh || (echo "\n[!] Error: Failed to start. Try running 'make install-deps' to ensure all packages are installed." && exit 1)

@@ -55,6 +55,7 @@ export class PongRenderer {
   ) {
     const leftH = s.leftPaddleH ?? PADDLE_HEIGHT;
     const rightH = s.rightPaddleH ?? PADDLE_HEIGHT;
+    const textColor = getComputedStyle(ctx.canvas).color;
 
     // Background
     ctx.fillStyle = COLOR_BG;
@@ -135,7 +136,7 @@ export class PongRenderer {
         );
         ctx.fill();
 
-        ctx.fillStyle = '#EEE9E6';
+        ctx.fillStyle = textColor;
         ctx.font =
           'bold 20px "Courier New", monospace';
 

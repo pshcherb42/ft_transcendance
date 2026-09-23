@@ -54,6 +54,7 @@ services:
     image: cloudflare/cloudflared:latest
     command: tunnel --config /etc/cloudflared/config.yml run
     profiles: [tunnel]
+    user: '0:0'
     volumes:
       - ./cloudflared:/etc/cloudflared:ro
     depends_on: [nginx]

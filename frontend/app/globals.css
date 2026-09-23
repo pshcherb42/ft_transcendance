@@ -13,9 +13,10 @@
   --subtle: #b5acac;
   --border: #d9d5d1;
   --muted: #cfc5c1;
-  --surface: #eee9e6;
+  --surface: #fff;
   --status-online: #8ebe78;
   --canvas: #171717;
+  --canvas-text: #fff;
   --decline: #e0897a;
   --notice: #f5dcd3;
   --card-shadow: rgba(193, 168, 163, 0.25);
@@ -38,6 +39,7 @@
   --surface: #26211f;
   --status-online: #96c682;
   --canvas: #171717;
+  --canvas-text: #fff;
   --decline: #e69686;
   --notice: #3d2b26;
   --card-shadow: rgba(0, 0, 0, 0.7);
@@ -59,6 +61,7 @@
   --color-surface: var(--surface);
   --color-status-online: var(--status-online);
   --color-canvas: var(--canvas);
+  --color-canvas-text: var(--canvas-text);
   --color-decline: var(--decline);
   --color-notice: var(--notice);
 

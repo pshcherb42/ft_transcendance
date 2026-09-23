@@ -164,7 +164,7 @@ export function PongMatch({
       ref={canvasRef}
       width={WIDTH}
       height={HEIGHT}
-      className='block h-auto w-full max-w-full bg-canvas touch-none'
+      className='block h-auto w-full max-w-full bg-canvas text-canvas-text touch-none'
       onTouchStart={(e) => {
         e.preventDefault();
         const rect = canvasRef.current!.getBoundingClientRect();

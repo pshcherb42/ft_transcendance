@@ -773,6 +773,7 @@ setScore(finalScore);
       overflow-hidden
       rounded-[14px]
       bg-canvas
+      text-canvas-text
       ${ready ? '' : 'min-h-[260px] sm:min-h-[300px] md:min-h-[330px]'}
     `}
   >
@@ -924,7 +925,7 @@ setScore(finalScore);
             break-words
             uppercase
             leading-none
-            text-foreground
+            text-color-text
           "
         >
           {currentMatch.p1}
@@ -942,7 +943,7 @@ setScore(finalScore);
             break-words
             uppercase
             leading-none
-            text-foreground
+            text-color-text
           "
         >
           {currentMatch.p2}
