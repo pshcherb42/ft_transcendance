@@ -209,7 +209,7 @@ export default function GamePage() {
 
       mySide = data.side;
       setSide(data.side);
-      setOpponentUsername(data.opponentUsername);
+      if (data.opponentUsername) setOpponentUsername(data.opponentUsername);
       setWinner(null);
       setOnlineStatus('playing');
     };

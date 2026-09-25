@@ -228,11 +228,20 @@ export class WebsocketsGateway
       if (players) {
         const side: Side =
           players.leftUserId === client.data.user?.sub ? 'left' : 'right';
+
+        const opponentUserId =
+          side === 'left' ? players.rightUserId : players.leftUserId;
+        const opponentSocketId = this.presence.getSocketId(opponentUserId);
+        const opponentSocket = opponentSocketId
+          ? this.server.sockets.sockets.get(opponentSocketId)
+          : undefined;
+        const opponentUsername = opponentSocket?.data.user?.username ?? null;
+
         this.assignToRoom(client, liveRoomId, side);
         client.emit('rejoinedGame', {
           roomId: liveRoomId,
           side,
-          opponentUsername: null,
+          opponentUsername,
         });
         return;
       }
