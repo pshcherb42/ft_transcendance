@@ -564,7 +564,7 @@ function RegisterPage() {
             {t('auth.haveAccount')}{' '}
             <a
               href='/login'
-              className='font-bold text-foreground hover:underline'
+              className='font-bold text-foreground hover:underline underline-offset-4'
             >
               {t('auth.login')}
             </a>

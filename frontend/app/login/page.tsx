@@ -447,7 +447,7 @@ function LoginPage() {
             {t('auth.noAccount')}{' '}
             <a
               href='/register'
-              className='font-bold text-foreground hover:underline'
+              className='font-bold text-foreground hover:underline underline-offset-4'
             >
               {t('auth.createAccount')}
             </a>

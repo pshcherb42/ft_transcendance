@@ -15,7 +15,11 @@ import { useSocket } from '@/context/SocketContext';
 import { decode } from '@msgpack/msgpack';
 
 type OnlineStatus =
-  'connecting' | 'waiting' | 'playing' | 'gameover' | 'opponent-left';
+  | 'connecting'
+  | 'waiting'
+  | 'playing'
+  | 'gameover'
+  | 'opponent-left';
 
 export default function GamePage() {
   const { t } = useTranslation();
@@ -319,6 +323,11 @@ export default function GamePage() {
       setReconnectSecondsLeft(null);
     };
 
+    const onInviteAccepted = () => {
+      setOnlineStatus('connecting');
+      socket.emit('checkRoom');
+    };
+
     socket.on('connect', onConnect);
     socket.on('waiting', onWaiting);
     socket.on('rejoinedGame', onRejoined);
@@ -330,6 +339,7 @@ export default function GamePage() {
     socket.on('opponentDisconnected', onOpponentDisconnected);
     socket.on('matchVoided', onMatchVoided);
     socket.on('opponentReconnected', onOpponentReconnected);
+    socket.on('gameInviteAccepted', onInviteAccepted);
 
     if (socket.connected) onConnect();
 
@@ -373,7 +383,10 @@ export default function GamePage() {
     let stopTimeout: ReturnType<typeof setTimeout> | null = null;
     const scheduleAutoStop = () => {
       if (stopTimeout) clearTimeout(stopTimeout);
-      stopTimeout = setTimeout(() => touchControlsRef.current?.setDir('stop'), 100);
+      stopTimeout = setTimeout(
+        () => touchControlsRef.current?.setDir('stop'),
+        100,
+      );
     };
     const onTouchStart = (e: TouchEvent) => {
       e.preventDefault();
@@ -457,6 +470,7 @@ export default function GamePage() {
       socket.off('matchVoided', onMatchVoided);
       socket.off('opponentReconnected', onOpponentReconnected);
       socket.off('noActiveGame', onNoActiveGame);
+      socket.off('gameInviteAccepted', onInviteAccepted);
     };
   }, [mode, onlineRound, socket, t]);
 
