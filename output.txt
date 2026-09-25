@@ -1,57 +1,0 @@
-Certs already created in ./nginx/certs - skipping.
-Starting project...
-cloudflared/config.yml found — starting the tunnel too.
-Attaching to backend-1, cloudflared-1, db-1, frontend-1, nginx-1
-db-1  | 
-db-1  | PostgreSQL Database directory appears to contain a database; Skipping initialization
-db-1  | 
-nginx-1  | /docker-entrypoint.sh: /docker-entrypoint.d/ is not empty, will attempt to perform configuration
-nginx-1  | /docker-entrypoint.sh: Looking for shell scripts in /docker-entrypoint.d/
-nginx-1  | /docker-entrypoint.sh: Launching /docker-entrypoint.d/10-listen-on-ipv6-by-default.sh
-nginx-1  | 10-listen-on-ipv6-by-default.sh: info: IPv6 listen already enabled
-nginx-1  | /docker-entrypoint.sh: Sourcing /docker-entrypoint.d/15-local-resolvers.envsh
-nginx-1  | /docker-entrypoint.sh: Launching /docker-entrypoint.d/20-envsubst-on-templates.sh
-nginx-1  | /docker-entrypoint.sh: Launching /docker-entrypoint.d/30-tune-worker-processes.sh
-nginx-1  | /docker-entrypoint.sh: Configuration complete; ready for start up
-frontend-1     | ▲ Next.js 16.2.10 (Turbopack)
-frontend-1     | - Local:         http://localhost:3000
-frontend-1     | - Network:       http://172.18.0.4:3000
-frontend-1     | ✓ Ready in 2.1s
-[Kcloudflared-1 exited with code 1 (restarting)
-frontend-1     | - Experiments (use with caution):
-frontend-1     |   ✓ externalDir
-frontend-1     | 
-cloudflared-1  | open /etc/cloudflared/config.yml: permission denied
-cloudflared-1  | open /etc/cloudflared/config.yml: permission denied
-[Kcloudflared-1 exited with code 1 (restarting)
-cloudflared-1  | open /etc/cloudflared/config.yml: permission denied
-[Kcloudflared-1 exited with code 1 (restarting)
-cloudflared-1  | open /etc/cloudflared/config.yml: permission denied
-backend-1      | 
-backend-1      | ✔ Generated Prisma Client (7.8.0) to ./src/generated/prisma in 258ms
-backend-1      | 
-[Kcloudflared-1 exited with code 1 (restarting)
-cloudflared-1  | open /etc/cloudflared/config.yml: permission denied
-backend-1      | Datasource "db": PostgreSQL database "transcendence", schema "public" at "db:5432"
-[Kcloudflared-1 exited with code 1 (restarting)
-backend-1      | 
-backend-1      | 2 migrations found in prisma/migrations
-backend-1      | 
-backend-1      | 
-backend-1      | No pending migrations to apply.
-[Kcloudflared-1 exited with code 1 (restarting)
-cloudflared-1  | open /etc/cloudflared/config.yml: permission denied
-cloudflared-1  | open /etc/cloudflared/config.yml: permission denied
-[Kcloudflared-1 exited with code 1 (restarting)
-backend-1      | [2J[3J[H[[90m4:29:58 PM[0m] Starting compilation in watch mode...
-backend-1      | 
-[Kcloudflared-1 exited with code 1 (restarting)
-cloudflared-1  | open /etc/cloudflared/config.yml: permission denied
-backend-1      | [[90m4:30:08 PM[0m] Found 0 errors. Watching for file changes.
-backend-1      | 
-Gracefully Stopping... press Ctrl+C again to force
-[K Container tst-cloudflared-1  [32mStopping[0m
-[K Container tst-cloudflared-1  [32mStopped[0m
-[K Container tst-nginx-1  [32mStopping[0m
-[K Container tst-nginx-1  [32mStopped[0m
-[K Container tst-frontend-1  [32mStopping[0m
