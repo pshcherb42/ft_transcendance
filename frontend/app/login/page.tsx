@@ -169,7 +169,7 @@ function LoginPage() {
                 <button
                   type='button'
                   onClick={() => router.push('/forgot-password')}
-                  className='underline text-muted-foreground'
+                  className='underline text-muted-foreground underline-offset-4'
                 >
                   {t('auth.forgotPassword')}
                 </button>
@@ -240,7 +240,7 @@ function LoginPage() {
               <button
                 type='button'
                 onClick={() => router.push('/register?form=open')}
-                className='font-bold text-foreground hover:underline'
+                className='font-bold text-foreground hover:underline underline-offset-4'
               >
                 {t('auth.createAccount')}
               </button>
@@ -392,7 +392,7 @@ function LoginPage() {
               <button
                 type='button'
                 onClick={() => router.push('/forgot-password')}
-                className='underline text-muted-foreground hover:underline'
+                className='text-muted-foreground underline-offset-4 hover:underline'
               >
                 {t('auth.forgotPassword')}
               </button>

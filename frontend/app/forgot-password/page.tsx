@@ -132,7 +132,7 @@ function ForgotPasswordPage() {
           <button
             type='button'
             onClick={() => router.push('/login')}
-            className='font-bold text-foreground hover:underline'
+            className='font-bold text-foreground hover:underline underline-offset-4'
           >
             {t('auth.backToLogin')}
           </button>

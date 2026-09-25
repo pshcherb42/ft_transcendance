@@ -374,7 +374,7 @@ function RegisterPage() {
                 <button
                   type='button'
                   onClick={() => router.push('/login?form=open')}
-                  className='font-bold text-foreground hover:underline'
+                  className='font-bold text-foreground hover:underline underline-offset-4'
                 >
                   {t('auth.login')}
                 </button>
