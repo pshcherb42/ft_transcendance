@@ -184,6 +184,10 @@ password protection actually worth something. Don't run
 `tunnel create`/`route dns` yourself in this case — that would create a
 second, different tunnel instead of reusing this one.
 
+**Used the zip? Skip straight to [step 4](#4-make).** Sections 3.3–3.6
+below are first-time setup only, and the zip's `.env` already has all of it
+done (domain, Google OAuth, Resend).
+
 ### 3.3 `.env` — point the app at the public domain
 
 ```
@@ -272,14 +276,28 @@ exist, the tunnel is skipped entirely and the app just runs locally.
 2. `make jwt-secrets`
 3. Fill in the rest of `.env` (DB password, Google OAuth, `RESEND_API_KEY`)
 4. `make install-deps`
-5. `make host-deps`
-6. One-time tunnel setup:
-   - New tunnel: `cloudflared tunnel login/create/route dns`, then copy the
-     resulting `config.yml` + `<tunnel-id>.json` into `./cloudflared/` and
-     adjust `service:`/`credentials-file:` for the container (see 3.2).
-   - Existing tunnel: `make unpack-secrets ZIP=...` instead, skip to step 9.
-7. Set `.env`: `FRONTEND_URL` and `GOOGLE_CALLBACK_URL` to the tunnel domain
-8. Google Console: add redirect URI + JS origin + authorized domain
-9. Resend: verify `mail.rmanzanas.com`, set `RESEND_API_KEY`, update the
-   `from` address in `mail.service.ts` if it changed
+5. `make host-deps` (optional — editor autocomplete only, safe to skip if it
+   fights you; doesn't affect whether the app runs)
+6. One-time tunnel setup — pick ONE:
+   - **New tunnel** (nobody's set this up before): `cloudflared tunnel
+     login/create/route dns`, then copy the resulting `config.yml` +
+     `<tunnel-id>.json` into `./cloudflared/` (named exactly `cloudflared`,
+     no leading dot — watch out for a leftover file with that name from an
+     old clone blocking the folder) and adjust `service:`/`credentials-file:`
+     for the container (see 3.2). Continue with steps 7–9 below, since
+     you're also registering the domain for the first time.
+   - **Existing tunnel** (a teammate already did this): `make unpack-secrets
+     ZIP=...` instead. This hands you a `.env` that's *already* pointed at
+     the shared domain, with Google OAuth credentials that are *already*
+     registered in Google Console for that exact domain (Google checks the
+     OAuth client + redirect URI string, never the machine or IP running
+     it), and a `RESEND_API_KEY` for a domain that's *already* verified.
+     Steps 7–9 are already done for you — **skip straight to step 10.**
+7. _(new tunnel only)_ Set `.env`: `FRONTEND_URL` and `GOOGLE_CALLBACK_URL`
+   to the tunnel domain
+8. _(new tunnel only)_ Google Console: add redirect URI + JS origin +
+   authorized domain
+9. _(new tunnel only)_ Resend: verify `mail.rmanzanas.com`, set
+   `RESEND_API_KEY`, update the `from` address in `mail.service.ts` if it
+   changed
 10. `make` (tunnel starts automatically since `cloudflared/config.yml` exists)
