@@ -24,7 +24,9 @@ export function ActionToast({
 }) {
   return (
     <div className='rounded-[10px] border border-border bg-notice p-4 shadow-[-8px_8px_32px_0_var(--card-shadow)]'>
-      <p className='mb-3 text-sm font-medium text-muted-foreground'>{message}</p>
+      <p className='mb-3 text-sm font-medium text-muted-foreground'>
+        {message}
+      </p>
       <div className='flex justify-end gap-2'>
         <button
           type='button'
@@ -86,6 +88,7 @@ export function NotificationListener() {
             body: JSON.stringify({ action }),
           });
           if (!res.ok) throw new Error();
+          window.dispatchEvent(new Event('friends:changed'));
           if (action === 'accept') {
             toast.success(
               t('notification.friendAdded', { username: data.username }),
