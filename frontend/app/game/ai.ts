@@ -22,12 +22,17 @@ interface AiParams {
 
 const PARAMS: Record<Difficulty, AiParams> = {
   easy: { reactionTicks: 10, deadZone: 26, aimNoise: 34, predict: false },
-  medium: { reactionTicks: 5, deadZone: 16, aimNoise: 18, predict: false },
-  hard: { reactionTicks: 2, deadZone: 14, aimNoise: 6, predict: true },
+  medium: { reactionTicks: 7, deadZone: 16, aimNoise: 18, predict: false },
+  hard: { reactionTicks: 5, deadZone: 14, aimNoise: 6, predict: false },
 };
 
 // Predicts a ball's Y when it reaches the right paddle, reflecting off the walls.
-function predictInterceptY(x: number, y: number, vx: number, vy: number): number {
+function predictInterceptY(
+  x: number,
+  y: number,
+  vx: number,
+  vy: number,
+): number {
   if (vx <= 0) return HEIGHT / 2;
   const ticks = (RIGHT_PADDLE_X - x) / vx;
   const min = BALL_RADIUS;
@@ -54,7 +59,8 @@ export class PongAi {
       this.ticksToReplan = this.p.reactionTicks;
 
       // Incoming ball (vx>0) that will reach the right paddle first.
-      let target: { x: number; y: number; vx: number; vy: number } | null = null;
+      let target: { x: number; y: number; vx: number; vy: number } | null =
+        null;
       let bestTicks = Infinity;
       for (const b of engine.balls) {
         if (b.vx > 0) {

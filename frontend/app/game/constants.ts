@@ -19,12 +19,12 @@ export const RIGHT_PADDLE_X = WIDTH - 24 - PADDLE_WIDTH; // 764
 
 // --- Ball ---
 export const BALL_RADIUS = 9;
-export const BALL_SPEED_START = 7;
-export const BALL_SPEED_MAX = 15;
-export const BALL_SPEEDUP = 0.6;
+export const BALL_SPEED_START = 10;
+export const BALL_SPEED_MAX = 17;
+export const BALL_SPEEDUP = 0.8;
 export const MAX_BOUNCE_RAD = Math.PI / 4;
 export const SERVE_JITTER_RAD = Math.PI / 36; // ±5° random variation on the serve
-export const BALL_SPIN = 0.25;                // vertical drag of the paddle on the ball (spin)
+export const BALL_SPIN = 0.25; // vertical drag of the paddle on the ball (spin)
 
 // --- Match ---
 export const WINNING_SCORE = 5;
@@ -47,9 +47,9 @@ export const MAX_BALLS = 4; // max simultaneous balls with multiball
 // Colors of the obstacles and of each power-up type (used by the renderer).
 export const COLOR_OBSTACLE = '#52525b';
 export const POWERUP_COLORS: Record<string, string> = {
-  grow: '#5B8DEF',      // soft blue
-  shrink: '#C87AB6',    // dusty fuchsia
-  speed: '#F2A65A',     // warm amber
+  grow: '#5B8DEF', // soft blue
+  shrink: '#C87AB6', // dusty fuchsia
+  speed: '#F2A65A', // warm amber
   multiball: '#7B6EF6', // rich purple
 };
 
