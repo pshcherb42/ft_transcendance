@@ -65,7 +65,7 @@ pack-secrets:
 unpack-secrets:
 	@bash scripts/unpackSecrets.sh $(ZIP)
 
-re: fclean install-deps host-deps up
+re: fclean install-deps up
 
 help:
 	@echo "Available commands:"
