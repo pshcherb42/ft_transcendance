@@ -97,7 +97,7 @@ export function TournamentView({ onExit }: { onExit: () => void }) {
   // ------------------------------------------------------------ REGISTER
   if (phase === 'register') {
     return (
-      <div className='flex min-h-[calc(100dvh-48px)] flex-col bg-surface'>
+      <div className='flex flex-1 flex-col bg-surface'>
         <main className='flex flex-1'>
           <section
             className='
@@ -344,7 +344,7 @@ export function TournamentView({ onExit }: { onExit: () => void }) {
   // --------------------------------------------------------------- DONE
   if (phase === 'done') {
     return (
-      <div className='flex min-h-[calc(100dvh-48px)] flex-col bg-surface'>
+      <div className='flex flex-1 flex-col bg-surface'>
         <main className='flex flex-1'>
           <section
             className='
@@ -577,7 +577,7 @@ export function TournamentView({ onExit }: { onExit: () => void }) {
   };
 
   return (
-    <div className='flex min-h-[calc(100dvh-48px)] flex-col bg-surface'>
+    <div className='flex flex-1 flex-col bg-surface'>
       <main className='flex flex-1'>
         <section
           className='

@@ -63,7 +63,7 @@ function ResetPasswordForm() {
   }
 
   return (
-    <div className='relative flex min-h-[calc(100dvh-48px)] flex-col bg-background'>
+    <div className='relative flex flex-1 flex-col bg-background'>
       <BouncingBall />
       <div className='relative z-10 mx-auto flex w-full max-w-[480px] flex-1 flex-col justify-center px-4 py-16 sm:px-6'>
         <div className='w-full rounded-[10px] bg-surface px-6 py-8 shadow-[-8px_8px_32px_0_var(--card-shadow)] sm:px-8'>

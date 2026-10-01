@@ -73,7 +73,7 @@ export default function ProfilePage() {
   );
 
   return (
-    <div className="relative flex min-h-[calc(100dvh-48px)] flex-col overflow-hidden bg-background">
+    <div className="relative flex flex-1 flex-col overflow-hidden bg-background">
       <main className="relative z-10 flex flex-1 flex-col">
         <header
           className="

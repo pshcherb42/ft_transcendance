@@ -28,7 +28,7 @@ export default function PrivacyPolicyPage() {
   }) as string[];
 
   return (
-    <div className="relative flex min-h-[calc(100dvh-48px)] flex-col bg-background">
+    <div className="relative flex flex-1 flex-col bg-background">
       <main className="flex flex-1 flex-col">
         <header className="px-8 pt-8 md:px-16">
           <button

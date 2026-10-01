@@ -46,7 +46,6 @@ export default function GamePage() {
   const [reconnectSecondsLeft, setReconnectSecondsLeft] = useState<
     number | null
   >(null);
-  const [footerHeight, setFooterHeight] = useState(48);
 
   const mode: Mode =
     modeParam === 'online' ||
@@ -116,16 +115,6 @@ export default function GamePage() {
       router.replace('/');
     }
   }, [modeParam, router]);
-
-  useEffect(() => {
-    const footer = document.querySelector('footer');
-    if (!footer) return;
-    const update = () => setFooterHeight(footer.getBoundingClientRect().height);
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(footer);
-    return () => ro.disconnect();
-  }, []);
 
   // ----------------------------------------------------------------- ONLINE
   useEffect(() => {
@@ -605,10 +594,7 @@ export default function GamePage() {
         : t('game.canvas.rightPlayer');
 
   return (
-    <div
-      className='flex flex-col bg-background'
-      style={{ minHeight: `calc(100dvh - ${footerHeight}px)` }}
-    >
+    <div className='flex flex-1 flex-col bg-background'>
       <main className='flex flex-1'>
         <section
           className='

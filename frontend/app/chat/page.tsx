@@ -76,7 +76,7 @@ export default function ChatPage() {
   };
 
   return (
-    <div className='relative flex min-h-[calc(100dvh-48px)] flex-col bg-background'>
+    <div className='relative flex flex-1 flex-col bg-background'>
       <main className='relative z-10 flex flex-1 flex-col'>
         {/* Top navigation */}
         <header

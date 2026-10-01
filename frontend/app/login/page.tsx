@@ -17,9 +17,10 @@ function LoginPage() {
 
   const searchParams = useSearchParams();
 
-  const [mobileFormOpen, setMobileFormOpen] = useState(
-    searchParams.get('form') === 'open',
-  );
+  // The URL is the source of truth, so a refresh keeps the same view.
+  const mobileFormOpen = searchParams.get('form') === 'open';
+  const setMobileFormOpen = (open: boolean) =>
+    router.replace(open ? '/login?form=open' : '/login', { scroll: false });
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -93,7 +94,7 @@ function LoginPage() {
   }
 
   return (
-    <div className='relative min-h-[calc(100dvh-48px)] bg-background flex flex-col'>
+    <div className='relative flex-1 bg-background flex flex-col'>
       <BouncingBall />
 
       {/* Mobile / tablet */}
