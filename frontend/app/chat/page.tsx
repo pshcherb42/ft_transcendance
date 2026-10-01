@@ -515,7 +515,7 @@ export default function ChatPage() {
                             ${
                               isOwnMessage
                                 ? 'rounded-br-md bg-border'
-                                : 'rounded-bl-md bg-surface'
+                                : 'rounded-bl-md bg-border/20'
                             }
                           `}
                           >

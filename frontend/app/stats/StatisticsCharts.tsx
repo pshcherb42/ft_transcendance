@@ -12,6 +12,7 @@ import {
   type Plugin,
 } from 'chart.js';
 import { Doughnut, Bar } from 'react-chartjs-2';
+import { useChartColors } from '@/hooks/useChartColors';
 
 ChartJS.register(
   ArcElement,
@@ -39,18 +40,6 @@ type Stats = {
   matches: Match[];
 };
 
-const COLORS = {
-  surface: '#FFFFFF',
-  textPrimary: '#615050',
-  textSecondary: '#615050',
-  muted: '#A3A3A3',
-  grid: '#EEE9E6',
-  good: '#9DA995',
-  critical: '#EE4424',
-  seriesYou: '#9DA995',
-  seriesOpponent: '#EE4424',
-};
-
 function centerTextPlugin(
   label: string,
   color: string,
@@ -66,25 +55,21 @@ function centerTextPlugin(
         return;
       }
 
-      const x =
-        (chartArea.left + chartArea.right) / 2;
+      const x = (chartArea.left + chartArea.right) / 2;
 
-      const y =
-        (chartArea.top + chartArea.bottom) / 2;
+      const y = (chartArea.top + chartArea.bottom) / 2;
 
       ctx.save();
 
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      ctx.font =
-        '600 22px system-ui, -apple-system, "Segoe UI", sans-serif';
+      ctx.font = '600 22px system-ui, -apple-system, "Segoe UI", sans-serif';
 
       ctx.fillStyle = color;
       ctx.fillText(label, x, y - 8);
 
-      ctx.font =
-        '12px system-ui, -apple-system, "Segoe UI", sans-serif';
+      ctx.font = '12px system-ui, -apple-system, "Segoe UI", sans-serif';
 
       ctx.fillText(winsLabel, x, y + 14);
 
@@ -93,40 +78,24 @@ function centerTextPlugin(
   };
 }
 
-export default function StatisticsCharts({
-  stats,
-}: {
-  stats: Stats;
-}) {
+export default function StatisticsCharts({ stats }: { stats: Stats }) {
   const { t } = useTranslation();
+  const COLORS = useChartColors();
 
-  const winRatePct = Math.round(
-    stats.winRate * 100,
-  );
+  if (!COLORS) return null;
 
-  const recentMatches = [
-    ...stats.matches,
-  ]
-    .slice(0, 10)
-    .reverse();
+  const winRatePct = Math.round(stats.winRate * 100);
+
+  const recentMatches = [...stats.matches].slice(0, 10).reverse();
 
   const doughnutData = {
-    labels: [
-      t('stats.result.win'),
-      t('stats.result.loss'),
-    ],
+    labels: [t('stats.result.win'), t('stats.result.loss')],
 
     datasets: [
       {
-        data: [
-          stats.wins,
-          stats.losses,
-        ],
+        data: [stats.wins, stats.losses],
 
-        backgroundColor: [
-          COLORS.good,
-          COLORS.critical,
-        ],
+        backgroundColor: [COLORS.good, COLORS.critical],
 
         borderColor: COLORS.surface,
         borderWidth: 2,
@@ -136,20 +105,15 @@ export default function StatisticsCharts({
   };
 
   const barData = {
-    labels: recentMatches.map(
-      (_, index) => `#${index + 1}`,
-    ),
+    labels: recentMatches.map((_, index) => `#${index + 1}`),
 
     datasets: [
       {
         label: t('stats.you'),
 
-        data: recentMatches.map(
-          (match) => match.myScore,
-        ),
+        data: recentMatches.map((match) => match.myScore),
 
-        backgroundColor:
-          COLORS.seriesYou,
+        backgroundColor: COLORS.seriesYou,
 
         borderRadius: 4,
       },
@@ -157,13 +121,9 @@ export default function StatisticsCharts({
       {
         label: t('stats.opponent'),
 
-        data: recentMatches.map(
-          (match) =>
-            match.opponentScore,
-        ),
+        data: recentMatches.map((match) => match.opponentScore),
 
-        backgroundColor:
-          COLORS.seriesOpponent,
+        backgroundColor: COLORS.seriesOpponent,
 
         borderRadius: 4,
       },
@@ -171,9 +131,9 @@ export default function StatisticsCharts({
   };
 
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
+    <div className='grid gap-6 lg:grid-cols-2'>
       <div
-        className="
+        className='
           min-w-0
           rounded-[10px]
           border
@@ -182,14 +142,15 @@ export default function StatisticsCharts({
           p-4
           sm:p-5
           md:p-6
-        "
+        '
       >
-        <h2 className="mb-4 font-display text-[20px] uppercase leading-none text-brand-red sm:text-[22px] md:text-[24px]">
+        <h2 className='mb-4 font-display text-[20px] uppercase leading-none text-brand-red sm:text-[22px] md:text-[24px]'>
           {t('stats.winLossChart')}
         </h2>
 
-        <div className="h-[220px] sm:h-[250px] md:h-[280px]">
+        <div className='h-[220px] sm:h-[250px] md:h-[280px]'>
           <Doughnut
+            key={COLORS.textPrimary}
             data={doughnutData}
             options={{
               maintainAspectRatio: false,
@@ -201,8 +162,7 @@ export default function StatisticsCharts({
                   position: 'bottom',
 
                   labels: {
-                    color:
-                      COLORS.textSecondary,
+                    color: COLORS.textSecondary,
 
                     boxWidth: 10,
                     padding: 10,
@@ -210,14 +170,11 @@ export default function StatisticsCharts({
                 },
 
                 tooltip: {
-                  backgroundColor:
-                    COLORS.surface,
+                  backgroundColor: COLORS.surface,
 
-                  titleColor:
-                    COLORS.textPrimary,
+                  titleColor: COLORS.textPrimary,
 
-                  bodyColor:
-                    COLORS.textSecondary,
+                  bodyColor: COLORS.textSecondary,
 
                   borderColor: COLORS.grid,
                   borderWidth: 1,
@@ -236,7 +193,7 @@ export default function StatisticsCharts({
       </div>
 
       <div
-        className="
+        className='
           min-w-0
           rounded-[10px]
           border
@@ -245,15 +202,15 @@ export default function StatisticsCharts({
           p-4
           sm:p-5
           md:p-6
-        "
+        '
       >
-        <h2 className="mb-4 font-display text-[20px] uppercase leading-none text-brand-red sm:text-[22px] md:text-[24px]">
+        <h2 className='mb-4 font-display text-[20px] uppercase leading-none text-brand-red sm:text-[22px] md:text-[24px]'>
           {t('stats.scoreChart', {
             count: recentMatches.length,
           })}
         </h2>
 
-        <div className="h-[240px] sm:h-[260px] md:h-[280px]">
+        <div className='h-[240px] sm:h-[260px] md:h-[280px]'>
           <Bar
             data={barData}
             options={{
@@ -289,8 +246,7 @@ export default function StatisticsCharts({
                   position: 'bottom',
 
                   labels: {
-                    color:
-                      COLORS.textSecondary,
+                    color: COLORS.textSecondary,
 
                     boxWidth: 10,
                     padding: 10,
@@ -298,14 +254,11 @@ export default function StatisticsCharts({
                 },
 
                 tooltip: {
-                  backgroundColor:
-                    COLORS.surface,
+                  backgroundColor: COLORS.surface,
 
-                  titleColor:
-                    COLORS.textPrimary,
+                  titleColor: COLORS.textPrimary,
 
-                  bodyColor:
-                    COLORS.textSecondary,
+                  bodyColor: COLORS.textSecondary,
 
                   borderColor: COLORS.grid,
                   borderWidth: 1,

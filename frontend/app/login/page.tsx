@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, FormEvent, useEffect, Suspense } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import AuthMobileWelcome from '@/components/AuthMobileWelcome';
 import { useAuth } from '@/context/AuthContext';
 import Input from '@/components/input';
 import BouncingBall from '@/components/bouncingBall';
@@ -12,6 +14,12 @@ function LoginPage() {
   const { login, user, loading: authLoading } = useAuth();
   const router = useRouter();
   const { t } = useTranslation();
+
+  const searchParams = useSearchParams();
+
+  const [mobileFormOpen, setMobileFormOpen] = useState(
+    searchParams.get('form') === 'open',
+  );
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -103,6 +111,12 @@ function LoginPage() {
             min-[800px]:hidden
           '
       >
+        {!mobileFormOpen ? (
+          <AuthMobileWelcome
+            onLogin={() => setMobileFormOpen(true)}
+            onRegister={() => router.push('/register?form=open')}
+          />
+        ) : (
         <div
           className='
               mx-auto
@@ -114,6 +128,41 @@ function LoginPage() {
               justify-center
             '
         >
+          <button
+            type='button'
+            onClick={() => setMobileFormOpen(false)}
+            aria-label='Back'
+            className='
+              mb-6
+              flex
+              h-10
+              w-10
+              items-center
+              justify-center
+              rounded-full
+              border
+              border-border
+              text-muted-foreground
+              transition-colors
+              hover:bg-border/20
+            '
+          >
+            <svg
+              viewBox='0 0 24 24'
+              fill='none'
+              aria-hidden='true'
+              className='h-5 w-5'
+            >
+              <path
+                d='M15 18l-6-6 6-6'
+                stroke='currentColor'
+                strokeWidth='1.8'
+                strokeLinecap='round'
+                strokeLinejoin='round'
+              />
+            </svg>
+          </button>
+
           <div
             className='
                 w-full
@@ -247,6 +296,7 @@ function LoginPage() {
             </p>
           </div>
         </div>
+        )}
       </div>
 
       {/* main content */}
@@ -445,12 +495,12 @@ function LoginPage() {
 
           <p className='mt-[20px] text-sm text-muted-foreground'>
             {t('auth.noAccount')}{' '}
-            <a
+            <Link
               href='/register'
               className='font-bold text-foreground hover:underline underline-offset-4'
             >
               {t('auth.createAccount')}
-            </a>
+            </Link>
           </p>
         </div>
       </div>

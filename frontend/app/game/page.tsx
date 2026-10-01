@@ -7,7 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { PongRenderer } from './renderer';
 import { PongMatch } from './PongMatch';
 import { TournamentView } from './TournamentView';
-import { WIDTH, HEIGHT } from './constants';
+import { WIDTH, HEIGHT, PADDLE_HEIGHT } from './constants';
 import { type MapId } from './config';
 import type { Difficulty } from './ai';
 import type { GameSnapshot, Mode, Side } from './types';
@@ -147,10 +147,32 @@ export default function GamePage() {
     setOnlineStatus('connecting');
     setSide(null);
     setWinner(null);
+    setOpponentUsername(null);
+    setReconnectSecondsLeft(null);
+    setCountdown(0);
     setScore({
       left: 0,
       right: 0,
     });
+
+    // Paint an empty board right away, so we can redraw when player looks for a new match
+    // without leaving the game page
+    renderer.draw(
+      ctx,
+      {
+        status: 'countdown',
+        countdown: 0,
+        leftPaddleY: (HEIGHT - PADDLE_HEIGHT) / 2,
+        rightPaddleY: (HEIGHT - PADDLE_HEIGHT) / 2,
+        ballX: WIDTH / 2,
+        ballY: HEIGHT / 2,
+        scoreLeft: 0,
+        scoreRight: 0,
+        winner: null,
+      },
+      undefined,
+      canvasLabels,
+    );
 
     // let snapshot: GameSnapshot | null = null;
     let mySide: Side | null = null;

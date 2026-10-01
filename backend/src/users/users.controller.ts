@@ -15,12 +15,14 @@ import { UsersService } from './users.service';
 import { FriendsService } from '../friends/friends.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { PresenceService } from '../presence/presence.service';
 
 @Controller('users')
 export class UsersController {
   constructor(
     private usersService: UsersService,
     private friendsService: FriendsService,
+    private presence: PresenceService,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -35,6 +37,7 @@ export class UsersController {
   @Put('me')
   async updateMe(@Request() req, @Body() dto: UpdateUserDto) {
     const updated = await this.usersService.updateProfile(req.user.id, dto);
+    this.presence.updateUsername(updated.id, updated.username);
     return this.usersService.sanitize(updated);
   }
 

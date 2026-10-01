@@ -46,6 +46,14 @@ export class PresenceService {
     return true;
   }
 
+  updateUsername(userId: string, username: string) {
+    const socketId = this.userSockets.get(userId);
+    const sock = socketId
+      ? this.server?.sockets.sockets.get(socketId)
+      : undefined;
+    if (sock?.data.user) sock.data.user.username = username;
+  }
+
   setOffline(userId: string, socketId: string, onConfirmedOffline: () => void) {
     if (this.userSockets.get(userId) !== socketId) return;
 

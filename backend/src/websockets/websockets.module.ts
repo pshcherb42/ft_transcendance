@@ -6,9 +6,16 @@ import { GameService } from './game.service';
 import { MatchService } from './match.service';
 import { PresenceModule } from '../presence/presence.module';
 import { FriendsModule } from '../friends/friends.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
-  imports: [ConfigModule, JwtModule, PresenceModule, FriendsModule],
+  imports: [
+    ConfigModule,
+    JwtModule,
+    PresenceModule,
+    FriendsModule,
+    UsersModule,
+  ],
   providers: [WebsocketsGateway, GameService, MatchService],
 })
 export class WebsocketsModule {}

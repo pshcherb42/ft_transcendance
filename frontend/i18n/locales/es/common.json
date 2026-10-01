@@ -4,7 +4,7 @@
     "to": "a nuestro",
     "ourPong": "Pong",
     "game": "juego!",
-    "title": "¡Bienvenido a <0>nuestro</0> juego de <0>Pong</0>!",
+    "title": "¡Unete a <0>nuestro</0> juego de <0>Pong</0>!",
     "subtitle": "Creado para el proyecto 42 Transcendence por el mejor equipo.",
     "login": "Iniciar sesión",
     "register": "Registrarse",
@@ -120,8 +120,8 @@
       "waiting": "Buscando rival…",
       "playingLeft": "Eres el jugador IZQUIERDO",
       "playingRight": "Eres el jugador DERECHO",
-      "won": "¡Has ganado! 🎉",
-      "lost": "Has perdido 😢",
+      "won": "¡Has ganado!",
+      "lost": "Has perdido",
       "opponentLeft": "El rival se ha ido — ganas por abandono"
     },
     "reconnect": "Rival desconectado — ganas en {{seconds}}s si no vuelve",
@@ -132,10 +132,10 @@
     },
     "result": {
       "finalScore": "Puntuación final",
-      "youWin": "¡Has ganado! 🎉",
-      "aiWins": "¡Gana la IA! 🤖",
-      "leftWins": "¡Gana el jugador de la IZQUIERDA! 🎉",
-      "rightWins": "¡Gana el jugador de la DERECHA! 🎉"
+      "youWin": "¡Has ganado!",
+      "aiWins": "Gana la IA",
+      "leftWins": "¡Gana el jugador de la IZQUIERDA!",
+      "rightWins": "¡Gana el jugador de la DERECHA!"
     },
     "subtitle": {
       "ai": "Tú (izquierda) vs IA · {{difficulty}} — primero a 5 gana",

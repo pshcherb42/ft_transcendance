@@ -120,8 +120,8 @@
       "waiting": "Looking for opponent…",
       "playingLeft": "You are the LEFT player",
       "playingRight": "You are the RIGHT player",
-      "won": "You won! 🎉",
-      "lost": "You lost 😢",
+      "won": "You won!",
+      "lost": "You lost",
       "opponentLeft": "Opponent left — you win by forfeit"
     },
     "reconnect": "Opponent disconnected — you win in {{seconds}}s if they don't return",

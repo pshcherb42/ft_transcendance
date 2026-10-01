@@ -40,7 +40,15 @@ export default function RootLayout({
     <html
       lang='en'
       className={`${gasoekOne.variable} ${manrope.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{if(localStorage.getItem('theme')==='dark')document.documentElement.setAttribute('data-theme', 'dark')}catch(e){}`,
+          }}
+        />
+      </head>
       <body className='min-h-full flex flex-col'>
         <I18nProvider>
           <AuthProvider>

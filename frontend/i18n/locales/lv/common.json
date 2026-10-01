@@ -126,8 +126,8 @@
       "waiting": "Notiek pretinieka meklēšana…",
       "playingLeft": "Jūs spēlējat KREISAJĀ PUSĒ",
       "playingRight": "Jūs spēlējat LABAJĀ PUSĒ",
-      "won": "Jūs uzvarējāt! 🎉",
-      "lost": "Jūs zaudējāt 😢",
+      "won": "Jūs uzvarējāt!",
+      "lost": "Jūs zaudējāt",
       "opponentLeft": "Pretinieks pameta spēli — jums tiek piešķirta tehniskā uzvara"
     },
     "reconnect": "Pretinieks atvienojās — jūs uzvarēsiet pēc {{seconds}} s, ja viņš neatgriezīsies",
@@ -138,10 +138,10 @@
     },
     "result": {
       "finalScore": "Gala rezultāts",
-      "youWin": "Jūs uzvarējāt! 🎉",
-      "aiWins": "MI uzvar! 🤖",
-      "leftWins": "Uzvar spēlētājs KREISAJĀ PUSĒ! 🎉",
-      "rightWins": "Uzvar spēlētājs LABAJĀ PUSĒ! 🎉"
+      "youWin": "Jūs uzvarējāt!",
+      "aiWins": "MI uzvar",
+      "leftWins": "Uzvar spēlētājs KREISAJĀ PUSĒ!",
+      "rightWins": "Uzvar spēlētājs LABAJĀ PUSĒ!"
     },
     "subtitle": {
       "ai": "Jūs (kreisajā pusē) pret MI · {{difficulty}} — līdz 5 punktiem",

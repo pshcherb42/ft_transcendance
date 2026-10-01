@@ -17,6 +17,7 @@ import { FriendsService } from '../friends/friends.service';
 import { OnGatewayInit } from '@nestjs/websockets';
 import { randomUUID } from 'crypto';
 import { send } from 'process';
+import { UsersService } from '../users/users.service';
 
 // Enable CORS just like on HTTP so the frontend can connect.
 // 8080 = access via nginx (same origin as the app); 3000 = frontend directly in dev.
@@ -105,6 +106,7 @@ export class WebsocketsGateway
     private gameService: GameService,
     private presence: PresenceService,
     private friendsService: FriendsService,
+    private usersService: UsersService,
   ) {}
 
   // This method fires automatically when a client tries to connect
@@ -116,8 +118,11 @@ export class WebsocketsGateway
       const payload = await this.jwtService.verifyAsync(token, {
         secret: this.configService.get<string>('JWT_SECRET'),
       }); // backend checks if the token is real and then discifer it
-
-      client.data.user = payload; // identify this connection with users identity
+      const dbUser = await this.usersService.findById(payload.sub);
+      client.data.user = {
+        ...payload,
+        username: dbUser?.username ?? payload.username,
+      };
       const userId = payload.sub;
       console.log(`Client connected: ${client.id} | User ID: ${payload.sub}`);
 
