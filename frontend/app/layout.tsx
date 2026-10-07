@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { Gasoek_One, Manrope } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
@@ -55,7 +56,9 @@ export default function RootLayout({
             <SocketProvider>
               <ChatUnreadProvider>
                 <NotificationListener />
-                <div className='flex flex-1 flex-col'>{children}</div>
+                <div className='flex flex-1 flex-col'>
+                  <Suspense fallback={null}>{children}</Suspense>
+                </div>
                 <Footer />
                 <Toaster
                   position='top-right'

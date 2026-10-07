@@ -1,0 +1,11 @@
+# Railway gateway: the only public service. Railway handles HTTPS,
+# so this nginx just routes plain HTTP to the private services.
+FROM nginx:alpine
+
+# Defaults; override in Railway variables
+ENV PORT=8080
+ENV FRONTEND_HOST=frontend.railway.internal
+ENV BACKEND_HOST=backend.railway.internal
+
+# nginx:alpine runs envsubst on /etc/nginx/templates/*.template at startup
+COPY nginx/nginx.railway.conf.template /etc/nginx/templates/default.conf.template

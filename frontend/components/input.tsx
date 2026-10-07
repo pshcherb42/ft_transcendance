@@ -10,7 +10,7 @@ type InputProps = Omit<
   InputHTMLAttributes<HTMLInputElement>,
   'onChange'
 > & {
-  label: string;
+  label?: string;
   error?: string;
   onChange?: (
     event: ChangeEvent<HTMLInputElement>,
@@ -40,16 +40,18 @@ export default function Input({
 
   return (
     <div className="flex flex-col gap-[6px]">
-      <label
-        htmlFor={inputId}
-        className="
-          text-[14px]
-          leading-[20px]
-          text-foreground
-        "
-      >
-        {label}
-      </label>
+      {label && (
+        <label
+          htmlFor={inputId}
+          className="
+            text-[14px]
+            leading-[20px]
+            text-foreground
+          "
+        >
+          {label}
+        </label>
+      )}
 
       <input
         id={inputId}

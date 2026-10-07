@@ -35,6 +35,7 @@ import { UsersService } from '../users/users.service';
 
       // 2. Comprehensive validation rule checks
       const allowed =
+        (!!process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) ||
         /^https?:\/\/localhost(:\d+)?$/.test(origin) ||
         /^https:\/\/transcendance\.rmanzanas\.com$/.test(origin) ||
         /^https?:\/\/127\.0\.0\.1(:\d+)?$/.test(origin) ||
