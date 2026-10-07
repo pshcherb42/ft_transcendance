@@ -7,5 +7,9 @@ ENV PORT=8080
 ENV FRONTEND_HOST=frontend.railway.internal
 ENV BACKEND_HOST=backend.railway.internal
 
+# Makes the entrypoint export NGINX_LOCAL_RESOLVERS (Railway's DNS server),
+# used by the "resolver" line in the template
+ENV NGINX_ENTRYPOINT_LOCAL_RESOLVERS=1
+
 # nginx:alpine runs envsubst on /etc/nginx/templates/*.template at startup
 COPY nginx/nginx.railway.conf.template /etc/nginx/templates/default.conf.template
